@@ -29,9 +29,8 @@ class StockController extends Controller
     {
         //dd(request()->all());
 
-        $file_name = request()->file->getClientOriginalName();
-        request()->file->storeAs('public/', $file_name);
-
+        //$file_name = request()->file->getClientOriginalName();
+        //request()->file->storeAs('public/', $file_name);
 
         $stock->name = $request->input('name');
         $stock->genre = $request->input('genre');
@@ -42,9 +41,6 @@ class StockController extends Controller
         $stock->path = 'test';
         $stock->save();
 
-        //ここに成功したことを記すreturnがあるとなよい
-        //↑さっきvueファイルにそれは書いたぞ？
-        //完全に書き込めたとという意味でこの部分に.thenを書くべきなん？
     }
 
     /**

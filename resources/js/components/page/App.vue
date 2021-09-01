@@ -1,7 +1,5 @@
 <template>
-    <div>
-        <button type="button" class="btn btn-primary">Primary</button>
-
+    <div class="container"><!--ここにcontiner設置するとヘッダーとかもぶつ切りにされる？-->
         <router-view />
     </div>
 </template>
