@@ -62,10 +62,18 @@ class StockController extends Controller
      */
     public function show()
     {
-        $stock = Stock::all();
-        return new StockResource($stock);
+        $stock = Stock::all();//stocksテーブルの情報をすべて取得
+        return new StockResource($stock);//StockResourceにデータを渡してjsonに変換？
     }
 
+    public function single($stock_id){
+        //ここに個別投稿を表示するアクション
+
+        //resoucrcesの出力形式を整えてあげないとidを取得できないと思う
+        //整えたら整えたで今までのアーカイブ消えそう
+        $stock = Stock::find($stock_id);
+        return new StockResource($stock);
+    }
     /**
      * Show the form for editing the specified resource.
      *

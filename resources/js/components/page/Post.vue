@@ -3,9 +3,9 @@
         <Header />
         <div id="form">
             <div class="form">
-                <div class="form-title">
+                <div class="">
                     <div class="form-group">
-                        <label for="exampleFormControlInput1">作品名</label>
+                        <label for="">作品名</label>
                         <code id="nameCheck"></code>
                         <input v-model="name" @change="checkName" @blur="checkName" type="txt" class="form-control"
                             id="">
@@ -17,7 +17,7 @@
             <div class="form-group">
                 <code id="fileCheck"></code>
                 <span id="file_input_area">
-                    <input type="file" class="form-control-file " id="myImage" @change="fileSelected" 
+                    <input type="file" class="form-control-file " id="myImage" ref="file" @change="fileSelected" 
                         accept=".jpg,.jpeg,.png,.gif,.mp3,.wav,.m4a,.mp4,.mov">
                 </span>
             </div>
@@ -25,11 +25,11 @@
 
             <div class=form-group>
                 <label for="">ジャンル</label>
-                {{genreString}}
+                <input type="txt" placeholder="自動選択されます" v-bind:value="genreString" readonly>                
             </div>
 
             <div class=form-group>
-                <label for="exampleFormControlSelect1">販売価格</label>
+                <label for="">販売価格</label>
                 <select v-model="feeSelected">
                     <option v-for="feeOption in feeOptions" v-bind:value="feeOption.value" :key="feeOption.value">
                         {{ feeOption.text }}
@@ -39,10 +39,10 @@
             </div>
 
             <div class="form-group">
-                <label for="exampleFormControlTextarea1">商品説明</label>
+                <label for="">商品説明</label>
                 <code id="detailCheck"></code>
                 <textarea v-model="detail" @change="checkDetail" @blur="checkDetail" class="form-control"
-                    id="exampleFormControlTextarea1" rows="5"></textarea>
+                    id="" rows="5"></textarea>
                 <p style="white-space: pre-line;">{{ detail }}</p>
             </div>
             <div class="form-submit">
@@ -198,8 +198,6 @@
                 console.log(this.fileInfo)
                 console.log('あとでけす')
 
-                
-
                 let postData = {
                     //v-modelで取得した入力値の内容を変数に格納
                     name: this.name,
@@ -214,9 +212,8 @@
                 console.log(`detail:${this.checkDetail()}`) //detailのバリデーションメソッド発動&問題ないかをリターン
                 console.log(`file:${this.checkFile()}`)
 
-            
 
-                if (this.checkName() && this.checkDetail()) { //バリデーション関数のreturnがどちらもtrueなら下記実行
+                if (this.checkName() && this.checkDetail()&& this.checkFile()) { //バリデーション関数のreturnがどちらもtrueなら下記実行
 
                     axios.post('/api/stocks/create', postData) //api.phpのルートを指定。第2引数には渡したい変数を入れる（今回は配列postData=入力された内容）
                         .then(response => {
@@ -226,11 +223,12 @@
 
                             //投稿に成功したらv-modelを使って書くフォームをクリア
                             this.name = ""
-                            //ファイルもクリアしたい
+                            
+                            this.$refs.file.value = null;//input fileクリア
                             this.genre = ""
                             this.feeSelected = 1500
                             this.detail = ""
-
+                            this.genreString=""
                         })
                         .catch(function (error) {
                             // handle error(axiosの処理にエラーが発生した場合に処理させたいことを記述)

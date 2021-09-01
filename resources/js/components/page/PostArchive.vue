@@ -25,6 +25,8 @@ export default {
           }
   },  
   mounted() {//必ず通過するフック
+
+            //api.phpに記載された/stocksのルーティングのアクションを発動
             axios.get('/api/stocks')
             .then(response => {
                 this.stocks = response.data.data

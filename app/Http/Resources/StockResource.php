@@ -15,6 +15,6 @@ class StockResource extends JsonResource
      */
     public function toArray($request)
     {
-        return parent::toArray($request);
+        return parent::toArray($request);//コントローラーから受け取った情報をjson形式に変換？returnの中身は好きなフォーマットに書き換えることも可能
     }
 }

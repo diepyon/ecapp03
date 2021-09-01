@@ -14,7 +14,10 @@ use App\Http\Controllers\StockController;
 |
 */
 
-Route::get('/stocks', [StockController::class, 'show']);
+Route::get('/stocks', [StockController::class, 'show']);//StockControllerのshowメソッドを発動
+
+Route::get('/stocks/{stock_id}', [StockController::class, 'single']);
+
 Route::get('/stock/author/{author_id}', [StockController::class, 'stocksByAuthorId']);
 
 Route::post('/stocks/create', [StockController::class, 'create']);
