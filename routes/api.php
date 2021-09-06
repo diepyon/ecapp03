@@ -16,7 +16,7 @@ use App\Http\Controllers\StockController;
 
 Route::get('/stocks', [StockController::class, 'show']);//StockControllerのshowメソッドを発動
 
-Route::get('/stocks/{stock_id}', [StockController::class, 'single']);
+Route::get('/stocks/{stock_id}', [StockController::class, 'single']);//urlのstock_idの部分に入力された数字をsingleメソッドに渡す
 
 Route::get('/stock/author/{author_id}', [StockController::class, 'stocksByAuthorId']);
 

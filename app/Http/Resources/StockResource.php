@@ -13,8 +13,8 @@ class StockResource extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function toArray($request)
+    public function toArray($request)//全部のデータをstockkontrollerのcreateメソッドから受け取ったぜ
     {
-        return parent::toArray($request);//コントローラーから受け取った情報をjson形式に変換？returnの中身は好きなフォーマットに書き換えることも可能
+        return parent::toArray($request);
     }
 }

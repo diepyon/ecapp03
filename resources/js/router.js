@@ -2,8 +2,9 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import Home from './components/page/Home'
 import About from './components/page/About.vue'
-import Post from './components/page/Post.vue'
-import PostArchive from './components/page/PostArchive.vue'
+import StockCreate from './components/page/StockCreate.vue'
+import StockArchive from './components/page/StockArchive.vue'
+import StockSingle from './components/page/StockSingle.vue' 
 import NotFound from './components/page/NotFound.vue'
 
 Vue.use(Router)
@@ -27,15 +28,20 @@ export default new Router({
       component: About
         },
     {
-      path: '/post',
-      name: 'post',
-      component: Post
+      path: '/stocks/create',
+      name: 'stockcreate',
+      component: StockCreate
         },
     {
-      path: '/postarchive',
-      name: 'postarchive',
-      component: PostArchive
+      path: '/stocks',
+      name: 'stockarchive',
+      component: StockArchive
+    }, 
+    {
+      path: '/stocks/:id(\\d+)',
+      name: 'stocksingle',
+      component: StockSingle,
+      props: route => ({ id: Number(route.params.id) })
     },    
-    
   ]
 })

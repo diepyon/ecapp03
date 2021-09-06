@@ -27,10 +27,9 @@ class StockController extends Controller
      */
     public function create(Request $request ,Stock $stock)
     {
-        //dd(request()->all());
 
-        //$file_name = request()->file->getClientOriginalName();
-        //request()->file->storeAs('public/', $file_name);
+        //dd($request->input('file'));
+
 
         $stock->name = $request->input('name');
         $stock->genre = $request->input('genre');
@@ -63,15 +62,11 @@ class StockController extends Controller
     public function show()
     {
         $stock = Stock::all();//stocksテーブルの情報をすべて取得
-        return new StockResource($stock);//StockResourceにデータを渡してjsonに変換？
+        return new StockResource($stock);//StockResourceにデータを渡してjsonに変換してもらおう
     }
 
-    public function single($stock_id){
-        //ここに個別投稿を表示するアクション
-
-        //resoucrcesの出力形式を整えてあげないとidを取得できないと思う
-        //整えたら整えたで今までのアーカイブ消えそう
-        $stock = Stock::find($stock_id);
+    public function single($stock_id){//url上の数値を取得
+        $stock = Stock::find($stock_id);//受け取った数値と一致するIDのレコードを取得
         return new StockResource($stock);
     }
     /**
