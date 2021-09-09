@@ -25,21 +25,32 @@ class StockController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create(Request $request ,Stock $stock)
+    public function create(Request $request, Stock $stock)
     {
 
-        //dd($request->input('file'));
+        //dd($request->file('fileInfo'));
+        //$request->file('fileInfo')->store('');
+        // dd($request->file('files')[0]);
+
+        $request->file('files')[0]->storeAs('public/img', 'hoge.png');
+        //ファイル情報全体が配列なので番号を指定、storage/app/public/imgに保存する
 
 
-        $stock->name = $request->input('name');
-        $stock->genre = $request->input('genre');
-        $stock->fee = $request->input('fee');
-        $stock->detail =  $request->input('detail');
+        $request->file('files')[0]->storeAs('private/img', 'hoge.png');
 
-        $stock->author_id = 1;        
+
+       
+
+        $stock->name = $request->form['name'];
+        $stock->genre = $request->form['genre'];
+        $stock->fee =  $request->form['fee'];
+        $stock->detail =  $request->form['detail'];
+
+        $stock->author_id = 1;
         $stock->path = 'test';
         $stock->save();
 
+        //dd($request->file('files'));
     }
 
     /**
@@ -65,7 +76,8 @@ class StockController extends Controller
         return new StockResource($stock);//StockResourceにデータを渡してjsonに変換してもらおう
     }
 
-    public function single($stock_id){//url上の数値を取得
+    public function single($stock_id)
+    {//url上の数値を取得
         $stock = Stock::find($stock_id);//受け取った数値と一致するIDのレコードを取得
         return new StockResource($stock);
     }
@@ -110,5 +122,5 @@ class StockController extends Controller
     {
         $author = Stock::find($author_id);
         return new StockCollection($stock->stocks);
-    }    
+    }
 }
