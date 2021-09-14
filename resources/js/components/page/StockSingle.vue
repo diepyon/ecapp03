@@ -7,6 +7,7 @@
             <p >金額：{{stock.fee}}</p>
             <p >ジャンル：{{stock.genre}}</p>
             <p >詳細：{{stock.detail}}</p>
+             <p >投稿日:{{stock.created_at}}</p>
         </span>
         <Footer />
     </div>
