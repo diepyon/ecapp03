@@ -6,14 +6,12 @@
                 <div class="">
                     <div class="form-group">
                         <label for="">作品名</label>
-                        <code id="nameCheck"></code>
-                        <input v-model="name" @change="checkName" @blur="checkName" type="txt" class="form-control"
-                            id="">
+                        <code>{{errorMessage.name}}</code>
+                        <input v-model="name" @change="checkName" @blur="checkName" type="txt" class="form-control">
                         <p>{{name}}</p>
                     </div>
                 </div>
             </div>
-
 
             <div class="drop_area" 　　　　　@dragenter="dragEnter" 　　　　　:class="{enter: isEnter}">
                 ファイルアップロード（ドラッグアンドドロップエリア作成中）CSSとかまだ
@@ -21,14 +19,18 @@
 
 
             <div class="form-group">
-                <code id="fileCheck"></code>
+                <code>{{errorMessage.file}}</code>
                 <span id="file_input_area">
-                    <input type="file" class="form-control-file " id="myImage" ref="file" @change="fileSelected"
+                    <input type="file" class="form-control-file " ref="file" @change="fileSelected"
                         accept=".jpg,.jpeg,.png,.gif,.mp3,.wav,.m4a,.mp4,.mov">
                 </span>
 
+                <div v-show="previewArea" class="preview">
+                    <img v-show="genre=='image'" :src="blobUrl">
+                    <video controls v-show="genre=='video'" id="video" loop autoplay muted :src="blobUrl"></video>
+                    <audio v-show="genre=='audio'" id="audio" controls :src="blobUrl"></audio>
+                </div>
 
-            <div v-if="previewImg" class="preview"><img :src="blobUrl"></div>
             </div>
 
             <div class=form-group>
@@ -48,7 +50,7 @@
 
             <div class="form-group">
                 <label for="">商品説明</label>
-                <code id="detailCheck"></code>
+                <code>{{errorMessage.detail}}</code>
                 <textarea v-model="detail" @change="checkDetail" @blur="checkDetail" class="form-control" id=""
                     rows="5"></textarea>
                 <p style="white-space: pre-line;">{{ detail }}</p>
@@ -64,13 +66,18 @@
     .enter {
         border: 10px dotted powderblue;
     }
+
     .preview {
-        margin:.5em;
-    }/*ファイルプレビューエリアの余白*/
-    .preview img{
-        width:100%;
+        margin: .5em;
+    }
+
+    /*ファイルプレビューエリアの余白*/
+    .preview img,
+    video {
+        width: 100%;
         max-width: 500px;
     }
+
 </style>
 <script>
     import Header from '../layout/Header'
@@ -84,11 +91,14 @@
             return {
                 //あらかじめ変数を定義してあげないとフロントが混乱する
                 name: '',
-                isEnter: false,
                 detail: '',
+
+                isEnter: false,
                 fileInfo: null, //inputfileの情報を格納する変数
+
                 //ジャンル選択の配列
                 genre: '',
+
                 genreString: '',
                 //金額選択の配列
                 feeSelected: 1500,
@@ -109,127 +119,208 @@
                         value: 20000
                     },
                 ],
+
+                //配列にしたい
                 maxNameLength: 10,
                 maxDetailLength: 120,
 
-            
-                previewImg:false,
+
+                errorMessage: {
+                    'name': null,
+                    'detail': null,
+                    'file': null
+                },
+
+                blobUrl: null,
+                previewArea: false,
+
+                fuga: null,
 
             }
         },
         mounted() { //必ず通過するフック
+
         },
         methods: {
             //ドラッグアンドドロップでファイルを選択できるようにもしたい
             dragEnter() {
                 this.isEnter = true;
             },
-            fuga(){
-                alert('aaaa')
-            },
+
             //バリテーション
             checkName() {
                 var n = ''
                 var n = this.name.length //nameの文字数を取得
                 if (n > this.maxNameLength) { //maxNameLengthはdata()内で定義
-                    var nameMessage = String(this.maxNameLength) + "文字以内で入力してください。"
+                    this.nameMessage = String(this.maxNameLength) + "文字以内で入力してください。"
                 } else if (n == 0) {
-                    var nameMessage = "何か入力してください。"
+                    this.errorMessage.name = "何か入力してください。"
                 } else {
-                    var nameMessage = ""
+                    this.errorMessage.name = ""
                 }
-                document.getElementById('nameCheck').innerHTML = nameMessage
-                if (nameMessage == "") {
+                //document.getElementById('nameCheck').innerHTML = nameMessage
+
+                if (this.errorMessage.name == "") {
                     var result = true
                 } else {
                     var result = false
                 } //nameの入力に問題がなければtrueを返す
                 return (result)
             },
+
             checkDetail() {
                 var n = ''
                 var n = this.detail.length //detailの文字数を取得
                 if (n > this.maxDetailLength) {
-                    var detailMessage = String(this.maxDetailLength) + "文字以内で入力してください。"
+                    this.errorMessage.detail = String(this.maxDetailLength) + "文字以内で入力してください。"
                 } else if (n == 0) {
-                    var detailMessage = "何か入力してください。"
+                    this.errorMessage.detail = "何か入力してください。"
                 } else {
-                    var detailMessage = ""
+                    this.errorMessage.detail = ""
                 }
-                document.getElementById('detailCheck').innerHTML = detailMessage
-                if (detailMessage == "") {
+                //document.getElementById('detailCheck').innerHTML = errorMessage.detail
+
+                if (this.errorMessage.detail == "") {
                     var result = true
                 } else {
                     var result = false
                 } //detailの入力に問題がなければtrueを返す
                 return (result)
             },
+
+
+
             checkFile() {
+                console.log(this.fuga)
+                this.previewArea = true //previewエリアのタグを非表示
+
                 if (this.fileInfo == null) {
-                    var fileMessage = "選択してください"
+                    this.errorMessage.file = "選択してください"
+                 
                 } else if (this.fileInfo.size > 5242880) { //いったんテストで5MB
                     //1GBなら1073741824
-                    var fileMessage = "ファイルサイズの上限〇GBを超えています。"
+                  
+                    this.errorMessage.file = "ファイルサイズの上限〇GBを超えています。"
+                } else if (this.fileInfo.size <= 0) {
+                  
+                    this.errodMessage.file = "ファイル不正です。サイズが0KBです。"
+                } else if (this.fuga > 25) {
+                  
+                    this.errorMessage.file = "長すぎ。"
+                    alert(this.errorMessage.file)
                 } else {
-                    var fileMessage = ""
+                   
+                    this.errorMessage.file = ""
+                    this.previewArea = true //previewエリアのタグを表示
                 }
-                //console.log(this.fileInfo)
-                document.getElementById('fileCheck').innerHTML = fileMessage
-                if (fileMessage == "") {
+                //document.getElementById('fileCheck').innerHTML = errorMessage.file
+
+                if (this.errorMessage.file == "") {
                     var result = true
                 } else {
                     var result = false
                 } //fileの入力に問題がなければtrueを返す
+
+                console.log(this.errorMessage.file)
                 return (result)
+
+
             },
             fileSelected(event) {
+                console.log('選択された')
                 this.fileInfo = event.target.files[0] //選択されたファイルの情報を変数に格納
                 if (this.fileInfo) {
-                    document.getElementById('fileCheck').innerHTML = ""
-                } //ファイル未選択のバリデーションエラーが出てたら消す
-                this.checkFile()
-                if (this.fileInfo && this.fileInfo.type.match('image')) { //ファイル存在（選ばれていて）なおかつ画像なら
+                    this.errorMessage.file = null //ファイル未選択のバリデーションエラーが出てたら消す
+                }
+                 console.log('格納完了')
+                this.blobUrl = URL.createObjectURL(this.fileInfo) //選択されたファイルのURLを取得  
+                 console.log('url取得')
+
+
+                const ms = 5000;
+                new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve();
+                }, ms)
+                }).then(() => {
+   
+                   //videoの長さを取得したいが発動タイミングが分からん
+                var video = document.getElementById('video')
+
+      
+
+                video.addEventListener('loadeddata', function() {
+                    if(video.readyState > 0){
+                        this.fuga = video.duration
+                        console.log(this.fuga)
+                    }
+           
+                });
+
+
+                this.fuga = video.duration
+                console.log(this.fuga)
+
+                if(this.fuga ==null){
+                    setTimeout(function(){
+                    console.log('待ちます')
+                },1000)
+                //while分で書く。もしfugaの値がちゃんと取れたら脱出
+                }
+
+
+                
+                let result = this.checkFile() //ファイルに問題がないかチェック
+
+                //this.blobUrl = URL.createObjectURL(this.fileInfo) //選択されたファイルのURLを取得  
+
+                if (result && this.fileInfo && this.fileInfo.type.match(
+                        'image')) { //問題がないファイルが存在（選ばれていて）なおかつ画像なら
                     this.genre = 'image'
                     this.genreString = "画像"
-                    
 
-                this.blobUrl = window.URL.createObjectURL(this.fileInfo);//選択されたファイルのURLを取得
-
-                this.previewImg=true //imgタグを表示
-
-                } else if (this.fileInfo && this.fileInfo.type.match('quicktime')) { //ファイル存在（選ばれていて）なおかつ動画なら
+                } else if (result && this.fileInfo && this.fileInfo.type.match(
+                        'quicktime')) { //問題ないファイル存在が（選ばれていて）なおかつ動画なら
                     this.genre = 'video'
                     this.genreString = "映像"
                     //macのmovファイル？プレビューできないかもしれないイことを説明
-                } else if (this.fileInfo && this.fileInfo.type.match('video')) { //ファイル存在（選ばれていて）なおかつ動画なら
+                } else if (result && this.fileInfo && this.fileInfo.type.match(
+                        'video')) { //問題ないファイル存在が（選ばれていて）なおかつ動画なら
                     this.genre = 'video'
                     this.genreString = "映像"
-                } else if (this.fileInfo && this.fileInfo.type.match('audio')) { //ファイル存在（選ばれていて）なおかつ音源なら
+                } else if (result && this.fileInfo && this.fileInfo.type.match(
+                        'audio')) { //問題ないファイル存在が（選ばれていて）なおかつ音源なら
                     this.genre = 'audio'
                     this.genreString = "音源"
+                } else {
+                    this.blobUrl = null
+                    this.previewArea = false
                 }
+
+
+                });
+             
+
+
+
+
+
+
             },
             stockCreate() { //投稿とボタンが押されたときに発動するメソッド
+                //投稿直前にも入力に不備がないかチェック
+                this.checkName()
+                this.checkDetail()
+                this.checkFile()
+
                 let postData = new FormData()
-                postData.append('files[0]', this.fileInfo)//files配列の先頭はthis.fileInfo
-                postData.append('form[name]', this.name) 
+                postData.append('files[0]', this.fileInfo) //files配列の先頭はthis.fileInfo
+                postData.append('form[name]', this.name)
                 postData.append('form[genre]', this.genre)
                 postData.append('form[fee]', this.feeSelected)
                 postData.append('form[detail]', this.detail)
-                
-/*                 let postData = {
-                    //v-modelで取得した入力値の内容を変数に格納
-                    name: this.name,
-                    genre: this.genre,
-                    fee: this.feeSelected,
-                    detail: this.detail,
-                    'files[0]': this.fileInfo,
-                    //ここにもfileInfoの情報が必要だと思う
-                }
-                console.log(postData) */
-                //console.log(`name:${this.checkName()}`) //nameのバリデーションメソッド発動&問題ないかをリターン
-                //console.log(`detail:${this.checkDetail()}`) //detailのバリデーションメソッド発動&問題ないかをリターン
-                //console.log(this.checkFile())
+
+
                 if (this.checkName() && this.checkDetail() && this.checkFile()) { //バリデーション関数のreturnがどちらもtrueなら下記実行
                     console.log(postData)
                     axios.post('/api/stocks/create', postData) //api.phpのルートを指定。第2引数には渡したい変数を入れる（今回は配列postData=入力された内容）
@@ -256,4 +347,5 @@
             }
         },
     }
+
 </script>
