@@ -16,6 +16,10 @@ use App\Http\Controllers\StockController;
 
 Route::get('/stocks', [StockController::class, 'show']);//StockControllerのshowメソッドを発動
 
+Route::get('/image', [StockController::class, 'showImage']);//StockControllerのshowImageメソッド発動
+
+Route::get('/duration', [StockController::class, 'duration']);//選択されたビデオファイルの時間をlaravel-ffmpegで取得したい
+
 Route::get('/stocks/{stock_id}', [StockController::class, 'single']);//urlのstock_idの部分に入力された数字をsingleメソッドに渡す
 
 Route::get('/stock/author/{author_id}', [StockController::class, 'stocksByAuthorId']);

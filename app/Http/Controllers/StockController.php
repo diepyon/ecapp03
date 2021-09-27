@@ -3,10 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Stock;
+
+
 use Illuminate\Http\Request;
 use App\Http\Resources\StockResource;
 
 use Illuminate\Support\Facades\Storage;//ファイルアップロード・削除関連
+
+use Image;
 
 class StockController extends Controller
 {
@@ -27,30 +31,23 @@ class StockController extends Controller
      */
     public function create(Request $request, Stock $stock)
     {
-
-        //dd($request->file('fileInfo'));
-        //$request->file('fileInfo')->store('');
-        // dd($request->file('files')[0]);
-
-        $request->file('files')[0]->storeAs('public/img', 'hoge.png');
-        //ファイル情報全体が配列なので番号を指定、storage/app/public/imgに保存する
-
-
-        $request->file('files')[0]->storeAs('private/img', 'hoge.png');
-
-
-       
-
+        $id= $stock->all()->last()->id+1;//lastのID＋1で今からポストするこの投稿のIDを取得（同時に投稿がかかったらまずい？）    
+        $extention = $request->form['extention']; //ファイルの拡張子を取得
+        $request->file('files')[0]->storeAs('private/stocks', $id.'.'.$extention);//投稿のID.拡張子をファイル名に指定
         $stock->name = $request->form['name'];
         $stock->genre = $request->form['genre'];
         $stock->fee =  $request->form['fee'];
         $stock->detail =  $request->form['detail'];
-
-        $stock->author_id = 1;
-        $stock->path = 'test';
+        $stock->author_id = 1;//認証システムがまだできていないのでいったん仮で1としている
+        $stock->path =$id.'.'.$extention;//投稿のID.拡張子をデータベースに登録
         $stock->save();
 
-        //dd($request->file('files'));
+        //投稿時に走らせるとやっぱり重い。認証システム入れたら承認時に変換する方式にしたい
+        if($request->form['genre']=='image'){
+            $stock->ConversionImage($request->file('files')[0], $id);//画像なら変換
+        }else if($request->form['genre']=='video'){
+            $stock->ConversionVideo($request->file('files')[0],$id);//動画なら変換
+        }
     }
 
     /**
@@ -75,6 +72,14 @@ class StockController extends Controller
         $stock = Stock::all();//stocksテーブルの情報をすべて取得
         return new StockResource($stock);//StockResourceにデータを渡してjsonに変換してもらおう
     }
+
+    public function showImage()
+    {
+        $stock = Stock::where('genre', 'image')->get();//stocksテーブルからジャンルがimageのレコードをすべて取得
+        dd($stock);
+
+        return new StockResource($stock);//StockResourceにデータを渡してjsonに変換してもらおう
+    }    
 
     public function single($stock_id)
     {//url上の数値を取得
@@ -123,4 +128,10 @@ class StockController extends Controller
         $author = Stock::find($author_id);
         return new StockCollection($stock->stocks);
     }
+
+    public function duration($fileInfo)
+    {
+        /*ここで取れたとして、どうやってビューに渡すのか*/
+    }
+
 }

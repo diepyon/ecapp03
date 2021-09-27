@@ -92,13 +92,10 @@
                 //あらかじめ変数を定義してあげないとフロントが混乱する
                 name: '',
                 detail: '',
-
                 isEnter: false,
                 fileInfo: null, //inputfileの情報を格納する変数
-
                 //ジャンル選択の配列
                 genre: '',
-
                 genreString: '',
                 //金額選択の配列
                 feeSelected: 1500,
@@ -119,47 +116,38 @@
                         value: 20000
                     },
                 ],
-
                 //配列にしたい
                 maxNameLength: 10,
                 maxDetailLength: 120,
-
-
                 errorMessage: {
                     'name': null,
                     'detail': null,
                     'file': null
                 },
-
                 blobUrl: null,
                 previewArea: false,
-
                 fuga: null,
-
             }
         },
         mounted() { //必ず通過するフック
-
         },
         methods: {
             //ドラッグアンドドロップでファイルを選択できるようにもしたい
             dragEnter() {
                 this.isEnter = true;
             },
-
             //バリテーション
             checkName() {
                 var n = ''
                 var n = this.name.length //nameの文字数を取得
                 if (n > this.maxNameLength) { //maxNameLengthはdata()内で定義
-                    this.nameMessage = String(this.maxNameLength) + "文字以内で入力してください。"
+                    this.errorMessage.name = String(this.maxNameLength) + "文字以内で入力してください。"
                 } else if (n == 0) {
                     this.errorMessage.name = "何か入力してください。"
                 } else {
                     this.errorMessage.name = ""
                 }
                 //document.getElementById('nameCheck').innerHTML = nameMessage
-
                 if (this.errorMessage.name == "") {
                     var result = true
                 } else {
@@ -167,7 +155,6 @@
                 } //nameの入力に問題がなければtrueを返す
                 return (result)
             },
-
             checkDetail() {
                 var n = ''
                 var n = this.detail.length //detailの文字数を取得
@@ -179,7 +166,6 @@
                     this.errorMessage.detail = ""
                 }
                 //document.getElementById('detailCheck').innerHTML = errorMessage.detail
-
                 if (this.errorMessage.detail == "") {
                     var result = true
                 } else {
@@ -187,107 +173,115 @@
                 } //detailの入力に問題がなければtrueを返す
                 return (result)
             },
-
-
-
             checkFile() {
-                console.log(this.fuga)
-                this.previewArea = true //previewエリアのタグを非表示
 
+                this.previewArea = true //previewエリアのタグを非表示
                 if (this.fileInfo == null) {
                     this.errorMessage.file = "選択してください"
-                 
+
                 } else if (this.fileInfo.size > 5242880) { //いったんテストで5MB
                     //1GBなら1073741824
-                  
+
                     this.errorMessage.file = "ファイルサイズの上限〇GBを超えています。"
                 } else if (this.fileInfo.size <= 0) {
-                  
+
                     this.errodMessage.file = "ファイル不正です。サイズが0KBです。"
-                } else if (this.fuga > 25) {
-                  
+                } else if (this.fuga > 13) {
                     this.errorMessage.file = "長すぎ。"
                     alert(this.errorMessage.file)
                 } else {
-                   
                     this.errorMessage.file = ""
                     this.previewArea = true //previewエリアのタグを表示
                 }
                 //document.getElementById('fileCheck').innerHTML = errorMessage.file
-
                 if (this.errorMessage.file == "") {
                     var result = true
                 } else {
                     var result = false
                 } //fileの入力に問題がなければtrueを返す
 
-                console.log(this.errorMessage.file)
                 return (result)
-
-
             },
             fileSelected(event) {
-                console.log('選択された')
+
                 this.fileInfo = event.target.files[0] //選択されたファイルの情報を変数に格納
                 if (this.fileInfo) {
                     this.errorMessage.file = null //ファイル未選択のバリデーションエラーが出てたら消す
                 }
-                 console.log('格納完了')
-                this.blobUrl = URL.createObjectURL(this.fileInfo) //選択されたファイルのURLを取得  
-                 console.log('url取得')
 
-
-                const ms = 5000;
-                new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve();
-                }, ms)
-                }).then(() => {
-   
-                   //videoの長さを取得したいが発動タイミングが分からん
-                var video = document.getElementById('video')
-
-      
-
-                video.addEventListener('loadeddata', function() {
-                    if(video.readyState > 0){
-                        this.fuga = video.duration
-                        console.log(this.fuga)
-                    }
-           
-                });
-
-
-                this.fuga = video.duration
-                console.log(this.fuga)
-
-                if(this.fuga ==null){
-                    setTimeout(function(){
-                    console.log('待ちます')
-                },1000)
-                //while分で書く。もしfugaの値がちゃんと取れたら脱出
+                if (event.target.files[0] != undefined) {
+                    this.blobUrl = URL.createObjectURL(this.fileInfo) //選択されたファイルのURLを取得  
+                } else {
+                    this.blobUrl = ""
                 }
 
+                //videoの長さを取得したいが発動タイミングが分からん
+                var video = document.getElementById('video')
 
-                
+
+
                 let result = this.checkFile() //ファイルに問題がないかチェック
 
-                //this.blobUrl = URL.createObjectURL(this.fileInfo) //選択されたファイルのURLを取得  
+                /*                 this.fuga = video.duratoin //あえてNaNを発生させる
+
+                                alert(this.fuga)
+
+                                if (isNaN(this.fuga) == false) {
+                                    alert('NaNじゃないで')
+                                    alert(this.fuga)
+                                } else {
+                                    alert('NaNやで')
+                                    alert(this.fuga)
+                                }
+                 */
+
+
+                //どうしても動画の再生時間を時間を取得できない
+                //コントローラーに渡して、laravel-ffmpegで取得しよう思うたが
+                //やりかたがわからない
+                //コントローラーで値が取れたとしても、どうやってビュー側にわたすん？
+                /*                 axios.get('/api/stocks/duration', this.fileInfo)
+                                    .then(response => {
+                                        alert('渡せた')
+                                    }) */
+
+
+
 
                 if (result && this.fileInfo && this.fileInfo.type.match(
                         'image')) { //問題がないファイルが存在（選ばれていて）なおかつ画像なら
                     this.genre = 'image'
                     this.genreString = "画像"
-
                 } else if (result && this.fileInfo && this.fileInfo.type.match(
                         'quicktime')) { //問題ないファイル存在が（選ばれていて）なおかつ動画なら
                     this.genre = 'video'
                     this.genreString = "映像"
+
+                    video.addEventListener('loadedmetadata', function () {
+
+                        //一時的に追加
+                        console.log('再生時間↓');
+                        console.log(video.duration);
+                        this.fuga = video.duration
+                        alert(this.fuga)
+                    });
+
                     //macのmovファイル？プレビューできないかもしれないイことを説明
                 } else if (result && this.fileInfo && this.fileInfo.type.match(
                         'video')) { //問題ないファイル存在が（選ばれていて）なおかつ動画なら
                     this.genre = 'video'
                     this.genreString = "映像"
+
+                    video.addEventListener('loadedmetadata', function () {
+
+                        //一時的に追加
+                        console.log('再生時間↓');
+                        console.log(video.duration);
+                        this.fuga = video.duration
+                        alert(this.fuga)
+                    });
+
+
                 } else if (result && this.fileInfo && this.fileInfo.type.match(
                         'audio')) { //問題ないファイル存在が（選ばれていて）なおかつ音源なら
                     this.genre = 'audio'
@@ -296,33 +290,25 @@
                     this.blobUrl = null
                     this.previewArea = false
                 }
-
-
-                });
-             
-
-
-
-
-
-
             },
             stockCreate() { //投稿とボタンが押されたときに発動するメソッド
+
                 //投稿直前にも入力に不備がないかチェック
-                this.checkName()
-                this.checkDetail()
-                this.checkFile()
-
-                let postData = new FormData()
-                postData.append('files[0]', this.fileInfo) //files配列の先頭はthis.fileInfo
-                postData.append('form[name]', this.name)
-                postData.append('form[genre]', this.genre)
-                postData.append('form[fee]', this.feeSelected)
-                postData.append('form[detail]', this.detail)
+                var nameResult = this.checkName()
+                var detailResult = this.checkDetail()
+                var fileResult = this.checkFile()
 
 
-                if (this.checkName() && this.checkDetail() && this.checkFile()) { //バリデーション関数のreturnがどちらもtrueなら下記実行
-                    console.log(postData)
+                if (nameResult && detailResult && fileResult) {//check項目が全てtrueなら
+                    let postData = new FormData()
+                    postData.append('files[0]', this.fileInfo) //files配列の先頭はthis.fileInfo
+                    postData.append('form[extention]', this.fileInfo.name.split('.').pop()) //拡張子を取得
+                    postData.append('form[name]', this.name)
+                    postData.append('form[genre]', this.genre)
+                    postData.append('form[fee]', this.feeSelected)
+                    postData.append('form[detail]', this.detail)
+
+                    //バリデーション関数のreturnがどちらもtrueなら下記実行
                     axios.post('/api/stocks/create', postData) //api.phpのルートを指定。第2引数には渡したい変数を入れる（今回は配列postData=入力された内容）
                         .then(response => {
                             //ここに成功した時に行いたい処理を記載
