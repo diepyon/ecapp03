@@ -6,9 +6,10 @@
             <b-col cols="6" sm="3" class="b-col" v-for="stock in stocks" :key="stock.id">
                 <div> <a :href="`stocks/` + stock.id">
                         <p>{{ stock.name }}</p>
+                        <p>{{ stock.genre }}</p>
                     </a>
                 </div>
-                <img :src="'/storage/img/hoge.png'">
+                 <img :src="'/storage/stock_thumbnail/167.jpg'">
             </b-col>
 
         </b-row>

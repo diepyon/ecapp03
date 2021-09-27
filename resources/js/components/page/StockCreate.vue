@@ -174,12 +174,11 @@
                 return (result)
             },
             checkFile() {
-
                 this.previewArea = true //previewエリアのタグを非表示
                 if (this.fileInfo == null) {
                     this.errorMessage.file = "選択してください"
 
-                } else if (this.fileInfo.size > 5242880) { //いったんテストで5MB
+                } else if (this.fileInfo.size > 25242880) { //いったんテストで25MB
                     //1GBなら1073741824
 
                     this.errorMessage.file = "ファイルサイズの上限〇GBを超えています。"

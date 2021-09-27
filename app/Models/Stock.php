@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
+use Illuminate\Support\Facades\Storage;//ファイルのリネームで必要
+
 use Image;//画像リサイズライブラリ
 
 //ffmpeg関連
@@ -79,16 +81,38 @@ class Stock extends Model
         })
         ->save(storage_path('app/public/stock_download_sample/'. $id.'.png'), 100);
     }
-    public static function ConversionVideo($file, $id)
+    public static function ConversionVideo($extention, $id)
     {
         //動画変換メソッド
- 
+        $file = 'private/stocks/'.$id.'.mp4';//元ファイルのパス
+        
+        //mp4じゃなかったらmp4に変換（ていうか音消したいからどのみち無条件で変換した方がいいかも）
+        if ($extention !='mp4') {//大文字MP4の場合どうなるのか　movならって条件の方がいいと思う
+            $format = new \FFMpeg\Format\Video\X264('aac');
+            $format->setAdditionalParameters(['-pix_fmt','yuv420p']);
+            FFMpeg::open('private/stocks/'.$id.'.'.$extention)
+            ->export()
+            ->addFilter('-an')//音を消す
+            ->inFormat($format)
+            ->save($file);
 
+            //movファイルを削除する処理も欲しい
+        }else{
+            //ここにmp4の時の音消し処理
+            $format = new \FFMpeg\Format\Video\X264('aac');
+            FFMpeg::open('private/stocks/'.$id.'.'.$extention)
+            ->export()
+            ->addFilter('-an')//音を消す
+            ->inFormat($format)
+            ->save('private/stocks/'.$id.'_tmp.mp4');//上書きできないので別名で保存                    
+            
+            Storage::delete($file);//上書きできないので元ファイルを削除
+            Storage::move('private/stocks/'.$id.'_tmp.mp4', $file);//一時ファイルの名前を正しい名前に変更
+        }
 
-        //動画サムネイルを生成
+        //動画サムネイル画像を生成
         $media = FFMpeg::fromDisk('local')
-        //->open('private/stock_data/'.$uploaded_filename)
-        ->open('private/stocks/'.$id.'.mp4')//mp4であることを全体にしてしまっているから、動画はmp4に変換する処理が手間に必要
+        ->open($file)//mp4であることを全体にしてしまっているから、動画はmp4に変換する処理が手間に必要
         ->getFrameFromSeconds(1)//1フレーム目
         ->export()
         ->save('public/stock_thumbnail/'.$id.'.jpg');//ファイル名をjpgに変換

@@ -31,7 +31,9 @@ class StockController extends Controller
      */
     public function create(Request $request, Stock $stock)
     {
-        $id= $stock->all()->last()->id+1;//lastのID＋1で今からポストするこの投稿のIDを取得（同時に投稿がかかったらまずい？）    
+        
+        $id= $stock->orderBy('id','desc')->first()->id+1;//lastのID＋1で今からポストするこの投稿のIDを取得（同時に投稿がかかったらまずい？）    
+
         $extention = $request->form['extention']; //ファイルの拡張子を取得
         $request->file('files')[0]->storeAs('private/stocks', $id.'.'.$extention);//投稿のID.拡張子をファイル名に指定
         $stock->name = $request->form['name'];
@@ -46,7 +48,7 @@ class StockController extends Controller
         if($request->form['genre']=='image'){
             $stock->ConversionImage($request->file('files')[0], $id);//画像なら変換
         }else if($request->form['genre']=='video'){
-            $stock->ConversionVideo($request->file('files')[0],$id);//動画なら変換
+            $stock->ConversionVideo($request->form['extention'],$id);//動画なら変換
         }
     }
 
@@ -76,7 +78,7 @@ class StockController extends Controller
     public function showImage()
     {
         $stock = Stock::where('genre', 'image')->get();//stocksテーブルからジャンルがimageのレコードをすべて取得
-        dd($stock);
+        
 
         return new StockResource($stock);//StockResourceにデータを渡してjsonに変換してもらおう
     }    
