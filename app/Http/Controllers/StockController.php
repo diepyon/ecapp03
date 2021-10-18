@@ -33,6 +33,7 @@ class StockController extends Controller
     {
         
         $id= $stock->orderBy('id','desc')->first()->id+1;//lastのID＋1で今からポストするこの投稿のIDを取得（同時に投稿がかかったらまずい？）    
+        //↑一応ランダムな文字列を付けたりユーザーIDをつけるなどして投稿が被ってもユニークな値が生成できるように後々しよう
 
         $extention = $request->form['extention']; //ファイルの拡張子を取得
         $request->file('files')[0]->storeAs('private/stocks', $id.'.'.$extention);//投稿のID.拡張子をファイル名に指定
