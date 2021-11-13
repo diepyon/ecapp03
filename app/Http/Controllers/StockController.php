@@ -79,8 +79,6 @@ class StockController extends Controller
     public function showImage()
     {
         $stock = Stock::where('genre', 'image')->get();//stocksテーブルからジャンルがimageのレコードをすべて取得
-        
-
         return new StockResource($stock);//StockResourceにデータを渡してjsonに変換してもらおう
     }    
 

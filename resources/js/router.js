@@ -8,6 +8,10 @@ import StockArchiveImage from './components/page/StockArchiveImage.vue'
 import StockSingle from './components/page/StockSingle.vue' 
 import NotFound from './components/page/NotFound.vue'
 
+import Register from './components/page/Register.vue'
+
+import { registerables } from 'chart.js'
+
 Vue.use(Router)
 
 export default new Router({
@@ -48,6 +52,11 @@ export default new Router({
       name: 'stocksingle',
       component: StockSingle,
       props: route => ({ id: Number(route.params.id) })
-    },    
+      },
+    {
+      path: '/register',
+      name: 'register',
+      component: Register,
+    },      
   ]
 })
