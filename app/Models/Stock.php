@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-use Illuminate\Support\Facades\Storage;//ファイルのリネームで必要
+use Illuminate\Support\Facades\Storage;//ファイルのリネームと削除で必要
 
 use Image;//画像リサイズライブラリ
 
@@ -26,6 +26,24 @@ class Stock extends Model
     {
         return $this->hasMany(Stock::class);
         //これいるのか？なくても動いた
+    }
+
+    private function gcd( $a, $b ) {
+        //最大公約数を計算
+        if( $a === 0 ) return $a ;
+        $diff = $a > $b ? $a - $b : $b - $a ;
+        $A = $diff ;
+        $B = $b ;
+        if( $B - $A ) {
+            $A = $b ;
+            $B = $diff ;
+        }
+        while( true ) {
+            if( $B === 0 ) return $A ;
+            $A %= $B ;
+            if( $A === 0 ) return $B ;
+            $B %= $A ;
+        }
     }
 
     public static function ConversionImage($file, $id)
@@ -85,7 +103,7 @@ class Stock extends Model
     {
         //動画変換メソッド
         $file = 'private/stocks/'.$id.'.mp4';//元ファイルのパス
-        
+
         //mp4じゃなかったらmp4に変換（ていうか音消したいからどのみち無条件で変換した方がいいかも）
         if ($extention !='mp4') {//大文字MP4の場合どうなるのか　movならって条件の方がいいと思う
             $format = new \FFMpeg\Format\Video\X264('aac');
@@ -117,47 +135,67 @@ class Stock extends Model
         ->export()
         ->save('public/stock_thumbnail/'.$id.'.jpg');//ファイル名をjpgに変換
 
+        $stock = new Stock();
+
+        //元ファイルの情報を取得
+        $media = FFMpeg::open($file);
+        $mediaStreams = $media->getStreams()[0];
+        $height = $mediaStreams->get('height');// 解像度(縦)を取得
+        $width = $mediaStreams->get('width');// 解像度(横)を取得
 
         //どんな透かしを入れるのかを定義
         $watermark = new WatermarkFilter(storage_path('app/private/watermark/logo.png'), [
         'position'=>'relative',
-        'bottom' => 0,
+        //位置が動画のサイズによってずれまくる。相対的に決めたほうがいい。真ん中に指定できないんかな
+        'bottom' =>0,
         'left' => 0,
          ]);
 
 
-         
         /*----------
         リサイズ
         ----------*/
-        $height = $mediaStreams->get('height');// 解像度(縦)を取得
-        $width = $mediaStreams->get('width');// 解像度(横)を取得
+
+
+
         $aspect=$stock->gcd($width, $height);//アスペクト比を取得
 
-        
         if ($height >= 2160) {
             $size ='4k'; //サイズを指定
-            $this->resizeVideo($size, $id, $width, $height);//サイズの名前,ファイルid,横幅,高さ
+            $stock->resizeVideo($size, $id, $width, $height);//サイズの名前,ファイルid,横幅,高さ
         }
         
         //fullHD以上なら1080pに変換
         if ($height >= 1080) {
             $size='hd';
-            $this->resizeVideo($size, $id, $width, $height);
+            $stock->resizeVideo($size, $id, $width, $height);
         }
         
         //480以上ならSD画質に変換
         if ($height >= 480) {
             $size='sd';
-            $this->resizeVideo($size, $id, $width, $height);
+            $stock->resizeVideo($size, $id, $width, $height);
         }
 
          
         /*----------
         圧縮ありの透かし(singleページ用)
         ----------*/
+        $stock->resizeVideo('stock_sample', $id);//480pに変換
 
-        
+        FFMpeg::open('private/stocks/'.$id.'_stock_sample.mp4')//480pに変換したファイルを読み込み
+            ->export()
+            ->inFormat(new \FFMpeg\Format\Video\X264('aac'))
+            ->addFilter($watermark)
+            ->save('public/stock_sample/'. $id.'.mp4');//480pに変換したファイルに透かしを付けて保存
+
+        //これを下回る画質の動画をアップしたどうなるのかも知りたい。
+
+
+         Storage::delete('private/stocks/'.$id.'_stock_sample.mp4');//480pのデータ削除
+
+         
+
         /*----------
         圧縮なしの透かし(サンプルダウンロード用)
         ----------*/
@@ -165,16 +203,14 @@ class Stock extends Model
             ->export()
             ->inFormat(new \FFMpeg\Format\Video\X264('aac'))
             ->addFilter($watermark)
-            ->save('stock_download_sample/'. $id.'.mp4');
+            ->save('public/stock_download_sample/'. $id.'.mp4');
     }
-    
-
-
- 
 
     //ビデオリサイズ関数。
-    private function resizeVideo($size, $id, $width, $height)
+    private function resizeVideo($size, $id)
     {
+        $stock = new Stock();
+
         $file = 'private/stocks/'.$id.'.mp4';//元ファイルのパス
         
         $media = FFMpeg::open($file);
@@ -185,7 +221,7 @@ class Stock extends Model
         // 解像度(横)を取得
         $width = $mediaStreams->get('width');
         //アスペクト比を取得
-        $aspect=$stock->gcd($width, $height);
+        $aspect=$stock->gcd($width, $height);//アスペクト比を取得
 
         //指定されたサイズにより解像度を決定
         if($size=="4k"){
@@ -194,9 +230,11 @@ class Stock extends Model
             $resolution = 1080;
         }elseif($size=="sd"){
             $resolution = 480;
+        }elseif($size=="stock_sample"){
+            $resolution = 480;
         }
 
-        FFMpeg::open('private/stock_data/'.$stock_filename.'.mp4')->addFilter(function ($filters) use($width,$height,$resolution){
+        FFMpeg::open($file)->addFilter(function ($filters) use($width,$height,$resolution){
             $changeWidth = round($width*$resolution/$height);
             if ($changeWidth%2==1) {
                 $changeWidth = $changeWidth+1;
@@ -206,9 +244,8 @@ class Stock extends Model
         ->export()
         ->toDisk('local')
         ->inFormat(new \FFMpeg\Format\Video\X264('aac'))
-        ->save(ここのパスちゃんとかく);
+        ->save('private/stocks/'.$id.'_'.$size.'.mp4');
     }
-
 
 
         //サイズ別にビデオをまとめて変換
@@ -216,21 +253,21 @@ class Stock extends Model
             //4以上なら4kに変換(ファイルサイズ制限がdocker側にあるので動作確認できていない)
             if($height >= 2160){
                 $size ='4k'; //サイズを指定
-                $this->resizeVideo($size,$stock_filename,$width,$height);
+                $this->resizeVideo($size,$stock_filenam);
                 
             }                
             
             //fullHD以上なら1080pに変換
             if($height >= 1080){
                 $size='hd';
-                $this->resizeVideo($size,$stock_filename,$width,$height);
+                $this->resizeVideo($size,$stock_filename);
                                                   
             }                     
             
             //480以上ならSD画質に変換
             if($height >= 480){
                 $size='sd';
-                $this->resizeVideo($size,$stock_filename,$width,$height);
+                $this->resizeVideo($size,$stock_filename);
                 
             }
         }    
