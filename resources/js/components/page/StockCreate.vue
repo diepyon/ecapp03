@@ -12,25 +12,34 @@
                     </div>
                 </div>
             </div>
-
-            <div class="drop_area" 　　　　　@dragenter="dragEnter" 　　　　　:class="{enter: isEnter}">
-                ファイルアップロード（ドラッグアンドドロップエリア作成中）CSSとかまだ
-            </div>
-
-
+            
+            <code>{{errorMessage.file}}</code>
+            <div class="drop_area" 
+                v-show="previewArea==false" 
+                @dragenter="dragEnter" 
+                @dragleave="dragLeave" 
+                @dragover.prevent
+                @drop.prevent="dropFile" 
+                :class="{enter: isEnter}">
+              <div>販売する作品をドラッグ＆ドロップ</div>
+              <div>png,jpg,mp4,mov,wav,mp3</div> 
+                <label>
+                    <span class="btn btn-primary">
+                        選択
+                        <input type="file" class="form-control-file " ref="file" @change="fileSelected"
+                            accept=".jpg,.jpeg,.png,.gif,.mp3,.wav,.m4a,.mp4,.mov" style="display:none">
+                    </span>
+                </label>                
+            </div>           
+            
             <div class="form-group">
-                <code>{{errorMessage.file}}</code>
-                <span id="file_input_area">
-                    <input type="file" class="form-control-file " ref="file" @change="fileSelected"
-                        accept=".jpg,.jpeg,.png,.gif,.mp3,.wav,.m4a,.mp4,.mov">
-                </span>
-
                 <div v-show="previewArea" class="preview">
+                    <div class="delete-mark" @click="deleteFile">×</div>
                     <img v-show="genre=='image'" :src="blobUrl">
-                    <video controls v-show="genre=='video'" id="video" loop autoplay muted :src="blobUrl"></video>
+                    <video v-on:loadedmetadata="videoInfo" controls v-show="genre=='video'" id="video" loop autoplay muted :src="blobUrl"></video>
                     <audio v-show="genre=='audio'" id="audio" controls :src="blobUrl"></audio>
-                </div>
-
+            </div>
+            {{fileName}}
             </div>
 
             <div class=form-group>
@@ -63,9 +72,31 @@
     </div>
 </template>
 <style scoped>
+    .drop_area {
+        color: gray;
+        font-weight: bold;
+        font-size: 1.2em;
+        /*display: flex;*/
+        justify-content: center;
+        align-items: center;
+        width: 500px;
+        /*height: 300px;*/
+        border: 5px solid gray;
+        border-radius: 15px;
+        max-width:100%;
+        padding: 5em 0.5em;  
+        text-align: center;
+    }
+
     .enter {
         border: 10px dotted powderblue;
     }
+    
+    .delete-mark {
+        top: -14px;
+        right: -10px;
+        font-size: 30px;
+    }    
 
     .preview {
         margin: .5em;
@@ -92,8 +123,16 @@
                 //あらかじめ変数を定義してあげないとフロントが混乱する
                 name: '',
                 detail: '',
-                isEnter: false,
+                isEnter: false,//ドラッグアンドドロップフォームの変数初期値
                 fileInfo: null, //inputfileの情報を格納する変数
+                videDuration:null,
+
+                fileType:null,
+
+                fileName:'',
+
+                deleteButton:false,
+
                 //ジャンル選択の配列
                 genre: '',
                 genreString: '',
@@ -126,16 +165,27 @@
                 },
                 blobUrl: null,
                 previewArea: false,
-                fuga: null,
             }
         },
         mounted() { //必ず通過するフック
         },
+        
         methods: {
-            //ドラッグアンドドロップでファイルを選択できるようにもしたい
-            dragEnter() {
-                this.isEnter = true;
+            videoInfo(){
+                this.checkFile(video.duration)//プレビュー用のvideoタグから長さを取得
             },
+
+            deleteFile() {
+                this.fileInfo=null;
+                this.previewArea = false
+                this.deleteButton = false
+                this.fileName=null
+                this.$refs.file.value = null; //input fileクリア
+                this.genre=null
+                this.genreString=null
+                },            
+            
+            
             //バリテーション
             checkName() {
                 var n = ''
@@ -173,21 +223,22 @@
                 } //detailの入力に問題がなければtrueを返す
                 return (result)
             },
-            checkFile() {
-                this.previewArea = true //previewエリアのタグを非表示
-                if (this.fileInfo == null) {
+            checkFile(videoDuration) {
+                this.previewArea = false //previewエリアのタグを非表示
+
+                if (this.fileInfo == null||this.fileInfo == undefined) {
                     this.errorMessage.file = "選択してください"
 
-                } else if (this.fileInfo.size > 25242880) { //いったんテストで25MB
+                } else if (this.fileInfo.size > 252428800) { //いったんテストで250MB
                     //1GBなら1073741824
 
                     this.errorMessage.file = "ファイルサイズの上限〇GBを超えています。"
                 } else if (this.fileInfo.size <= 0) {
 
                     this.errodMessage.file = "ファイル不正です。サイズが0KBです。"
-                } else if (this.fuga > 13) {
+                } else if (videoDuration > 13) {
                     this.errorMessage.file = "長すぎ。"
-                    alert(this.errorMessage.file)
+                    this.fileInfo=null
                 } else {
                     this.errorMessage.file = ""
                     this.previewArea = true //previewエリアのタグを表示
@@ -198,54 +249,63 @@
                 } else {
                     var result = false
                 } //fileの入力に問題がなければtrueを返す
-
                 return (result)
             },
-            fileSelected(event) {
 
-                this.fileInfo = event.target.files[0] //選択されたファイルの情報を変数に格納
+            dragEnter() {
+                this.isEnter = true;
+            },
+            dragLeave() {
+            this.isEnter = false;
+            },
+            dragOver() {
+                console.log('DragOver')
+            },
+            dropFile(event) {
+                this.fileInfo =[...event.dataTransfer.files][0]//選択されたファイルの情報を変数に格納
+
+                this.fileType=this.fileInfo.type;
+
+                if(this.fileType.match('video')||this.fileType.match('audio')||this.fileType.match('image')){ 
+                    this.fileName = this.fileInfo.name 
+                }else{
+                    alert('そのファイル形式は選択できません。')
+                    this.fileInfo = null
+                }
+
+                this.isEnter = false;
+
                 if (this.fileInfo) {
                     this.errorMessage.file = null //ファイル未選択のバリデーションエラーが出てたら消す
                 }
 
-                if (event.target.files[0] != undefined) {
+                if ( this.fileInfo != undefined) {
                     this.blobUrl = URL.createObjectURL(this.fileInfo) //選択されたファイルのURLを取得  
                 } else {
                     this.blobUrl = ""
                 }
 
-                //videoの長さを取得したいが発動タイミングが分からん
-                var video = document.getElementById('video')
+                 this.genreSelect()
+            }, 
 
+            fileSelected(event) {
+                this.fileInfo = event.target.files[0] //選択されたファイルの情報を変数に格納
 
+                if (this.fileInfo) {
+                    this.errorMessage.file = null //ファイル未選択のバリデーションエラーが出てたら消す
+                }
 
+                if (event.target.files[0] != undefined) {
+                    this.blobUrl = URL.createObjectURL(this.fileInfo) //選択されたファイルのURLを取得 
+                    this.fileName=this.fileInfo.name
+                } else {
+                    this.blobUrl = ""
+                }
+                this.genreSelect()
+            },
+
+            genreSelect(){
                 let result = this.checkFile() //ファイルに問題がないかチェック
-
-                /*                 this.fuga = video.duratoin //あえてNaNを発生させる
-
-                                alert(this.fuga)
-
-                                if (isNaN(this.fuga) == false) {
-                                    alert('NaNじゃないで')
-                                    alert(this.fuga)
-                                } else {
-                                    alert('NaNやで')
-                                    alert(this.fuga)
-                                }
-                 */
-
-
-                //どうしても動画の再生時間を時間を取得できない
-                //コントローラーに渡して、laravel-ffmpegで取得しよう思うたが
-                //やりかたがわからない
-                //コントローラーで値が取れたとしても、どうやってビュー側にわたすん？
-                /*                 axios.get('/api/stocks/duration', this.fileInfo)
-                                    .then(response => {
-                                        alert('渡せた')
-                                    }) */
-
-
-
 
                 if (result && this.fileInfo && this.fileInfo.type.match(
                         'image')) { //問題がないファイルが存在（選ばれていて）なおかつ画像なら
@@ -256,30 +316,11 @@
                     this.genre = 'video'
                     this.genreString = "映像"
 
-                    video.addEventListener('loadedmetadata', function () {
-
-                        //一時的に追加
-                        console.log('再生時間↓');
-                        console.log(video.duration);
-                        this.fuga = video.duration
-                        alert(this.fuga)
-                    });
-
                     //macのmovファイル？プレビューできないかもしれないイことを説明
                 } else if (result && this.fileInfo && this.fileInfo.type.match(
                         'video')) { //問題ないファイル存在が（選ばれていて）なおかつ動画なら
                     this.genre = 'video'
                     this.genreString = "映像"
-
-                    video.addEventListener('loadedmetadata', function () {
-
-                        //一時的に追加
-                        console.log('再生時間↓');
-                        console.log(video.duration);
-                        this.fuga = video.duration
-                        alert(this.fuga)
-                    });
-
 
                 } else if (result && this.fileInfo && this.fileInfo.type.match(
                         'audio')) { //問題ないファイル存在が（選ばれていて）なおかつ音源なら
@@ -288,10 +329,10 @@
                 } else {
                     this.blobUrl = null
                     this.previewArea = false
-                }
+                }   
             },
-            stockCreate() { //投稿とボタンが押されたときに発動するメソッド
 
+            stockCreate() { //投稿とボタンが押されたときに発動するメソッド
                 //投稿直前にも入力に不備がないかチェック
                 var nameResult = this.checkName()
                 var detailResult = this.checkDetail()
@@ -315,11 +356,14 @@
                             //console.log(response); //成功してたらデータが返ってくる
                             //投稿に成功したらv-modelを使って書くフォームをクリア
                             this.name = ""
+                            this.fileName=""
+                            this.fileInfo =null
                             this.$refs.file.value = null; //input fileクリア
                             this.genre = ""
                             this.feeSelected = 1500
                             this.detail = ""
                             this.genreString = ""
+                            this.previewArea = false
                         })
                         .catch(function (error) {
                             // handle error(axiosの処理にエラーが発生した場合に処理させたいことを記述)
@@ -328,6 +372,7 @@
                         })
                 } else {
                     alert('入力に不備があります。')
+                    this.$refs.file.value = null; //input fileクリア
                 }
             }
         },

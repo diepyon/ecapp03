@@ -46,14 +46,14 @@ class Stock extends Model
         }
     }
 
-    public static function ConversionImage($file, $id)
+    public static function ConversionImage($file, $filename)
     {//画像変換メソッド
         /*----------
         縮小サイズで保存（ループ一覧用）
         ----------*/
         Image::make($file)->resize(800, 280, function ($constraint) {
             $constraint->aspectRatio();
-        })->save(storage_path(('app/public/stock_thumbnail/'. $id.'.png'), 100));
+        })->save(storage_path(('app/public/stock_thumbnail/'. $filename.'.png'), 100));
         
 
         $imageWidth =Image::make($file)->width();//画像の横幅を取得
@@ -82,7 +82,7 @@ class Stock extends Model
         ->resize(1000, 1000, function ($constraint) {
             $constraint->aspectRatio();
         })//singleページ用に圧縮
-        ->save(storage_path('app/public/stock_sample/'. $id.'.png'), 100);
+        ->save(storage_path('app/public/stock_sample/'. $filename.'.png'), 100);
 
 
         /*----------
@@ -97,18 +97,18 @@ class Stock extends Model
             $font->valign('top');   // 縦の揃え方（top, middle, bottom）
             $font->angle(30);       // 回転（フォントが指定されていないと無視されます。）
         })
-        ->save(storage_path('app/public/stock_download_sample/'. $id.'.png'), 100);
+        ->save(storage_path('app/public/stock_download_sample/'. $filename.'.png'), 100);
     }
-    public static function ConversionVideo($extention, $id)
+    public static function ConversionVideo($extention, $filename)
     {
         //動画変換メソッド
-        $file = 'private/stocks/'.$id.'.mp4';//元ファイルのパス
+        $file = 'private/stocks/'.$filename.'.mp4';//元ファイルのパス
 
         //mp4じゃなかったらmp4に変換（ていうか音消したいからどのみち無条件で変換した方がいいかも）
         if ($extention !='mp4') {//大文字MP4の場合どうなるのか　movならって条件の方がいいと思う
             $format = new \FFMpeg\Format\Video\X264('aac');
             $format->setAdditionalParameters(['-pix_fmt','yuv420p']);
-            FFMpeg::open('private/stocks/'.$id.'.'.$extention)
+            FFMpeg::open('private/stocks/'.$filename.'.'.$extention)
             ->export()
             ->addFilter('-an')//音を消す
             ->inFormat($format)
@@ -118,14 +118,14 @@ class Stock extends Model
         } else {
             //ここにmp4の時の音消し処理
             $format = new \FFMpeg\Format\Video\X264('aac');
-            FFMpeg::open('private/stocks/'.$id.'.'.$extention)
+            FFMpeg::open('private/stocks/'.$filename.'.'.$extention)
             ->export()
             ->addFilter('-an')//音を消す
             ->inFormat($format)
-            ->save('private/stocks/'.$id.'_tmp.mp4');//上書きできないので別名で保存
+            ->save('private/stocks/'.$filename.'_tmp.mp4');//上書きできないので別名で保存
             
             Storage::delete($file);//上書きできないので元ファイルを削除
-            Storage::move('private/stocks/'.$id.'_tmp.mp4', $file);//一時ファイルの名前を正しい名前に変更
+            Storage::move('private/stocks/'.$filename.'_tmp.mp4', $file);//一時ファイルの名前を正しい名前に変更
         }
 
         //動画サムネイル画像を生成
@@ -133,8 +133,18 @@ class Stock extends Model
         ->open($file)//mp4であることを全体にしてしまっているから、動画はmp4に変換する処理が手間に必要
         ->getFrameFromSeconds(1)//1フレーム目
         ->export()
-        ->save('public/stock_thumbnail/'.$id.'.jpg');//ファイル名をjpgに変換
+        ->save('public/stock_thumbnail/'.$filename.'.png');//ファイル名をjpgに変換
 
+        //どんな透かしを入れるのかを定義
+        $watermark = new WatermarkFilter(storage_path('app/private/watermark/logo.png'), [
+        'position'=>'relative',
+        'center' =>0,
+         ]);
+
+
+        /*----------
+        リサイズ
+        ----------*/
         $stock = new Stock();
 
         //元ファイルの情報を取得
@@ -143,56 +153,42 @@ class Stock extends Model
         $height = $mediaStreams->get('height');// 解像度(縦)を取得
         $width = $mediaStreams->get('width');// 解像度(横)を取得
 
-        //どんな透かしを入れるのかを定義
-        $watermark = new WatermarkFilter(storage_path('app/private/watermark/logo.png'), [
-        'position'=>'relative',
-        //位置が動画のサイズによってずれまくる。相対的に決めたほうがいい。真ん中に指定できないんかな
-        'bottom' =>0,
-        'left' => 0,
-         ]);
-
-
-        /*----------
-        リサイズ
-        ----------*/
-
-
 
         $aspect=$stock->gcd($width, $height);//アスペクト比を取得
 
         if ($height >= 2160) {
             $size ='4k'; //サイズを指定
-            $stock->resizeVideo($size, $id, $width, $height);//サイズの名前,ファイルid,横幅,高さ
+            $stock->resizeVideo($size, $filename, $width, $height);//サイズの名前,ファイルid,横幅,高さ
         }
         
         //fullHD以上なら1080pに変換
         if ($height >= 1080) {
             $size='hd';
-            $stock->resizeVideo($size, $id, $width, $height);
+            $stock->resizeVideo($size, $filename, $width, $height);
         }
         
         //480以上ならSD画質に変換
         if ($height >= 480) {
             $size='sd';
-            $stock->resizeVideo($size, $id, $width, $height);
+            $stock->resizeVideo($size, $filename, $width, $height);
         }
 
          
         /*----------
         圧縮ありの透かし(singleページ用)
         ----------*/
-        $stock->resizeVideo('stock_sample', $id);//480pに変換
+        $stock->resizeVideo('stock_sample', $filename);//480pに変換
 
-        FFMpeg::open('private/stocks/'.$id.'_stock_sample.mp4')//480pに変換したファイルを読み込み
+        FFMpeg::open('private/stocks/'.$filename.'_stock_sample.mp4')//480pに変換したファイルを読み込み
             ->export()
             ->inFormat(new \FFMpeg\Format\Video\X264('aac'))
             ->addFilter($watermark)
-            ->save('public/stock_sample/'. $id.'.mp4');//480pに変換したファイルに透かしを付けて保存
+            ->save('public/stock_sample/'. $filename.'.mp4');//480pに変換したファイルに透かしを付けて保存
 
         //これを下回る画質の動画をアップしたどうなるのかも知りたい。
 
 
-         Storage::delete('private/stocks/'.$id.'_stock_sample.mp4');//480pのデータ削除
+         Storage::delete('private/stocks/'.$filename.'_stock_sample.mp4');//480pのデータ削除
 
          
 
@@ -203,15 +199,15 @@ class Stock extends Model
             ->export()
             ->inFormat(new \FFMpeg\Format\Video\X264('aac'))
             ->addFilter($watermark)
-            ->save('public/stock_download_sample/'. $id.'.mp4');
+            ->save('public/stock_download_sample/'. $filename.'.mp4');
     }
 
     //ビデオリサイズ関数。
-    private function resizeVideo($size, $id)
+    private function resizeVideo($size, $filename)
     {
         $stock = new Stock();
 
-        $file = 'private/stocks/'.$id.'.mp4';//元ファイルのパス
+        $file = 'private/stocks/'.$filename.'.mp4';//元ファイルのパス
         
         $media = FFMpeg::open($file);
         $mediaStreams = $media->getStreams()[0];
@@ -244,7 +240,7 @@ class Stock extends Model
         ->export()
         ->toDisk('local')
         ->inFormat(new \FFMpeg\Format\Video\X264('aac'))
-        ->save('private/stocks/'.$id.'_'.$size.'.mp4');
+        ->save('private/stocks/'.$filename.'_'.$size.'.mp4');
     }
 
 

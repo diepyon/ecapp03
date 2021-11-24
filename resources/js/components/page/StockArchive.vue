@@ -4,14 +4,16 @@
         <h1>アーカイブです。</h1>
         <b-row>
             <b-col cols="6" sm="3" class="b-col" v-for="stock in stocks" :key="stock.id">
-                <div> <a :href="`stocks/` + stock.id">
-                        <p>{{ stock.name }}</p>
-                        <p>{{ stock.genre }}</p>
-                    </a>
-                </div>
-                 <img :src="'/storage/stock_thumbnail/167.jpg'">
+                <a :href="`stocks/` + stock.id">
+                    <div>
+                        <h2>{{ stock.name }}</h2>
+                        <span v-show="stock.genre=='image'"><i class="far fa-image"></i></span>
+                        <span v-show="stock.genre=='video'">映像</span>
+                        <span v-show="stock.genre=='audio'">音源</span>
+                    </div>
+                    <img :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
+                </a>
             </b-col>
-
         </b-row>
         <Footer />
     </div>
@@ -43,7 +45,8 @@
 
 </script>
 <style scoped>
-     .b-col img {
+    .b-col img {
         max-width: 100%;
     }
+
 </style>
