@@ -1,16 +1,12 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\Stock;
-
-
 use Illuminate\Http\Request;
 use App\Http\Resources\StockResource;
-
 use Illuminate\Support\Facades\Storage;//ファイルアップロード・削除関連
-
 use Image;
+use App\Models\User;
 
 class StockController extends Controller
 {
@@ -32,23 +28,15 @@ class StockController extends Controller
     public function create(Request $request, Stock $stock)
     {       
         $filename = substr(bin2hex(random_bytes(8)), 0, 8);//ランダムなファイル名を定義
-        
         $extention = $request->form['extention']; //ファイルの拡張子を取得
-
-
         $request->file('files')[0]->storeAs('private/stocks', $filename.'.'.$extention);//ランダムなファイル名.拡張子をファイル名に指定
         $stock->name = $request->form['name'];
-
         $stock->genre = $request->form['genre'];//ジャンルを登録（html側では改ざん不可）
-        
         $stock->fee =  $request->form['fee'];
         $stock->detail =  $request->form['detail'];
         $stock->author_id = 1;//認証システムがまだできていないのでいったん仮で1としている
-        
         $stock->path =$filename.'.'.$extention;//ファイル名.拡張子をデータベースに登録
-
         $stock->filename =$filename;//ファイル名（拡張子なし）をデータベースに登録
-        
         $stock->save();
 
         //投稿時に走らせるとやっぱり重い。認証システム入れたら承認時に変換する方式にしたい
@@ -56,6 +44,8 @@ class StockController extends Controller
             $stock->ConversionImage($request->file('files')[0], $filename);//画像なら変換
         }else if($request->form['genre']=='video'){
             $stock->ConversionVideo($request->form['extention'],$filename);//動画なら変換
+        }else if($request->form['genre']=='audio'){
+            $stock->ConversionAudio($request->form['extention'],$filename);//音声なら変換
         }
     }
 
@@ -135,10 +125,4 @@ class StockController extends Controller
         $author = Stock::find($author_id);
         return new StockCollection($stock->stocks);
     }
-
-    public function duration($fileInfo)
-    {
-        /*ここで取れたとして、どうやってビューに渡すのか*/
-    }
-
 }

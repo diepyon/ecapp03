@@ -25,6 +25,10 @@ Route::get('/stocks/{stock_id}', [StockController::class, 'single']);//urlのsto
 
 Route::get('/stock/author/{author_id}', [StockController::class, 'stocksByAuthorId']);
 
+Route::group(['middleware'=>'auth:sanctum'],function(){
+    //ログインが必要な処理をここに書く
+});
+
 Route::post('/stocks/create', [StockController::class, 'create']);
 
 //会員登録

@@ -15,6 +15,7 @@ use FFMpeg\Format\VideoInterface;
 use FFMpeg\Media\Video;
 use ProtoneMedia\LaravelFFMpeg\Filters\WatermarkFactory;
 use ProtoneMedia\LaravelFFMpeg\Filters\WatermarkFilter;
+use ProtoneMedia\LaravelFFMpeg\Filesystem\Media;
 
 class Stock extends Model
 {
@@ -141,7 +142,6 @@ class Stock extends Model
         'center' =>0,
          ]);
 
-
         /*----------
         リサイズ
         ----------*/
@@ -152,8 +152,6 @@ class Stock extends Model
         $mediaStreams = $media->getStreams()[0];
         $height = $mediaStreams->get('height');// 解像度(縦)を取得
         $width = $mediaStreams->get('width');// 解像度(横)を取得
-
-
         $aspect=$stock->gcd($width, $height);//アスペクト比を取得
 
         if ($height >= 2160) {
@@ -187,10 +185,7 @@ class Stock extends Model
 
         //これを下回る画質の動画をアップしたどうなるのかも知りたい。
 
-
          Storage::delete('private/stocks/'.$filename.'_stock_sample.mp4');//480pのデータ削除
-
-         
 
         /*----------
         圧縮なしの透かし(サンプルダウンロード用)
@@ -202,13 +197,39 @@ class Stock extends Model
             ->save('public/stock_download_sample/'. $filename.'.mp4');
     }
 
+    public static function ConversionAudio($extention, $filename){
+       //サンプル用にmp3に変換する
+        $file = 'private/stocks/'.$filename.'.'.$extention;//元ファイルのパス
+
+        //透かしなしwav(買った人が使う)ビットレートとかサイト内で統一したいから拡張子が同じでも変換
+        //元データがmp3の場合は音質が上がるわけではないのでそれを明記する必要がある
+        $ffMpeg = FFMpeg::fromDisk('local')->open([$file])->export();
+        $ffMpeg->inFormat(new \FFMpeg\Format\Audio\Wav);
+        $ffMpeg->save('private/stocks/'.$filename.'_convert.wav');  
+
+        //透かしなしmp3(買った人が使う)ビットレートとかサイト内で統一したいから拡張子が同じでも変換
+        $ffMpeg = FFMpeg::fromDisk('local')->open([$file])->export();
+        $ffMpeg->inFormat(new \FFMpeg\Format\Audio\Mp3);
+        $ffMpeg->save('private/stocks/'.$filename.'_convert.mp3');          
+
+        //ページに埋め込むmp3（サンプル音声付、再現性のあるサンプルにしたいからあえて元データを使って合成)
+        $ffMpeg = FFMpeg::fromDisk('local')->open(['private/watermark/sample.mp3', $file])->export(); 
+        $ffMpeg->addFilter('[0][1]', 'amix=inputs=2:duration=shortest', '[a]'); 
+        $ffMpeg->addFormatOutputMapping(new \FFMpeg\Format\Video\WebM, Media::make('local', 'public/stock_sample/'.$filename.'.mp3'), ['[a]']);
+        $ffMpeg->save();
+
+        //ダウンロード用にmp3サンプルをコピー
+        Storage::copy('public/stock_sample/'.$filename.'.mp3', 'public/stock_download_sample/'.$filename.'.mp3');
+
+        //アーカイブのループサムネイル用にmp3サンプルをコピー（使うかはわからん）
+        Storage::copy('public/stock_sample/'.$filename.'.mp3', 'public/stock_thumbnail/'.$filename.'.mp3');
+    }    
+
     //ビデオリサイズ関数。
     private function resizeVideo($size, $filename)
     {
         $stock = new Stock();
-
         $file = 'private/stocks/'.$filename.'.mp4';//元ファイルのパス
-        
         $media = FFMpeg::open($file);
         $mediaStreams = $media->getStreams()[0];
 
@@ -242,7 +263,6 @@ class Stock extends Model
         ->inFormat(new \FFMpeg\Format\Video\X264('aac'))
         ->save('private/stocks/'.$filename.'_'.$size.'.mp4');
     }
-
 
         //サイズ別にビデオをまとめて変換
         public function videoEncode($height,$width, $stock_filename,$stock_path){

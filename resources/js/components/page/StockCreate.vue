@@ -35,9 +35,9 @@
             <div class="form-group">
                 <div v-show="previewArea" class="preview">
                     <div class="delete-mark" @click="deleteFile">×</div>
-                    <img v-show="genre=='image'" :src="blobUrl">
-                    <video v-on:loadedmetadata="videoInfo" controls v-show="genre=='video'" id="video" loop autoplay muted :src="blobUrl"></video>
-                    <audio v-show="genre=='audio'" id="audio" controls :src="blobUrl"></audio>
+                    <img v-if="genre=='image'" :src="blobUrl">
+                    <video v-on:loadedmetadata="videoInfo" controls v-if="genre=='video'" id="video" loop autoplay muted :src="blobUrl"></video>
+                    <audio  v-on:loadedmetadata="audioInfo" v-if="genre=='audio'" id="audio" controls :src="blobUrl"></audio>
             </div>
             {{fileName}}
             </div>
@@ -172,7 +172,12 @@
         
         methods: {
             videoInfo(){
+                console.log(video)
                 this.checkFile(video.duration)//プレビュー用のvideoタグから長さを取得
+            },
+            audioInfo(){
+                console.log(audio)
+                this.checkFile(audio.duration)
             },
 
             deleteFile() {
@@ -223,22 +228,23 @@
                 } //detailの入力に問題がなければtrueを返す
                 return (result)
             },
-            checkFile(videoDuration) {
+            checkFile(duration) {
                 this.previewArea = false //previewエリアのタグを非表示
 
                 if (this.fileInfo == null||this.fileInfo == undefined) {
-                    this.errorMessage.file = "選択してください"
-
-                } else if (this.fileInfo.size > 252428800) { //いったんテストで250MB
+                    this.errorMessage.file = "選択してください"           
+                } else if (this.fileInfo.size > 1073741824) { 
                     //1GBなら1073741824
-
-                    this.errorMessage.file = "ファイルサイズの上限〇GBを超えています。"
+                    this.errorMessage.file = "ファイルサイズ上限の1GBを超えています。"                
                 } else if (this.fileInfo.size <= 0) {
-
                     this.errodMessage.file = "ファイル不正です。サイズが0KBです。"
-                } else if (videoDuration > 13) {
-                    this.errorMessage.file = "長すぎ。"
-                    this.fileInfo=null
+                  
+                } else if (this.genre=='video' && duration > 60) {//〇秒以上の動画なら
+                    this.errorMessage.file = "投稿できる動画は60秒までです。"
+        
+                } else if (this.genre=='audio' && duration > 300) {//〇秒以上の動画なら
+                    this.errorMessage.file = "投稿できる音源は5分までです。"
+                           
                 } else {
                     this.errorMessage.file = ""
                     this.previewArea = true //previewエリアのタグを表示
@@ -248,6 +254,7 @@
                     var result = true
                 } else {
                     var result = false
+                    this.deleteFile()//ファイル情報をクリア
                 } //fileの入力に問題がなければtrueを返す
                 return (result)
             },

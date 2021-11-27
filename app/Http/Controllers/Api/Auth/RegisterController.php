@@ -15,12 +15,10 @@ use App\Models\User;
 
 class RegisterController extends Controller
 {
-
     public function register(UserRegistRequest $request)
     {
-
         $defaultName = explode("@", $request->email);
-        
+       
         User::create([
             'name' =>  $defaultName[0],//初期値はemailの@マークより右側を入れたい
             'email' =>  $request->email,

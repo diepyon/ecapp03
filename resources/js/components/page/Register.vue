@@ -112,15 +112,12 @@
                     var result = false
                 } //passwordの入力に問題がなければtrueを返す
                 return (result)
-
             },
 
             register() { //投稿とボタンが押されたときに発動するメソッド
                 //投稿直前にも入力に不備がないかチェック
                 var emailResult = this.checkEmail()
                 var passwordResult = this.checkPassword()
-
-
 
                 if (emailResult && passwordResult) {//check項目が全てtrueなら      
                     //バリデーション関数のreturnがどちらもtrueなら下記実行
