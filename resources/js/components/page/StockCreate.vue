@@ -1,6 +1,7 @@
 <template>
     <div>
         <Header />
+        
         <div id="form">
             <div class="form">
                 <div class="">
@@ -43,6 +44,7 @@
             </div>
 
             <div class=form-group>
+                <font-awesome-icon icon="coffee" />
                 <label for="">ジャンル</label>
                 <input type="txt" placeholder="自動選択されます" v-bind:value="genreString" readonly>
             </div>

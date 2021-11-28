@@ -10,13 +10,20 @@ Vue.use(IconsPlugin)
 
 require('./bootstrap');
 
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faCoffee } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+/* import { fas } from '@fortawesome/free-solid-svg-icons'
+import { far } from '@fortawesome/free-regular-svg-icons'
 
-library.add(faCoffee)
+import {fab} from  '@fortawesome/fontawesome-free/scss/brands';
+library.add(fab)
 
+
+library.add(far,fas)
+library.add(far)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
+*/
+
+
+
 
 
 window.Vue = require('vue').default;
