@@ -4,15 +4,21 @@
         <h1>アーカイブです。</h1>
         <b-row>
             <b-col cols="6" sm="3" class="b-col" v-for="stock in stocks" :key="stock.id">
-                <a :href="`stocks/` + stock.id">
-                    <div>
-                        <h2>{{ stock.name }}</h2>
-                        <span v-show="stock.genre=='image'"><i class="far fa-image"></i></span>
-                        <span v-show="stock.genre=='video'">映像</span>
-                        <span v-show="stock.genre=='audio'">音源</span>
+                <div class="stock_thumbnail">
+                    <a :href="`stocks/` + stock.id">
+                        <div>
+                            <h2>{{ stock.name }}</h2>
+                        </div>
+                        <img v-if="stock.genre=='image'" :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
+                        <img v-else-if="stock.genre=='video'" :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
+                        <img v-else-if="stock.genre=='audio'" :src="'/storage/stock_thumbnail/audiothumbnail.png'">
+                    </a>
+                    <div class="genre_icon">
+                        <span v-show="stock.genre=='image'"><font-awesome-icon :icon="['fas', 'image']" /></span>
+                        <span v-show="stock.genre=='video'"><font-awesome-icon :icon="['fas', 'video']" /></span>
+                        <span v-show="stock.genre=='audio'"><font-awesome-icon :icon="['fas', 'music']" /></span>                
                     </div>
-                    <img :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
-                </a>
+                </div>
             </b-col>
         </b-row>
         <Footer />
@@ -48,5 +54,21 @@
     .b-col img {
         max-width: 100%;
     }
-
+    
+.stock_thumbnail {
+    position: relative;
+}
+.genre_icon {
+    color: #adb5bd99;
+    ;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    position: absolute;
+    bottom: 0%;
+    left: 0%;
+    margin:8px;
+}/*サムネイルの左下に出るジャンル判別アイコン*/
 </style>

@@ -133,7 +133,7 @@
                             // handle error(axiosの処理にエラーが発生した場合に処理させたいことを記述)
                             alert('あかんかったわ、コンソール見て');
                             alert('このメールアドレスは既に登録されています。')//こうするしかない？
-                            console.log(error);
+                            console.log(error.response.data.message);
                         })
 
                 } else {

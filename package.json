@@ -26,10 +26,14 @@
     },
     "dependencies": {
         "@fortawesome/fontawesome-svg-core": "^1.2.36",
+        "@fortawesome/free-brands-svg-icons": "^5.15.4",
+        "@fortawesome/free-regular-svg-icons": "^5.15.4",
         "@fortawesome/free-solid-svg-icons": "^5.15.4",
         "@fortawesome/vue-fontawesome": "^2.0.6",
         "bootstrap-vue": "^2.21.2",
+        "date-fns": "^2.26.0",
         "node-sass": "^6.0.1",
-        "vue-router": "^3.5.2"
+        "vue-router": "^3.5.2",
+        "vue-wave-surfer": "^1.0.1"
     }
 }
