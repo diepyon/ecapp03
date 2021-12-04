@@ -5,7 +5,8 @@ import About from './components/page/About.vue'
 import StockCreate from './components/page/StockCreate.vue'
 import StockArchive from './components/page/StockArchive.vue'
 import StockArchiveImage from './components/page/StockArchiveImage.vue'
-import StockSingle from './components/page/StockSingle.vue' 
+import StockSingle from './components/page/StockSingle.vue'
+import Login from './components/page/Login.vue' 
 import NotFound from './components/page/NotFound.vue'
 
 import Register from './components/page/Register.vue'
@@ -57,6 +58,11 @@ export default new Router({
       path: '/register',
       name: 'register',
       component: Register,
-    },      
+      },
+      {
+      path: '/login',
+      name: 'login',
+      component: Login,
+    },   
   ]
 })

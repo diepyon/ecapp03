@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\StockController;
 use App\Http\Controllers\Api\Auth\RegisterController;//追記
+use App\Http\Controllers\Api\Auth\LoginController;//追記
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -32,4 +34,7 @@ Route::group(['middleware'=>'auth:sanctum'],function(){
 Route::post('/stocks/create', [StockController::class, 'create']);
 
 //会員登録
-Route::post('/register', [RegisterController::class, 'register']);//追記
+Route::post('/register', [RegisterController::class, 'register']);
+
+//ログイン処理
+Route::post('/login', [LoginController::class, 'login']);

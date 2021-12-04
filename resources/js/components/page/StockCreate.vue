@@ -1,7 +1,7 @@
 <template>
     <div>
-        <Header />
-        
+        <h1>Stock Create</h1>
+        <Header />  
         <div id="form">
             <div class="form">
                 <div class="">
@@ -114,6 +114,8 @@
 <script>
     import Header from '../layout/Header'
     import Footer from '../layout/Footer'
+    import * as Validate from '../../modules/validation.js'
+
     export default {
         components: {
             Header,
@@ -169,6 +171,8 @@
             }
         },
         mounted() { //必ず通過するフック
+
+
         },
         
         methods: {

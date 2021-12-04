@@ -5,12 +5,11 @@
 
         <span class="" v-if="stock">
             <audio controls  :src="'/storage/stock_sample/'+stock.filename+'.mp3'"></audio>
-
-            <p >名前：{{stock.name}}</p>
-            <p >金額：{{stock.fee}}</p>
-            <p >ジャンル：{{stock.genre}}</p>
-            <p >詳細：{{stock.detail}}</p>
-            <p >投稿日:{{date}}</p>   
+            <p>名前：{{stock.name}}</p>
+            <p>金額：{{stock.fee}}</p>
+            <p>ジャンル：{{stock.genre}}</p>
+            <p>詳細：{{stock.detail}}</p>
+            <p>投稿日:{{date}}</p>   
         </span>
         <button  @click="stop" v-if="playing">停止</button>
         <button  @click="play" v-else>再生</button>
