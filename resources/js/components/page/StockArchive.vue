@@ -6,9 +6,6 @@
             <b-col cols="6" sm="3" class="b-col" v-for="stock in stocks" :key="stock.id">
                 <div class="stock_thumbnail">
                     <a :href="`stocks/` + stock.id">
-                        <div>
-                            <h2>{{ stock.name }}</h2>
-                        </div>
                         <img v-if="stock.genre=='image'" :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
                         <img v-else-if="stock.genre=='video'" :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
                         <img v-else-if="stock.genre=='audio'" :src="'/storage/stock_thumbnail/audiothumbnail.png'">

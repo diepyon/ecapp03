@@ -10,10 +10,8 @@ Vue.use(IconsPlugin)
 
 require('./bootstrap');
 
-
 import VueWaveSurfer from 'vue-wave-surfer'
 Vue.use(VueWaveSurfer)
-
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { fas } from '@fortawesome/free-solid-svg-icons'

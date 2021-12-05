@@ -3,20 +3,24 @@
         <Header />
         <h1>ID.{{ id }}詳細個別ページです</h1>
 
+        <SingleImage v-bind:val="stock"/>
+
         <span class="" v-if="stock">
-            <audio controls  :src="'/storage/stock_sample/'+stock.filename+'.mp3'"></audio>
             <p>名前：{{stock.name}}</p>
             <p>金額：{{stock.fee}}</p>
             <p>ジャンル：{{stock.genre}}</p>
             <p>詳細：{{stock.detail}}</p>
-            <p>投稿日:{{date}}</p>   
+            <p>投稿日:{{date}}</p>
         </span>
-        <button  @click="stop" v-if="playing">停止</button>
-        <button  @click="play" v-else>再生</button>
-        <vue-wave-surfer :src="file" :options="options"></vue-wave-surfer>
+
+        <h2>↓後でキレイにする</h2>
+        <button @click="stop" v-if="playing">停止</button>
+        <button @click="play" v-else>再生</button>
+
+
+        <wavesurfer />
         <button @click="play">波形再生</button>
 
-        <font-awesome-icon icon="coffee" />
         <Footer />
     </div>
 </template>
@@ -24,7 +28,13 @@
 <script>
     import Header from "../layout/Header";
     import Footer from "../layout/Footer";
-    import Cursor from 'wavesurfer.js/dist/plugin/wavesurfer.cursor';
+
+    import SingleImage from '../layout/SingleImage'
+
+
+
+    import wavesurfer from '../parts/VueWaveSurfer'
+
 
     import * as fns from 'date-fns'
 
@@ -37,35 +47,31 @@
         components: {
             Header,
             Footer,
-            //VueWaveSurfer,
+            wavesurfer,
+            SingleImage,
         },
         data() {
             return {
-                stock:null,
+                stock: null,
 
-                date:null,
+                date: null,
 
-                audio:new Audio('/storage/stock_sample/c9fea342.mp3'),
-                playing:false,
+                audio: new Audio('/storage/stock_sample/c9fea342.mp3'),
+                playing: false,
 
-                options: {
-                plugins: [
-                Cursor.create()
-        ]                    
-                },
-                file: '/storage/stock_sample/f77fc4e0.mp3'                
+
             }
         },
-         methods:{
-             play(){
-                 this.audio.play();
-                 this.playing = true
-             },
-             stop(){
+        methods: {
+            play() {
+                this.audio.play();
+                this.playing = true
+            },
+            stop() {
                 this.audio.pause();
                 this.audio.currentTime = 0;
                 this.playing = false
-             },
+            },
         },
         mounted() { //必ず通過するフック
 
@@ -76,9 +82,19 @@
                     this.stock = response.data.data
                     this.date = fns.format(new Date(this.stock.created_at), 'yyyy/MM/dd')
 
-                    console.log(this.date)
+                    console.log(this.stock)
                 })
+
+/*             this.player.on('ready', () => {
+                console.log('ready')
+            }) */ //エラーになるからいったん消してる
+
         },
+        computed: {
+            player() {
+                //return this.$refs.surf.waveSurfer//エラーになるからいったん消してる
+            }
+        }
     };
 
 </script>

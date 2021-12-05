@@ -7,8 +7,12 @@ export default {
     return {
       options: {
       },
-      file: 'http://example.com/file.mp3'
+      file: '/storage/stock_sample/f77fc4e0.mp3'
     }
-  }
+  },
+  mounted() {
+
+  },  
+ 
 }
 </script>

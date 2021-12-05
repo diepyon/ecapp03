@@ -43,7 +43,7 @@
             {{fileName}}
             </div>
 
-            <div class=form-group>
+            <div class=form-group id="genreSelectForm">
                 <label for="">ジャンル</label>
                 <input type="txt" placeholder="自動選択されます" v-bind:value="genreString" readonly>
             </div>
@@ -108,6 +108,10 @@
     video {
         width: 100%;
         max-width: 500px;
+    }
+
+    #genreSelectForm{
+        display:none;
     }
 
 </style>
