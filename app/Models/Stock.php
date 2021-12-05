@@ -47,6 +47,30 @@ class Stock extends Model
         }
     }
 
+    static function aspect($a, $b)
+        {//アスペクト比を求める関数
+            if ($a === 0) {
+                return $a ;
+            }
+            $diff = $a > $b ? $a - $b : $b - $a ;
+            $A = $diff ;
+            $B = $b ;
+            if ($B - $A) {
+                $A = $b ;
+                $B = $diff ;
+            }
+            while (true) {
+                if ($B === 0) {
+                    return $a/$A.':'. $b/$A ;
+                }
+                $A %= $B ;
+                if ($A === 0) {
+                    return $a/$B.':'. $b/$B ;
+                }
+                $B %= $A ;
+            }
+        }    
+
     public static function ConversionImage($file, $filename)
     {//画像変換メソッド
         /*----------
@@ -286,6 +310,45 @@ class Stock extends Model
                 $this->resizeVideo($size,$stock_filename);
                 
             }
-        }    
+        }
+        public function calcFileSize($size){
+          {//ファイルサイズをいい感じの単位に調整する関数 
+            $b = 1024;    // バイト 
+            $mb = pow($b, 2);   // メガバイト 
+            $gb = pow($b, 3);   // ギガバイト 
+            
+            switch(true){ 
+                case $size >= $gb: 
+                $target = $gb; 
+                $unit = 'GB'; 
+                break; 
+                case $size >= $mb: 
+                $target = $mb; 
+                $unit = 'MB'; 
+                break; 
+                default: 
+                $target = $b; 
+                $unit = 'KB'; 
+                break; 
+            } 
+            
+            $new_size = round($size / $target, 2); 
+            $file_size = number_format($new_size, 2, '.', ',') . $unit; 
+            
+            return $file_size; 
+          }           
+        }
+        public function getWhSize($file){//販売データの縦サイズと横サイズ取得
+            $width =Image::make($file)->width();
+            $height =Image::make($file)->height();
+
+            $whSize=array(
+                'width'=>$width,
+                'height'=>$height,      
+                'aspect'=>$this->aspect($width,$height),
+            );
+           
+            return $whSize;
+        }
     
 }

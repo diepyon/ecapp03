@@ -78,9 +78,16 @@ class StockController extends Controller
         return new StockResource($stock);//StockResourceにデータを渡してjsonに変換してもらおう
     }    
 
-    public function single($stock_id)
-    {//url上の数値を取得
+    public function single(Stock $stockModel,$stock_id)
+    {   //url上の数値を取得
         $stock = Stock::find($stock_id);//受け取った数値と一致するIDのレコードを取得
+        $stock->size = $stockModel->calcFileSize(Storage::size('private/stocks/'.$stock->path));//販売データのサイズを単位変換して取得        
+        $stock->fileType =pathinfo($stock->path, PATHINFO_EXTENSION);//販売データの拡張子取得
+
+        $stock->whSize =$stockModel->getWhSize(storage_path(('app/private/stocks/'. $stock->path)));//販売テータのサーバーパス取得して縦横サイズ取得
+
+        //dd($stock->whSize['width']);
+        
         return new StockResource($stock);
     }
     /**

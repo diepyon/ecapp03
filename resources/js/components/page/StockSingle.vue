@@ -3,7 +3,7 @@
         <Header />
         <h1>ID.{{ id }}詳細個別ページです</h1>
 
-        <SingleImage v-bind:val="stock"/>
+        <SingleImage v-bind:stock="stock"/>
 
         <span class="" v-if="stock">
             <p>名前：{{stock.name}}</p>
@@ -31,10 +31,7 @@
 
     import SingleImage from '../layout/SingleImage'
 
-
-
     import wavesurfer from '../parts/VueWaveSurfer'
-
 
     import * as fns from 'date-fns'
 
@@ -53,13 +50,9 @@
         data() {
             return {
                 stock: null,
-
                 date: null,
-
                 audio: new Audio('/storage/stock_sample/c9fea342.mp3'),
                 playing: false,
-
-
             }
         },
         methods: {
@@ -74,7 +67,6 @@
             },
         },
         mounted() { //必ず通過するフック
-
             //console.log(this.id)
             //api.phpに記載された/stocksのルーティングのアクションを発動
             axios.get('/api/stocks/' + this.id)
@@ -90,6 +82,7 @@
             }) */ //エラーになるからいったん消してる
 
         },
+
         computed: {
             player() {
                 //return this.$refs.surf.waveSurfer//エラーになるからいったん消してる
