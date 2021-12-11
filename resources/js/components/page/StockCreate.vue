@@ -1,7 +1,7 @@
 <template>
     <div>
+
         <h1>Stock Create</h1>
-        <Header />  
         <div id="form">
             <div class="form">
                 <div class="">
@@ -69,7 +69,7 @@
                 <button type="button" class="btn btn-primary" @click="stockCreate">投稿する</button>
             </div>
         </div>
-        <Footer />
+
     </div>
 </template>
 <style scoped>

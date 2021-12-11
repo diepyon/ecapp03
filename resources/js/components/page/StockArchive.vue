@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Header />
+
         <h1>アーカイブです。</h1>
         <b-row>
             <b-col cols="6" sm="3" class="b-col" v-for="stock in stocks" :key="stock.id">
@@ -18,7 +18,7 @@
                 </div>
             </b-col>
         </b-row>
-        <Footer />
+
     </div>
 </template>
 

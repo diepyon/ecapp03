@@ -34,6 +34,7 @@
         "date-fns": "^2.26.0",
         "node-sass": "^6.0.1",
         "vue-router": "^3.5.2",
-        "vue-wave-surfer": "^1.0.1"
+        "wavesurfer.js": "^5.2.0",
+        "wavesurfer.js-vue": "^1.0.0"
     }
 }

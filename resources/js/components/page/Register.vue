@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Header />
+
         <h1>RegisterRegister</h1>
         <div id="form">
             <div class="form">

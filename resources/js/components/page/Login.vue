@@ -1,6 +1,6 @@
 <template>
     <div>
-        <Header />
+
         <h1>Login</h1>
         <b-form>
             <b-form-group id="input-group-1" label="メールアドレス" description="">
@@ -18,7 +18,7 @@
             </b-form-group>
             <b-button type="button" variant="primary" @click="onSubmit">ログイン</b-button>
         </b-form>
-        <Footer />
+
     </div>
 </template>
 

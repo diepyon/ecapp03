@@ -16,7 +16,7 @@
                     </ul>
                     
                     <button class="btn btn-outline-secondary"><font-awesome-icon :icon="['far', 'heart']" />お気に入りに保存</button>
-                    <a class="btn btn-outline-secondary" :href="'/storage/stock_sample/'+stock.filename+'.png'" role="button" download="">
+                    <a class="btn btn-outline-secondary" :href="'/storage/stock_download_sample/'+stock.filename+'.png'" role="button" download="">
                     <font-awesome-icon :icon="['fas', 'arrow-down']" />サンプルダウンロード</a>
 
                     <button class="btn btn-warning cart_button btn-lg btn-primary btn-lg btn-block"><font-awesome-icon :icon="['fas', 'cart-arrow-down']" />カートに追加</button>
