@@ -1,7 +1,6 @@
 <template>
     <div>
-
-        <h1>RegisterRegister</h1>
+        <h1>{{title}}</h1>
         <div id="form">
             <div class="form">
                 <div class="">
@@ -25,7 +24,6 @@
                 <button type="button" class="btn btn-primary" @click="register">登録</button>
             </div>
         </div>
-        <Footer />
     </div>
 </template>
 <style scoped>
@@ -58,8 +56,10 @@
             Header,
             Footer,
         },
+        title: 'Register',
         data() {
             return {
+                title: 'Register',
                 //あらかじめ変数を定義してあげないとフロントが混乱する
                 form:{
                     email: '',

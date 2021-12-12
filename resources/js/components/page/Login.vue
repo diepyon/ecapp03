@@ -1,7 +1,7 @@
 <template>
     <div>
 
-        <h1>Login</h1>
+        <h1>{{title}}</h1>
         <b-form>
             <b-form-group id="input-group-1" label="メールアドレス" description="">
                 <code>{{errorMessage.email}}</code>
@@ -33,8 +33,12 @@
             Header,
             Footer,
         },
+        title: 'Login',
+   
         data() {
             return {
+                title:'Login',
+                
                 form: {
                     email: '',
                     password: '',

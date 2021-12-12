@@ -1,7 +1,7 @@
 <template>
     <div>
 
-        <h1>アーカイブです。</h1>
+        <h1>{{title}}</h1>
         <b-row>
             <b-col cols="6" sm="3" class="b-col" v-for="stock in stocks" :key="stock.id">
                 <div> <a :href="`stocks/` + stock.id">
@@ -26,8 +26,10 @@
             Header,
             Footer,
         },
+        title: 'Image Archive',
         data() {
             return {
+                title: 'Image Archive',
                 stocks: null,
             }
         },

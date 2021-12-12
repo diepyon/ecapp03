@@ -54,8 +54,10 @@
             WaveSurferVue,
             SingleImage,
         },
+        //title: 'タイトルどうしよう'
         data() {
             return {
+                //title: 'タイトルどうしよう',
                 stock: null,
                 date: null,
                 audio: new Audio('/storage/stock_sample/c9fea342.mp3'),

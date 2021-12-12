@@ -1,7 +1,7 @@
 <template>
     <div>
 
-        <h1>Stock Create</h1>
+        <h1>{{title}}</h1>
         <div id="form">
             <div class="form">
                 <div class="">
@@ -125,8 +125,10 @@
             Header,
             Footer,
         },
+        title: 'Image Archive',
         data() {
             return {
+                title: 'Image Archive',
                 //あらかじめ変数を定義してあげないとフロントが混乱する
                 name: '',
                 detail: '',

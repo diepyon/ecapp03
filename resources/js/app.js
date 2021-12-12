@@ -24,21 +24,8 @@ library.add(fas, far, fab)
 Vue.component('font-awesome-icon', FontAwesomeIcon)
 
 
-
-/* import { fas } from '@fortawesome/free-solid-svg-icons'
-import { far } from '@fortawesome/free-regular-svg-icons'
-
-import {fab} from  '@fortawesome/fontawesome-free/scss/brands';
-library.add(fab)
-
-
-library.add(far,fas)
-library.add(far)
-Vue.component('font-awesome-icon', FontAwesomeIcon)
-*/
-
-
-
+import titleMixin from './modules/title.js'    
+Vue.mixin(titleMixin)
 
 
 window.Vue = require('vue').default;
@@ -49,6 +36,7 @@ const app = new Vue({
     el: '#app',
     
     router,
+    render: h => h(App),//なにこれ
     
     components: {
         App

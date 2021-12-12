@@ -1,7 +1,7 @@
 <template>
 	<div>
 
-		<h1>Home Page</h1>
+		<h1>Home</h1>
 
 	</div>  
 </template>
@@ -10,10 +10,10 @@
 	import Header from '../layout/Header'
 	import Footer from '../layout/Footer'
 
-	export default {
-		components: {
-			Header,
-			Footer,
-		},
-	}
+    export default {
+        components: {
+            Header,
+            Footer,
+        },
+    }
 </script>
