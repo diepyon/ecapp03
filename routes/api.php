@@ -27,8 +27,12 @@ Route::get('/stocks/{stock_id}', [StockController::class, 'single']);//urlのsto
 
 Route::get('/stock/author/{author_id}', [StockController::class, 'stocksByAuthorId']);
 
-Route::group(['middleware'=>'auth:sanctum'],function(){
+/* Route::group(['middleware'=>'auth:sanctum'],function(){
     //ログインが必要な処理をここに書く
+}); */
+
+Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+    return $request->user();
 });
 
 Route::post('/stocks/create', [StockController::class, 'create']);
@@ -38,3 +42,5 @@ Route::post('/register', [RegisterController::class, 'register']);
 
 //ログイン処理
 Route::post('/login', [LoginController::class, 'login']);
+
+Route::post('/logout', [LoginController::class, 'logout']);

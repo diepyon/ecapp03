@@ -36,7 +36,7 @@ const app = new Vue({
     el: '#app',
     
     router,
-    render: h => h(App),//なにこれ
+    //render: h => h(App),//なにこれ
     
     components: {
         App

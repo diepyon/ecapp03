@@ -339,7 +339,7 @@ class Stock extends Model
             return $file_size; 
           }           
         }
-        public function getWhSize($file){//販売データの縦サイズと横サイズ取得
+        public function getWhSizeImg($file){//販売データの縦サイズと横サイズ取得
             $width =Image::make($file)->width();
             $height =Image::make($file)->height();
 
@@ -348,8 +348,35 @@ class Stock extends Model
                 'height'=>$height,      
                 'aspect'=>$this->aspect($width,$height),
             );
-           
             return $whSize;
         }
+        public function getVideoInfo($filename){
+            $file = 'private/stocks/'.$filename.'.mp4';//元ファイルのパス      
+            
+            $media = FFMpeg::open($file);
+            $mediaStreams = $media->getStreams()[0];
+            $height = $mediaStreams->get('height');// 解像度(縦)を取得
+            $width = $mediaStreams->get('width');// 解像度(横)を取得
+                
+            $info=array(
+                'width'=>$width,
+                'height'=>$height,      
+                'aspect'=>$this->aspect($width,$height),
+                'time'=>$this->sToM($media->getDurationInSeconds())
+            );
+            return $info;
+        }
+        private  function sToM($seconds)
+        {   //秒を分に変換
+            $hours = floor($seconds / 3600);
+            $minutes = floor(($seconds / 60) % 60);
+            $seconds = $seconds % 60;
+            
+            $hms = sprintf("%02d:%02d",  $minutes, $seconds);
+            
+            return $hms;
+        }
+
+                
     
 }

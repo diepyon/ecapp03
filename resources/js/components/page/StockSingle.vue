@@ -1,9 +1,10 @@
 <template>
-    <div>
+    <div v-if="stock">
 
         <h1>ID.{{ id }}詳細個別ページです</h1>
 
-        <SingleImage v-bind:stock="stock" />
+        <SingleImage v-if="stock.genre=='image'" v-bind:stock="stock" />
+        <SingleVideo v-if="stock.genre=='video'" v-bind:stock="stock" />
 
         <span class="" v-if="stock">
             <p>名前：{{stock.name}}</p>
@@ -36,6 +37,7 @@
     import Footer from "../layout/Footer";
 
     import SingleImage from '../layout/SingleImage'
+    import SingleVideo from '../layout/SingleVideo'
 
 
     import * as fns from 'date-fns'
@@ -53,6 +55,7 @@
             Footer,
             WaveSurferVue,
             SingleImage,
+            SingleVideo
         },
         //title: 'タイトルどうしよう'
         data() {
@@ -65,8 +68,8 @@
 
                 options: {},
                 file: "/storage/stock_sample/c9fea342.mp3",
-                
-                filename:null
+
+                filename: null
             }
 
         },
@@ -83,9 +86,9 @@
                 //カーソルを先頭に戻すアクションも必要？
             },
 
-            hoge(){
-                this.wavesurfer.playPause(0,100)
-                
+            hoge() {
+                this.wavesurfer.playPause(0, 100)
+
             }
         },
         mounted() { //必ず通過するフック
@@ -104,7 +107,7 @@
                         }) */ //エラーになるからいったん消してる
 
             this.player.on('ready', () => {
-            console.log('ready')
+                console.log('ready')
             })
 
 
@@ -113,9 +116,23 @@
 
         computed: {
             player() {
-            return this.$refs.surf.waveSurfer
+                return this.$refs.surf.waveSurfer
             }
         }
     };
 
 </script>
+<style scoped>
+     ::v-deep .btn{
+        margin-top: .5em
+    }
+
+     ::v-deep li.list-group-item>svg{
+        margin-right: 0.2em;
+    }
+
+     ::v-deep .thumbnail {
+        width: 100%;
+    }    
+
+</style>

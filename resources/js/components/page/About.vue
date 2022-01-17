@@ -1,8 +1,11 @@
 <template>
     <div>
-        <h1>{{title}}</h1>
+        <p>{{ user.name }}</p>
+        <p>{{ user.email }}</p>
+        <button type="button" @click="logout">ログアウト</button>
     </div>
 </template>
+
 
 <script>
     import Header from '../layout/Header'
@@ -17,7 +20,28 @@
 
         data() {
             return {
-                title: 'About'
+                title: 'About',
+                user: "",
+            }
+        },
+        mounted() {
+            axios.get("/api/user").then(response => {
+                console.log(response.data)
+                this.user = response.data;
+            });
+        },
+        methods: {
+            logout() {
+                axios
+                    .post("api/logout")
+                    .then(response => {
+                        console.log(response);
+                        localStorage.removeItem("token");
+                        this.$router.push("/login");
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
             }
         }
     }

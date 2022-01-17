@@ -15,7 +15,7 @@ import { registerables } from 'chart.js'
 
 Vue.use(Router)
 
-export default new Router({
+const router=  new Router({
   mode: 'history',
     routes: [
     {
@@ -31,7 +31,8 @@ export default new Router({
     {
       path: '/about',
       name: 'about',
-      component: About
+      component: About,
+      meta: { authOnly: true },//試しにログインしている人に限定
         },
     {
       path: '/stocks/create',
@@ -63,6 +64,32 @@ export default new Router({
       path: '/login',
       name: 'login',
       component: Login,
+      meta: { guestOnly: true },
     },   
   ]
 })
+
+function isLoggedIn() {
+  return localStorage.getItem("token");
+}
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(record => record.meta.authOnly)) {
+      if (!isLoggedIn()) {
+          next("/login");
+      } else {
+          next();
+      }
+  } else if (to.matched.some(record => record.meta.guestOnly)) {
+      if (isLoggedIn()) {
+          next("/about");
+      } else {
+          next();
+      }
+  } else {
+      next();
+  }
+});
+
+
+export default router;

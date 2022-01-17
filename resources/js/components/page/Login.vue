@@ -75,8 +75,10 @@
                     axios.post('/api/login', this.form) //api.phpのルートを指定。第2引数には渡したい変数を入れる
                         .then(response => {
                             //ここに成功した時に行いたい処理を記載
-                            alert('送信（結果はコンソール見て）');
-                        })
+                            console.log(response.data.token);
+                            localStorage.setItem("token", response.data.token);
+                            //this.$router.push("/about");
+                            })
                         .catch(function (error) {
                             alert('あかんかったわ、コンソール見て');
                             console.log(error)

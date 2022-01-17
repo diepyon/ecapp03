@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="stock">
         <b-container class="bv-example-row">
             <b-row>
                 <b-col sm="8">
@@ -34,7 +34,7 @@
 
         data() {
             return {
-                
+               
             }
         },
         mounted() { 
@@ -48,8 +48,5 @@
 </script>
 
 <style scoped>
-    img.thumbnail {
-        width: 100%;
-    }
 
 </style>

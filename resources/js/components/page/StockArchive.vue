@@ -70,4 +70,12 @@
     left: 0%;
     margin:8px;
 }/*サムネイルの左下に出るジャンル判別アイコン*/
+
+.stock_thumbnail:hover img {
+    filter: brightness(50%);
+    -webkit-transition: 0.1s ease-in-out;
+    -moz-transition: 0.1s ease-in-out;
+    -o-transition: 0.1s ease-in-out;
+    transition: 0.1s ease-in-out;
+}
 </style>

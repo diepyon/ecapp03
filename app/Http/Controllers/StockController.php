@@ -41,6 +41,7 @@ class StockController extends Controller
 
         //投稿時に走らせるとやっぱり重い。認証システム入れたら承認時に変換する方式にしたい
         if($request->form['genre']=='image'){
+            
             $stock->ConversionImage($request->file('files')[0], $filename);//画像なら変換
         }else if($request->form['genre']=='video'){
             $stock->ConversionVideo($request->form['extention'],$filename);//動画なら変換
@@ -84,10 +85,12 @@ class StockController extends Controller
         $stock->size = $stockModel->calcFileSize(Storage::size('private/stocks/'.$stock->path));//販売データのサイズを単位変換して取得        
         $stock->fileType =pathinfo($stock->path, PATHINFO_EXTENSION);//販売データの拡張子取得
 
-        $stock->whSize =$stockModel->getWhSize(storage_path(('app/private/stocks/'. $stock->path)));//販売テータのサーバーパス取得して縦横サイズ取得
-
-        //dd($stock->whSize['width']);
-        
+        //縦横サイズ取得
+        if($stock->genre=="image"){
+            $stock->whSize = $stockModel->getWhSizeImg(storage_path(('app/private/stocks/'. $stock->path)));//販売テータのサーバーパス取得
+        }elseif($stock->genre=="video"){
+            $stock->info = $stockModel->getVideoInfo($stock->filename);
+        }
         return new StockResource($stock);
     }
     /**

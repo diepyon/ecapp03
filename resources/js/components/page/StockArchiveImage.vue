@@ -45,7 +45,5 @@
 
 </script>
 <style scoped>
-     .b-col img {
-        max-width: 100%;
-    }
+
 </style>
