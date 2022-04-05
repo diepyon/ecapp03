@@ -6,90 +6,73 @@ import StockCreate from './components/page/StockCreate.vue'
 import StockArchive from './components/page/StockArchive.vue'
 import StockArchiveImage from './components/page/StockArchiveImage.vue'
 import StockSingle from './components/page/StockSingle.vue'
-import Login from './components/page/Login.vue' 
+import Login from './components/page/Login.vue'
 import NotFound from './components/page/NotFound.vue'
 
 import Register from './components/page/Register.vue'
 
-import { registerables } from 'chart.js'
+import Animal from './components/page/Animal.vue'
+
 
 Vue.use(Router)
 
-const router=  new Router({
-  mode: 'history',
-    routes: [
-    {
-      path: '*',
-      name: NotFound,
-      component: NotFound
-    },      
-    {
-      path: '/',
-      name: 'home',
-      component: Home
-      },
-    {
-      path: '/about',
-      name: 'about',
-      component: About,
-      meta: { authOnly: true },//試しにログインしている人に限定
+const router = new Router({
+    mode: 'history',
+    routes: [{
+            path: '*',
+            name: NotFound,
+            component: NotFound
         },
-    {
-      path: '/stocks/create',
-      name: 'stockcreate',
-      component: StockCreate
+        {
+            path: '/',
+            name: 'home',
+            component: Home
         },
-    {
-      path: '/stocks',
-      name: 'stockarchive',
-      component: StockArchive
-    }, 
-    {
-      path: '/image',
-      name: 'stockarchiveimage',
-      component: StockArchiveImage
-    },     
-    {
-      path: '/stocks/:id(\\d+)',
-      name: 'stocksingle',
-      component: StockSingle,
-      props: route => ({ id: Number(route.params.id) })
-      },
-    {
-      path: '/register',
-      name: 'register',
-      component: Register,
-      },
-      {
-      path: '/login',
-      name: 'login',
-      component: Login,
-      meta: { guestOnly: true },
-    },   
-  ]
+        {
+            path: '/about',
+            name: 'about',
+            component: About,
+        },
+        {
+            path: '/stocks/create',
+            name: 'stockcreate',
+            component: StockCreate
+        },
+        {
+            path: '/stocks',
+            name: 'stockarchive',
+            component: StockArchive
+        },
+        {
+            path: '/image',
+            name: 'stockarchiveimage',
+            component: StockArchiveImage
+        },
+        {
+            path: '/stocks/:id(\\d+)',
+            name: 'stocksingle',
+            component: StockSingle,
+            props: route => ({
+                id: Number(route.params.id)
+            })
+        },
+        {
+            path: '/register',
+            name: 'register',
+            component: Register,
+        },
+        {
+            path: '/login',
+            name: 'login',
+            component: Login,
+        },
+        {
+            path: '/animal',
+            name: 'animal',
+            component: Animal,
+        },
+    ]
 })
-
-function isLoggedIn() {
-  return localStorage.getItem("token");
-}
-
-router.beforeEach((to, from, next) => {
-  if (to.matched.some(record => record.meta.authOnly)) {
-      if (!isLoggedIn()) {
-          next("/login");
-      } else {
-          next();
-      }
-  } else if (to.matched.some(record => record.meta.guestOnly)) {
-      if (isLoggedIn()) {
-          next("/about");
-      } else {
-          next();
-      }
-  } else {
-      next();
-  }
-});
 
 
 export default router;

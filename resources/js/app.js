@@ -32,13 +32,17 @@ window.Vue = require('vue').default;
 
 Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 
+
+import store from "./store";
+
 const app = new Vue({
     el: '#app',
-    
+    render: h => h(App),
+    store,
     router,
-    //render: h => h(App),//なにこれ
-    
     components: {
         App
     },    
 });
+
+

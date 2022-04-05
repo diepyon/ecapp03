@@ -9,11 +9,11 @@
                 <b-collapse id="nav-collapse" is-nav>
                     <b-navbar-nav>
                         <b-nav-item class="active" href="/">Home</b-nav-item>
-                        <b-nav-item href="/about">About</b-nav-item>
-                        <b-nav-item href="/stocks/create">Post</b-nav-item>
-                        <b-nav-item href="/stocks">Archive</b-nav-item>
-                        <b-nav-item href="/login">Login</b-nav-item>
-                        <b-nav-item href="/register">Register</b-nav-item>
+                        <b-nav-item to="/about">About</b-nav-item>
+                        <b-nav-item to="/stocks/create">Post</b-nav-item>
+                        <b-nav-item to="/stocks">Archive</b-nav-item>
+                        <b-nav-item to="/login">Login</b-nav-item>
+                        <b-nav-item to="/register">Register</b-nav-item>
                     </b-navbar-nav>
 
                     <!-- Right aligned nav items -->
@@ -25,7 +25,7 @@
                         <b-nav-item-dropdown right>
                             <!-- Using 'button-content' slot -->
                             <template #button-content>
-                                <em>User</em>
+                                <em>{{ userName }}</em>
                             </template>
                             <b-dropdown-item href="#">Profile</b-dropdown-item>
                             <b-dropdown-item href="#">Sign Out</b-dropdown-item>
@@ -34,10 +34,23 @@
                 </b-collapse>
             </b-navbar>
         </div>
-
-
     </header>
-
-
-
 </template>
+<script>
+    export default {
+        data() {
+            return {
+                userName: "ここに名前",
+                email: "",
+            };
+        },
+        mounted() {
+            //this.userName=localStorage.userName
+            console.log('ローカルストレージ')
+            console.log(localStorage.userName)
+        },
+        computed: {},
+        methods: {},
+    };
+
+</script>

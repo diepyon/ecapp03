@@ -40,7 +40,11 @@ Route::post('/stocks/create', [StockController::class, 'create']);
 //会員登録
 Route::post('/register', [RegisterController::class, 'register']);
 
-//ログイン処理
 Route::post('/login', [LoginController::class, 'login']);
+
+Route::middleware('auth:sanctum')->get('/loginCheck',function (Request $request) {
+});
+
+
 
 Route::post('/logout', [LoginController::class, 'logout']);

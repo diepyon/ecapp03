@@ -1,6 +1,5 @@
 <template>
     <div>
-
         <h1>{{title}}</h1>
         <b-form>
             <b-form-group id="input-group-1" label="メールアドレス" description="">
@@ -16,12 +15,12 @@
                     type="password" placeholder="password" required>
                 </b-form-input>
             </b-form-group>
+            <b-alert show variant="danger" v-if="message">{{message}}</b-alert>
             <b-button type="button" variant="primary" @click="onSubmit">ログイン</b-button>
         </b-form>
 
     </div>
 </template>
-
 <script>
     import Header from '../layout/Header'
     import Footer from '../layout/Footer'
@@ -34,11 +33,11 @@
             Footer,
         },
         title: 'Login',
-   
+
         data() {
             return {
-                title:'Login',
-                
+                title: 'Login',
+                message: null,
                 form: {
                     email: '',
                     password: '',
@@ -49,6 +48,10 @@
                     'password': null,
                 },
             }
+        },
+        mounted() {
+            this.message = this.$store.state.message
+            console.log(this.$store.state.message)
         },
         methods: {
             checkEmail() {
@@ -72,22 +75,27 @@
                 var passwordResult = this.checkPassword()
 
                 if (emailResult && passwordResult) { //check項目が全てtrueなら  
-                    axios.post('/api/login', this.form) //api.phpのルートを指定。第2引数には渡したい変数を入れる
+                    axios.post('/api/login', this.form) 
                         .then(response => {
-                            //ここに成功した時に行いたい処理を記載
-                            console.log(response.data.token);
-                            localStorage.setItem("token", response.data.token);
-                            //this.$router.push("/about");
-                            })
-                        .catch(function (error) {
-                            alert('あかんかったわ、コンソール見て');
-                            console.log(error)
+                            const userInfo = {
+                                name: response.data.user.name,
+                                email: response.data.user.email,
+                                token: response.data.token,
+                            }
+                            this.$store.commit("checkLogin", userInfo)
+                            this.$store.commit("resetMessage")//vuexに保存されているメッセージをリセット
+                            this.$router.push('/about')
+                        
                         })
+                        .catch((error => {
+                            //console.log(error)
+                            this.message = 'ユーザー名またはパスワードが違います。'
+
+                        }))
                 } else {
                     alert('入力内容に不備があります。')
                 }
             }
         }
     }
-
 </script>

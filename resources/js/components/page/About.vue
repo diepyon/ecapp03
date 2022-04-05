@@ -1,8 +1,13 @@
 <template>
     <div>
-        <p>{{ user.name }}</p>
-        <p>{{ user.email }}</p>
-        <button type="button" @click="logout">ログアウト</button>
+        <div v-if="isLoggedIn">
+            <p>{{ user.name }}</p>
+            <p>{{ user.email }}</p>
+            <button type="button" @click="logout">ログアウト</button>
+        </div>
+        <div v-else>
+            <p>{{ $store.state.message }}</p>
+        </div>
     </div>
 </template>
 
@@ -20,30 +25,44 @@
 
         data() {
             return {
-                title: 'About',
-                user: "",
+                user: {
+                    name: null,
+                    email: null,
+                    token: null,
+                },
+                isLoggedIn: false,
             }
         },
         mounted() {
-            axios.get("/api/user").then(response => {
-                console.log(response.data)
-                this.user = response.data;
-            });
+            this.user.name = localStorage.userName
+            this.user.email = localStorage.userEmail
+            this.user.token = localStorage.token
+
+            axios
+                .get("api/loginCheck")
+                .then(response => {
+                    this.isLoggedIn = true
+                })
+                .catch(error => {
+                    this.isLoggedIn = false
+                    this.$store.commit("message",'ログインしてください。')
+                    this.$router.push("/login") //ログイン画面にジャンプ
+                });
         },
         methods: {
             logout() {
                 axios
                     .post("api/logout")
                     .then(response => {
-                        console.log(response);
-                        localStorage.removeItem("token");
-                        this.$router.push("/login");
+                        localStorage.clear();
+                        this.$store.commit("logout") //vuexの内容をリセット
+                        this.$router.push("/login") //ログイン画面にジャンプ
                     })
                     .catch(error => {
                         console.log(error);
                     });
-            }
-        }
-    }
+            },
 
+        },
+    }
 </script>
