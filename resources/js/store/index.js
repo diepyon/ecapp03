@@ -10,14 +10,17 @@ const store = new Vuex.Store({
         email: null,
         token: null,
     },
+    getters: {
+        getUserName(state) { return state.name }
+    },
     mutations: {
         update(state) {
             state.message = '書き換え後のメッセージ'
         },
-        message(state,message){
+        message(state, message) {
             state.message = message
         },
-        resetMessage(state){
+        resetMessage(state) {
             state.message = null
         },
         updateUser(state, user) {
@@ -35,10 +38,12 @@ const store = new Vuex.Store({
             localStorage.setItem("userName", state.name)
             localStorage.setItem("userEmail", state.email)
         },
-        logout(state) {//vuexの内容を削除
+        logout(state) { //vuexの内容を削除
             state.name = null
             state.email = null
-            state.token = null            
+            state.token = null
+
+            localStorage.clear() //追記
         },
     }
 }, );

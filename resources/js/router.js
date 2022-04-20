@@ -7,11 +7,11 @@ import StockArchive from './components/page/StockArchive.vue'
 import StockArchiveImage from './components/page/StockArchiveImage.vue'
 import StockSingle from './components/page/StockSingle.vue'
 import Login from './components/page/Login.vue'
-import NotFound from './components/page/NotFound.vue'
 
+import NotFound from './components/page/NotFound.vue'
 import Register from './components/page/Register.vue'
 
-import Animal from './components/page/Animal.vue'
+import Account from './components/page/Account.vue'
 
 
 Vue.use(Router)
@@ -67,9 +67,9 @@ const router = new Router({
             component: Login,
         },
         {
-            path: '/animal',
-            name: 'animal',
-            component: Animal,
+            path: '/account',
+            name: 'account',
+            component: Account,
         },
     ]
 })

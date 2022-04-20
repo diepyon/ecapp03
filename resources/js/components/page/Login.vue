@@ -8,7 +8,6 @@
                     placeholder="Enter email" required>
                 </b-form-input>
             </b-form-group>
-
             <b-form-group id="input-group-2" label="パスワード" description="">
                 <code>{{errorMessage.password}}</code>
                 <b-form-input @change="checkPassword" @blur="checkPassword" id="input-2" v-model="form.password"
@@ -18,7 +17,6 @@
             <b-alert show variant="danger" v-if="message">{{message}}</b-alert>
             <b-button type="button" variant="primary" @click="onSubmit">ログイン</b-button>
         </b-form>
-
     </div>
 </template>
 <script>
@@ -42,7 +40,6 @@
                     email: '',
                     password: '',
                 },
-
                 errorMessage: {
                     'email': null,
                     'password': null,
@@ -51,8 +48,14 @@
         },
         mounted() {
             this.message = this.$store.state.message
-            console.log(this.$store.state.message)
+
+            axios.get("api/loginCheck")
+                .then(response => {
+                    console.log('既にログイン済')
+                    this.$router.push('/');
+                })
         },
+
         methods: {
             checkEmail() {
                 //モジュールからエラーメッセージを取得
@@ -75,7 +78,7 @@
                 var passwordResult = this.checkPassword()
 
                 if (emailResult && passwordResult) { //check項目が全てtrueなら  
-                    axios.post('/api/login', this.form) 
+                    axios.post('/api/login', this.form)
                         .then(response => {
                             const userInfo = {
                                 name: response.data.user.name,
@@ -83,14 +86,12 @@
                                 token: response.data.token,
                             }
                             this.$store.commit("checkLogin", userInfo)
-                            this.$store.commit("resetMessage")//vuexに保存されているメッセージをリセット
-                            this.$router.push('/about')
-                        
+                            this.$store.commit("resetMessage") //vuexに保存されているメッセージをリセット
+                            this.$router.push('/');
                         })
                         .catch((error => {
                             //console.log(error)
                             this.message = 'ユーザー名またはパスワードが違います。'
-
                         }))
                 } else {
                     alert('入力内容に不備があります。')
@@ -98,4 +99,5 @@
             }
         }
     }
+
 </script>

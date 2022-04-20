@@ -1,6 +1,5 @@
 <template>
     <div>
-
         <h1>{{title}}</h1>
         <div id="form">
             <div class="form">
@@ -13,34 +12,31 @@
                     </div>
                 </div>
             </div>
-            
+
             <code>{{errorMessage.file}}</code>
-            <div class="drop_area" 
-                v-show="previewArea==false" 
-                @dragenter="dragEnter" 
-                @dragleave="dragLeave" 
-                @dragover.prevent
-                @drop.prevent="dropFile" 
-                :class="{enter: isEnter}">
-              <div>販売する作品をドラッグ＆ドロップ</div>
-              <div>png,jpg,mp4,mov,wav,mp3</div> 
+            <div class="drop_area" v-show="previewArea==false" @dragenter="dragEnter" @dragleave="dragLeave"
+                @dragover.prevent @drop.prevent="dropFile" :class="{enter: isEnter}">
+                <div>販売する作品をドラッグ＆ドロップ</div>
+                <div>png,jpg,mp4,mov,wav,mp3</div>
                 <label>
                     <span class="btn btn-primary">
                         選択
                         <input type="file" class="form-control-file " ref="file" @change="fileSelected"
                             accept=".jpg,.jpeg,.png,.gif,.mp3,.wav,.m4a,.mp4,.mov" style="display:none">
                     </span>
-                </label>                
-            </div>           
-            
+                </label>
+            </div>
+
             <div class="form-group">
                 <div v-show="previewArea" class="preview">
                     <div class="delete-mark" @click="deleteFile">×</div>
                     <img v-if="genre=='image'" :src="blobUrl">
-                    <video v-on:loadedmetadata="videoInfo" controls v-if="genre=='video'" id="video" loop autoplay muted :src="blobUrl"></video>
-                    <audio  v-on:loadedmetadata="audioInfo" v-if="genre=='audio'" id="audio" controls :src="blobUrl"></audio>
-            </div>
-            {{fileName}}
+                    <video v-on:loadedmetadata="videoInfo" controls v-if="genre=='video'" id="video" loop autoplay muted
+                        :src="blobUrl"></video>
+                    <audio v-on:loadedmetadata="audioInfo" v-if="genre=='audio'" id="audio" controls
+                        :src="blobUrl"></audio>
+                </div>
+                {{fileName}}
             </div>
 
             <div class=form-group id="genreSelectForm">
@@ -84,20 +80,20 @@
         /*height: 300px;*/
         border: 5px solid gray;
         border-radius: 15px;
-        max-width:100%;
-        padding: 5em 0.5em;  
+        max-width: 100%;
+        padding: 5em 0.5em;
         text-align: center;
     }
 
     .enter {
         border: 10px dotted powderblue;
     }
-    
+
     .delete-mark {
         top: -14px;
         right: -10px;
         font-size: 30px;
-    }    
+    }
 
     .preview {
         margin: .5em;
@@ -110,37 +106,35 @@
         max-width: 500px;
     }
 
-    #genreSelectForm{
-        display:none;
+    #genreSelectForm {
+        display: none;
     }
 
 </style>
 <script>
     import Header from '../layout/Header'
     import Footer from '../layout/Footer'
-    import * as Validate from '../../modules/validation.js'
 
     export default {
         components: {
             Header,
             Footer,
         },
-        title: 'Image Archive',
         data() {
             return {
-                title: 'Image Archive',
+                title: 'Stock Create',
                 //あらかじめ変数を定義してあげないとフロントが混乱する
                 name: '',
                 detail: '',
-                isEnter: false,//ドラッグアンドドロップフォームの変数初期値
+                isEnter: false, //ドラッグアンドドロップフォームの変数初期値
                 fileInfo: null, //inputfileの情報を格納する変数
-                videDuration:null,
+                videDuration: null,
 
-                fileType:null,
+                fileType: null,
 
-                fileName:'',
+                fileName: '',
 
-                deleteButton:false,
+                deleteButton: false,
 
                 //ジャンル選択の配列
                 genre: '',
@@ -174,34 +168,45 @@
                 },
                 blobUrl: null,
                 previewArea: false,
+                isLoggedIn: false,
             }
         },
-        mounted() { //必ず通過するフック
-
-
+        mounted() {
+            axios
+                .get("/api/loginCheck")
+                .then(response => {
+                    this.isLoggedIn = true
+                    console.log(response)
+                })
+                .catch(error => {
+                    console.log(error)
+                    this.isLoggedIn = false
+                    this.$store.commit("message",'ログインしてください。')
+                    this.$router.push("/login") //ログイン画面にジャンプ
+                })
         },
-        
+
         methods: {
-            videoInfo(){
+            videoInfo() {
                 console.log(video)
-                this.checkFile(video.duration)//プレビュー用のvideoタグから長さを取得
+                this.checkFile(video.duration) //プレビュー用のvideoタグから長さを取得
             },
-            audioInfo(){
+            audioInfo() {
                 console.log(audio)
                 this.checkFile(audio.duration)
             },
 
             deleteFile() {
-                this.fileInfo=null;
+                this.fileInfo = null;
                 this.previewArea = false
                 this.deleteButton = false
-                this.fileName=null
+                this.fileName = null
                 this.$refs.file.value = null; //input fileクリア
-                this.genre=null
-                this.genreString=null
-                },            
-            
-            
+                this.genre = null
+                this.genreString = null
+            },
+
+
             //バリテーション
             checkName() {
                 var n = ''
@@ -242,20 +247,20 @@
             checkFile(duration) {
                 this.previewArea = false //previewエリアのタグを非表示
 
-                if (this.fileInfo == null||this.fileInfo == undefined) {
-                    this.errorMessage.file = "選択してください"           
-                } else if (this.fileInfo.size > 1073741824) { 
+                if (this.fileInfo == null || this.fileInfo == undefined) {
+                    this.errorMessage.file = "選択してください"
+                } else if (this.fileInfo.size > 1073741824) {
                     //1GBなら1073741824
-                    this.errorMessage.file = "ファイルサイズ上限の1GBを超えています。"                
+                    this.errorMessage.file = "ファイルサイズ上限の1GBを超えています。"
                 } else if (this.fileInfo.size <= 0) {
                     this.errodMessage.file = "ファイル不正です。サイズが0KBです。"
-                  
-                } else if (this.genre=='video' && duration > 60) {//〇秒以上の動画なら
+
+                } else if (this.genre == 'video' && duration > 60) { //〇秒以上の動画なら
                     this.errorMessage.file = "投稿できる動画は60秒までです。"
-        
-                } else if (this.genre=='audio' && duration > 300) {//〇秒以上の動画なら
+
+                } else if (this.genre == 'audio' && duration > 300) { //〇秒以上の動画なら
                     this.errorMessage.file = "投稿できる音源は5分までです。"
-                           
+
                 } else {
                     this.errorMessage.file = ""
                     this.previewArea = true //previewエリアのタグを表示
@@ -265,7 +270,7 @@
                     var result = true
                 } else {
                     var result = false
-                    this.deleteFile()//ファイル情報をクリア
+                    this.deleteFile() //ファイル情報をクリア
                 } //fileの入力に問題がなければtrueを返す
                 return (result)
             },
@@ -274,19 +279,19 @@
                 this.isEnter = true;
             },
             dragLeave() {
-            this.isEnter = false;
+                this.isEnter = false;
             },
             dragOver() {
                 console.log('DragOver')
             },
             dropFile(event) {
-                this.fileInfo =[...event.dataTransfer.files][0]//選択されたファイルの情報を変数に格納
+                this.fileInfo = [...event.dataTransfer.files][0] //選択されたファイルの情報を変数に格納
 
-                this.fileType=this.fileInfo.type;
+                this.fileType = this.fileInfo.type;
 
-                if(this.fileType.match('video')||this.fileType.match('audio')||this.fileType.match('image')){ 
-                    this.fileName = this.fileInfo.name 
-                }else{
+                if (this.fileType.match('video') || this.fileType.match('audio') || this.fileType.match('image')) {
+                    this.fileName = this.fileInfo.name
+                } else {
                     alert('そのファイル形式は選択できません。')
                     this.fileInfo = null
                 }
@@ -297,14 +302,14 @@
                     this.errorMessage.file = null //ファイル未選択のバリデーションエラーが出てたら消す
                 }
 
-                if ( this.fileInfo != undefined) {
+                if (this.fileInfo != undefined) {
                     this.blobUrl = URL.createObjectURL(this.fileInfo) //選択されたファイルのURLを取得  
                 } else {
                     this.blobUrl = ""
                 }
 
-                 this.genreSelect()
-            }, 
+                this.genreSelect()
+            },
 
             fileSelected(event) {
                 this.fileInfo = event.target.files[0] //選択されたファイルの情報を変数に格納
@@ -315,14 +320,14 @@
 
                 if (event.target.files[0] != undefined) {
                     this.blobUrl = URL.createObjectURL(this.fileInfo) //選択されたファイルのURLを取得 
-                    this.fileName=this.fileInfo.name
+                    this.fileName = this.fileInfo.name
                 } else {
                     this.blobUrl = ""
                 }
                 this.genreSelect()
             },
 
-            genreSelect(){
+            genreSelect() {
                 let result = this.checkFile() //ファイルに問題がないかチェック
 
                 if (result && this.fileInfo && this.fileInfo.type.match(
@@ -347,7 +352,7 @@
                 } else {
                     this.blobUrl = null
                     this.previewArea = false
-                }   
+                }
             },
 
             stockCreate() { //投稿とボタンが押されたときに発動するメソッド
@@ -357,7 +362,7 @@
                 var fileResult = this.checkFile()
 
 
-                if (nameResult && detailResult && fileResult) {//check項目が全てtrueなら
+                if (nameResult && detailResult && fileResult) { //check項目が全てtrueなら
                     let postData = new FormData()
                     postData.append('files[0]', this.fileInfo) //files配列の先頭はthis.fileInfo
                     postData.append('form[extention]', this.fileInfo.name.split('.').pop()) //拡張子を取得
@@ -374,8 +379,8 @@
                             //console.log(response); //成功してたらデータが返ってくる
                             //投稿に成功したらv-modelを使って書くフォームをクリア
                             this.name = ""
-                            this.fileName=""
-                            this.fileInfo =null
+                            this.fileName = ""
+                            this.fileInfo = null
                             this.$refs.file.value = null; //input fileクリア
                             this.genre = ""
                             this.feeSelected = 1500

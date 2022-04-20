@@ -1,15 +1,14 @@
 <template>
     <div>
-
         <h1>{{title}}</h1>
         <b-row>
             <b-col cols="6" sm="3" class="b-col" v-for="stock in stocks" :key="stock.id">
                 <div class="stock_thumbnail">
-                    <a :href="`stocks/` + stock.id">
+                    <router-link :to="`stocks/` + stock.id">                    
                         <img v-if="stock.genre=='image'" :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
                         <img v-else-if="stock.genre=='video'" :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
                         <img v-else-if="stock.genre=='audio'" :src="'/storage/stock_thumbnail/audiothumbnail.png'">
-                    </a>
+                    </router-link>
                     <div class="genre_icon">
                         <span v-show="stock.genre=='image'"><font-awesome-icon :icon="['fas', 'image']" /></span>
                         <span v-show="stock.genre=='video'"><font-awesome-icon :icon="['fas', 'video']" /></span>
@@ -18,7 +17,6 @@
                 </div>
             </b-col>
         </b-row>
-
     </div>
 </template>
 
@@ -31,19 +29,18 @@
             Header,
             Footer,
         },
-        title: 'Archive',
         data() {
             return {
                 title: 'Archive',
                 stocks: null,
             }
         },
-        mounted() { //必ず通過するフック
+        mounted() {
             //api.phpに記載された/stocksのルーティングのアクションを発動
             axios.get('/api/stocks')
                 .then(response => {
                     this.stocks = response.data.data.reverse()
-                    console.log(this.stocks)
+                    //console.log(this.stocks)
                 })
         },
     };

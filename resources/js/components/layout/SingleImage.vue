@@ -11,15 +11,18 @@
                         <li class="list-group-item"> {{stock.whSize.width}}x{{stock.whSize.height}}px</li>
                         <li class="list-group-item">{{stock.fileType}}</li>
                         <li class="list-group-item"> {{stock.size}}</li>
-                        <li class="list-group-item">  {{stock.whSize.aspect}}</li>
+                        <li class="list-group-item"> {{stock.whSize.aspect}}</li>
                         <li class="list-group-item"> ￥{{stock.fee}}</li>
                     </ul>
-                    
-                    <button class="btn btn-outline-secondary"><font-awesome-icon :icon="['far', 'heart']" />お気に入りに保存</button>
-                    <a class="btn btn-outline-secondary" :href="'/storage/stock_download_sample/'+stock.filename+'.png'" role="button" download="">
-                    <font-awesome-icon :icon="['fas', 'arrow-down']" />サンプルダウンロード</a>
 
-                    <button class="btn btn-warning cart_button btn-lg btn-primary btn-lg btn-block"><font-awesome-icon :icon="['fas', 'cart-arrow-down']" />カートに追加</button>
+                    <button class="btn btn-outline-secondary">
+                        <font-awesome-icon :icon="['far', 'heart']" />お気に入りに保存</button>
+                    <a class="btn btn-outline-secondary" :href="'/storage/stock_download_sample/'+stock.filename+'.png'"
+                        role="button" download="">
+                        <font-awesome-icon :icon="['fas', 'arrow-down']" />サンプルダウンロード</a>
+                        
+                    <button class="btn btn-warning cart_button btn-lg btn-primary btn-lg btn-block">
+                        <font-awesome-icon :icon="['fas', 'cart-arrow-down']" />カートに追加</button>
                 </b-col>
             </b-row>
         </b-container>
@@ -34,11 +37,11 @@
 
         data() {
             return {
-               
+
             }
         },
-        mounted() { 
-          
+        mounted() {
+
         },
         methods: {
 

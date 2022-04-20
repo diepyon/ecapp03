@@ -13,10 +13,6 @@
     import Header from '../layout/Header'
     import Footer from '../layout/Footer'
     import SingleImage from '../layout/SingleImage'
-    //import wavesurfer from '../parts/VueWaveSurfer'
-
-    //import Vue from 'vue'
-    //import VueWaveSurfer from 'vue-wave-surfer'
 
     export default {
         components: {
@@ -24,11 +20,7 @@
             Footer,
             SingleImage
         },
-        /* 		plugins: [
-        			'~/plugins/vue-wave-surfer'
-        		]	 */
     }
-
 </script>
 
 <style scoped>

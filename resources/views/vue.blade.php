@@ -14,7 +14,6 @@
 <body>
     <div id="app">
         <App />
-        <!--appコンポーネントなどを作成してrouter-viewはその中に。-->
     </div>
 </body>
 

@@ -41,7 +41,6 @@ class StockController extends Controller
 
         //投稿時に走らせるとやっぱり重い。認証システム入れたら承認時に変換する方式にしたい
         if($request->form['genre']=='image'){
-            
             $stock->ConversionImage($request->file('files')[0], $filename);//画像なら変換
         }else if($request->form['genre']=='video'){
             $stock->ConversionVideo($request->form['extention'],$filename);//動画なら変換
@@ -78,7 +77,6 @@ class StockController extends Controller
         $stock = Stock::where('genre', 'image')->get();//stocksテーブルからジャンルがimageのレコードをすべて取得
         return new StockResource($stock);//StockResourceにデータを渡してjsonに変換してもらおう
     }    
-
     public function single(Stock $stockModel,$stock_id)
     {   //url上の数値を取得
         $stock = Stock::find($stock_id);//受け取った数値と一致するIDのレコードを取得
@@ -90,6 +88,9 @@ class StockController extends Controller
             $stock->whSize = $stockModel->getWhSizeImg(storage_path(('app/private/stocks/'. $stock->path)));//販売テータのサーバーパス取得
         }elseif($stock->genre=="video"){
             $stock->info = $stockModel->getVideoInfo($stock->filename);
+        }elseif($stock->genre=="audio"){
+            $stock->info = $stockModel->getAudioInfo();
+           
         }
         return new StockResource($stock);
     }

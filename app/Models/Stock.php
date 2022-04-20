@@ -301,15 +301,13 @@ class Stock extends Model
             //fullHD以上なら1080pに変換
             if($height >= 1080){
                 $size='hd';
-                $this->resizeVideo($size,$stock_filename);
-                                                  
+                $this->resizeVideo($size,$stock_filename);                       
             }                     
             
             //480以上ならSD画質に変換
             if($height >= 480){
                 $size='sd';
                 $this->resizeVideo($size,$stock_filename);
-                
             }
         }
         public function calcFileSize($size){
@@ -366,14 +364,25 @@ class Stock extends Model
             );
             return $info;
         }
-        private  function sToM($seconds)
-        {   //秒を分に変換
+        public function getAudioInfo(){
+            $file =  'private/stocks/5712c66e_convert.wav';
+            $media = FFMpeg::open($file);
+            $mediaStreams =  $media->getStreams()[0];
+
+            $info=array(
+                'time'=>$this->sToM($media->getDurationInSeconds()),
+                'bitrate'=>$mediaStreams->get('bit_rate')/$mediaStreams->get('sample_rate')/$mediaStreams->get('channels'),
+                'sampringlate'=>$mediaStreams->get('sample_rate'),
+                'channels'=>$mediaStreams->get('channels'),
+            );
+            return $info;
+        }
+        private  function sToM($seconds) {   
+            //秒を分に変換
             $hours = floor($seconds / 3600);
             $minutes = floor(($seconds / 60) % 60);
             $seconds = $seconds % 60;
-            
             $hms = sprintf("%02d:%02d",  $minutes, $seconds);
-            
             return $hms;
         }
 

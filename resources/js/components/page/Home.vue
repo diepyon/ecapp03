@@ -1,8 +1,6 @@
 <template>
 	<div>
-
 		<h1>Home</h1>
-
 	</div>  
 </template>
 
@@ -15,5 +13,10 @@
             Header,
             Footer,
         },
+        data(){
+            return{
+                title: 'Home',
+                }
+        }
     }
 </script>

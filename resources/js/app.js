@@ -11,7 +11,6 @@ Vue.use(IconsPlugin)
 require('./bootstrap');
 
 import WaveSurferVue from "wavesurfer.js-vue";
- 
 Vue.use(WaveSurferVue);
 
 import { library } from '@fortawesome/fontawesome-svg-core'
