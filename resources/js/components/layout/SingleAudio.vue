@@ -77,6 +77,16 @@
                 this.$refs.surf.waveSurfer.stop()
                 this.playing = this.$refs.surf.waveSurfer.isPlaying()
             },
+            //バックエンドでやったほうがいい
+            // getAudioDuration() {
+            //     var audio = new Audio(); // audioの作成
+            //     audio.src = '/storage/stock_download_sample/' + this.stock.filename + '.mp3'
+            //     audio.load(); // audioの読み込み
+
+            //     audio.addEventListener('loadedmetadata', function (e) {
+            //         console.log(audio.duration); // 総時間の取得
+            //     });
+            // }
         },
         computed: {
             player() {

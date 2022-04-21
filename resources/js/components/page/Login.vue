@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="!(isLoggedIn)">
         <h1>{{title}}</h1>
         <b-form>
             <b-form-group id="input-group-1" label="メールアドレス" description="">
@@ -36,6 +36,8 @@
             return {
                 title: 'Login',
                 message: null,
+
+                //jumpTo: '/', //わざわざリダイレクト前のページを定義る必要がない説
                 form: {
                     email: '',
                     password: '',
@@ -44,15 +46,19 @@
                     'email': null,
                     'password': null,
                 },
+                isLoggedIn: false,
             }
         },
         mounted() {
             this.message = this.$store.state.message
+            //this.jumpTo = this.$store.state.jumpTo //ログインを求められて飛ばされた人が本来アクセスしたかったパス
+
+            this.isLoggedIn = localStorage.token //トークンがあればログインしている扱いにする
 
             axios.get("api/loginCheck")
                 .then(response => {
-                    console.log('既にログイン済')
-                    this.$router.push('/');
+                    //this.$router.push('/');
+                    this.$router.push(this.$router.go(-1))                
                 })
         },
 
@@ -86,8 +92,11 @@
                                 token: response.data.token,
                             }
                             this.$store.commit("checkLogin", userInfo)
-                            this.$store.commit("resetMessage") //vuexに保存されているメッセージをリセット
-                            this.$router.push('/');
+                            this.$store.commit("resetState") //vuexに保存されているメッセージをリセット
+                            
+                            //わざわざ元のページを把握する必要がない説
+                            //this.$router.push(this.jumpTo);
+                            this.$router.push(this.$router.go(-1))   
                         })
                         .catch((error => {
                             //console.log(error)

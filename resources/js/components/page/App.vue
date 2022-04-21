@@ -2,7 +2,7 @@
     <div>
         <Header />
         <div class="container">
-            <!--ここにcontiner設置するとヘッダーとかもぶつ切りにされる？-->
+            
             <router-view />
         </div>
         <Footer />
@@ -20,7 +20,14 @@
             Footer,
             SingleImage
         },
+        mounted() {
+            //ログインページに強制リダイレクトされてけど気が変わって
+            //別のメニューをクリックしたらログインフォームのリダイレクト先をデフォルト値に戻したい
+            //うまくいかない
+            //this.$store.commit("resetState") //vuexに保存されているメッセージをリセット
+        },
     }
+
 </script>
 
 <style scoped>

@@ -9,19 +9,22 @@ const store = new Vuex.Store({
         name: null,
         email: null,
         token: null,
+        jumpTo:'/',//ログイン失敗した人は本来どこに行きたかったのかを記憶
     },
     getters: {
         getUserName(state) { return state.name }
     },
     mutations: {
-        update(state) {
-            state.message = '書き換え後のメッセージ'
-        },
         message(state, message) {
             state.message = message
         },
-        resetMessage(state) {
+        jumpTo(state,jumpTo){
+            //わざわざリダイレクト前のパスを把握する必要がない説
+            state.jumpTo = jumpTo
+        },
+        resetState(state) {
             state.message = null
+            state.jumpTo = '/'
         },
         updateUser(state, user) {
             state.name = user.name

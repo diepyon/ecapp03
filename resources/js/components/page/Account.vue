@@ -1,13 +1,11 @@
 <template>
-    <div>
-        <div v-if="isLoggedIn">
+    <div v-if="isLoggedIn">
+        <div>
             <p>{{ user.name }}</p>
             <p>{{ user.email }}</p>
             <button type="button" @click="logout">ログアウト</button>
         </div>
-        <div v-else>
-            <p>{{ $store.state.message }}</p>
-        </div>
+
     </div>
 </template>
 
@@ -47,7 +45,8 @@
                     console.log(error)
                     this.isLoggedIn = false
                     this.$store.commit("message", 'ログインしてください。')
-                    //this.$router.push("/login") //ログイン画面にジャンプ
+
+                    this.$router.push("/login") //ログイン画面にジャンプ
                 })
         },
         methods: {

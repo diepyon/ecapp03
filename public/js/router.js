@@ -177,7 +177,16 @@ __webpack_require__.r(__webpack_exports__);
     stop: function stop() {
       this.$refs.surf.waveSurfer.stop();
       this.playing = this.$refs.surf.waveSurfer.isPlaying();
-    }
+    } //バックエンドでやったほうがいい
+    // getAudioDuration() {
+    //     var audio = new Audio(); // audioの作成
+    //     audio.src = '/storage/stock_download_sample/' + this.stock.filename + '.mp3'
+    //     audio.load(); // audioの読み込み
+    //     audio.addEventListener('loadedmetadata', function (e) {
+    //         console.log(audio.duration); // 総時間の取得
+    //     });
+    // }
+
   },
   computed: {
     player: function player() {
@@ -366,8 +375,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -399,7 +406,9 @@ __webpack_require__.r(__webpack_exports__);
       console.log(error);
       _this.isLoggedIn = false;
 
-      _this.$store.commit("message", 'ログインしてください。'); //this.$router.push("/login") //ログイン画面にジャンプ
+      _this.$store.commit("message", 'ログインしてください。');
+
+      _this.$router.push("/login"); //ログイン画面にジャンプ
 
     });
   },
@@ -508,6 +517,7 @@ __webpack_require__.r(__webpack_exports__);
     return {
       title: 'Login',
       message: null,
+      //jumpTo: '/', //わざわざリダイレクト前のページを定義る必要がない説
       form: {
         email: '',
         password: ''
@@ -515,17 +525,20 @@ __webpack_require__.r(__webpack_exports__);
       errorMessage: {
         'email': null,
         'password': null
-      }
+      },
+      isLoggedIn: false
     };
   },
   mounted: function mounted() {
     var _this = this;
 
-    this.message = this.$store.state.message;
-    axios.get("api/loginCheck").then(function (response) {
-      console.log('既にログイン済');
+    this.message = this.$store.state.message; //this.jumpTo = this.$store.state.jumpTo //ログインを求められて飛ばされた人が本来アクセスしたかったパス
 
-      _this.$router.push('/');
+    this.isLoggedIn = localStorage.token; //トークンがあればログインしている扱いにする
+
+    axios.get("api/loginCheck").then(function (response) {
+      //this.$router.push('/');
+      _this.$router.push(_this.$router.go(-1));
     });
   },
   methods: {
@@ -560,10 +573,12 @@ __webpack_require__.r(__webpack_exports__);
 
           _this2.$store.commit("checkLogin", userInfo);
 
-          _this2.$store.commit("resetMessage"); //vuexに保存されているメッセージをリセット
+          _this2.$store.commit("resetState"); //vuexに保存されているメッセージをリセット
+          //わざわざ元のページを把握する必要がない説
+          //this.$router.push(this.jumpTo);
 
 
-          _this2.$router.push('/');
+          _this2.$router.push(_this2.$router.go(-1));
         })["catch"](function (error) {
           //console.log(error)
           _this2.message = 'ユーザー名またはパスワードが違います。';
@@ -1000,7 +1015,6 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 //
 //
 //
-//
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -1064,6 +1078,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       _this.isLoggedIn = false;
 
       _this.$store.commit("message", 'ログインしてください。');
+
+      _this.$store.commit("jumpTo", _this.$route.path);
 
       _this.$router.push("/login"); //ログイン画面にジャンプ
 
@@ -1320,8 +1336,6 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
-//
-//
 //
 //
 //
@@ -8055,9 +8069,9 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [
-    _vm.isLoggedIn
-      ? _c("div", [
+  return _vm.isLoggedIn
+    ? _c("div", [
+        _c("div", [
           _c("p", [_vm._v(_vm._s(_vm.user.name))]),
           _vm._v(" "),
           _c("p", [_vm._v(_vm._s(_vm.user.email))]),
@@ -8068,8 +8082,8 @@ var render = function() {
             [_vm._v("ログアウト")]
           )
         ])
-      : _c("div", [_c("p", [_vm._v(_vm._s(_vm.$store.state.message))])])
-  ])
+      ])
+    : _vm._e()
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -8126,98 +8140,100 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    [
-      _c("h1", [_vm._v(_vm._s(_vm.title))]),
-      _vm._v(" "),
-      _c(
-        "b-form",
+  return !_vm.isLoggedIn
+    ? _c(
+        "div",
         [
+          _c("h1", [_vm._v(_vm._s(_vm.title))]),
+          _vm._v(" "),
           _c(
-            "b-form-group",
-            {
-              attrs: {
-                id: "input-group-1",
-                label: "メールアドレス",
-                description: ""
-              }
-            },
+            "b-form",
             [
-              _c("code", [_vm._v(_vm._s(_vm.errorMessage.email))]),
-              _vm._v(" "),
-              _c("b-form-input", {
-                attrs: {
-                  id: "input-1",
-                  type: "email",
-                  placeholder: "Enter email",
-                  required: ""
+              _c(
+                "b-form-group",
+                {
+                  attrs: {
+                    id: "input-group-1",
+                    label: "メールアドレス",
+                    description: ""
+                  }
                 },
-                on: { change: _vm.checkEmail, blur: _vm.checkEmail },
-                model: {
-                  value: _vm.form.email,
-                  callback: function($$v) {
-                    _vm.$set(_vm.form, "email", $$v)
-                  },
-                  expression: "form.email"
-                }
-              })
+                [
+                  _c("code", [_vm._v(_vm._s(_vm.errorMessage.email))]),
+                  _vm._v(" "),
+                  _c("b-form-input", {
+                    attrs: {
+                      id: "input-1",
+                      type: "email",
+                      placeholder: "Enter email",
+                      required: ""
+                    },
+                    on: { change: _vm.checkEmail, blur: _vm.checkEmail },
+                    model: {
+                      value: _vm.form.email,
+                      callback: function($$v) {
+                        _vm.$set(_vm.form, "email", $$v)
+                      },
+                      expression: "form.email"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "b-form-group",
+                {
+                  attrs: {
+                    id: "input-group-2",
+                    label: "パスワード",
+                    description: ""
+                  }
+                },
+                [
+                  _c("code", [_vm._v(_vm._s(_vm.errorMessage.password))]),
+                  _vm._v(" "),
+                  _c("b-form-input", {
+                    attrs: {
+                      id: "input-2",
+                      type: "password",
+                      placeholder: "password",
+                      required: ""
+                    },
+                    on: { change: _vm.checkPassword, blur: _vm.checkPassword },
+                    model: {
+                      value: _vm.form.password,
+                      callback: function($$v) {
+                        _vm.$set(_vm.form, "password", $$v)
+                      },
+                      expression: "form.password"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _vm.message
+                ? _c("b-alert", { attrs: { show: "", variant: "danger" } }, [
+                    _vm._v(_vm._s(_vm.message))
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _c(
+                "b-button",
+                {
+                  attrs: { type: "button", variant: "primary" },
+                  on: { click: _vm.onSubmit }
+                },
+                [_vm._v("ログイン")]
+              )
             ],
             1
-          ),
-          _vm._v(" "),
-          _c(
-            "b-form-group",
-            {
-              attrs: {
-                id: "input-group-2",
-                label: "パスワード",
-                description: ""
-              }
-            },
-            [
-              _c("code", [_vm._v(_vm._s(_vm.errorMessage.password))]),
-              _vm._v(" "),
-              _c("b-form-input", {
-                attrs: {
-                  id: "input-2",
-                  type: "password",
-                  placeholder: "password",
-                  required: ""
-                },
-                on: { change: _vm.checkPassword, blur: _vm.checkPassword },
-                model: {
-                  value: _vm.form.password,
-                  callback: function($$v) {
-                    _vm.$set(_vm.form, "password", $$v)
-                  },
-                  expression: "form.password"
-                }
-              })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _vm.message
-            ? _c("b-alert", { attrs: { show: "", variant: "danger" } }, [
-                _vm._v(_vm._s(_vm.message))
-              ])
-            : _vm._e(),
-          _vm._v(" "),
-          _c(
-            "b-button",
-            {
-              attrs: { type: "button", variant: "primary" },
-              on: { click: _vm.onSubmit }
-            },
-            [_vm._v("ログイン")]
           )
         ],
         1
       )
-    ],
-    1
-  )
+    : _vm._e()
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -8579,260 +8595,265 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [
-    _c("h1", [_vm._v(_vm._s(_vm.title))]),
-    _vm._v(" "),
-    _c("div", { attrs: { id: "form" } }, [
-      _c("div", { staticClass: "form" }, [
-        _c("div", {}, [
+  return _vm.isLoggedIn
+    ? _c("div", [
+        _c("h1", [_vm._v(_vm._s(_vm.title))]),
+        _vm._v(" "),
+        _c("div", { attrs: { id: "form" } }, [
+          _c("div", { staticClass: "form" }, [
+            _c("div", {}, [
+              _c("div", { staticClass: "form-group" }, [
+                _c("label", { attrs: { for: "" } }, [_vm._v("作品名")]),
+                _vm._v(" "),
+                _c("code", [_vm._v(_vm._s(_vm.errorMessage.name))]),
+                _vm._v(" "),
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.name,
+                      expression: "name"
+                    }
+                  ],
+                  staticClass: "form-control",
+                  attrs: { type: "txt" },
+                  domProps: { value: _vm.name },
+                  on: {
+                    change: _vm.checkName,
+                    blur: _vm.checkName,
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.name = $event.target.value
+                    }
+                  }
+                }),
+                _vm._v(" "),
+                _c("p", [_vm._v(_vm._s(_vm.name))])
+              ])
+            ])
+          ]),
+          _vm._v(" "),
+          _c("code", [_vm._v(_vm._s(_vm.errorMessage.file))]),
+          _vm._v(" "),
+          _c(
+            "div",
+            {
+              directives: [
+                {
+                  name: "show",
+                  rawName: "v-show",
+                  value: _vm.previewArea == false,
+                  expression: "previewArea==false"
+                }
+              ],
+              staticClass: "drop_area",
+              class: { enter: _vm.isEnter },
+              on: {
+                dragenter: _vm.dragEnter,
+                dragleave: _vm.dragLeave,
+                dragover: function($event) {
+                  $event.preventDefault()
+                },
+                drop: function($event) {
+                  $event.preventDefault()
+                  return _vm.dropFile.apply(null, arguments)
+                }
+              }
+            },
+            [
+              _c("div", [_vm._v("販売する作品をドラッグ＆ドロップ")]),
+              _vm._v(" "),
+              _c("div", [_vm._v("png,jpg,mp4,mov,wav,mp3")]),
+              _vm._v(" "),
+              _c("label", [
+                _c("span", { staticClass: "btn btn-primary" }, [
+                  _vm._v("\n                    選択\n                    "),
+                  _c("input", {
+                    ref: "file",
+                    staticClass: "form-control-file ",
+                    staticStyle: { display: "none" },
+                    attrs: {
+                      type: "file",
+                      accept: ".jpg,.jpeg,.png,.gif,.mp3,.wav,.m4a,.mp4,.mov"
+                    },
+                    on: { change: _vm.fileSelected }
+                  })
+                ])
+              ])
+            ]
+          ),
+          _vm._v(" "),
           _c("div", { staticClass: "form-group" }, [
-            _c("label", { attrs: { for: "" } }, [_vm._v("作品名")]),
+            _c(
+              "div",
+              {
+                directives: [
+                  {
+                    name: "show",
+                    rawName: "v-show",
+                    value: _vm.previewArea,
+                    expression: "previewArea"
+                  }
+                ],
+                staticClass: "preview"
+              },
+              [
+                _c(
+                  "div",
+                  { staticClass: "delete-mark", on: { click: _vm.deleteFile } },
+                  [_vm._v("×")]
+                ),
+                _vm._v(" "),
+                _vm.genre == "image"
+                  ? _c("img", { attrs: { src: _vm.blobUrl } })
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.genre == "video"
+                  ? _c("video", {
+                      attrs: {
+                        controls: "",
+                        id: "video",
+                        loop: "",
+                        autoplay: "",
+                        muted: "",
+                        src: _vm.blobUrl
+                      },
+                      domProps: { muted: true },
+                      on: { loadedmetadata: _vm.videoInfo }
+                    })
+                  : _vm._e(),
+                _vm._v(" "),
+                _vm.genre == "audio"
+                  ? _c("audio", {
+                      attrs: { id: "audio", controls: "", src: _vm.blobUrl },
+                      on: { loadedmetadata: _vm.audioInfo }
+                    })
+                  : _vm._e()
+              ]
+            ),
+            _vm._v("\n            " + _vm._s(_vm.fileName) + "\n        ")
+          ]),
+          _vm._v(" "),
+          _c(
+            "div",
+            { staticClass: "form-group", attrs: { id: "genreSelectForm" } },
+            [
+              _c("label", { attrs: { for: "" } }, [_vm._v("ジャンル")]),
+              _vm._v(" "),
+              _c("input", {
+                attrs: {
+                  type: "txt",
+                  placeholder: "自動選択されます",
+                  readonly: ""
+                },
+                domProps: { value: _vm.genreString }
+              })
+            ]
+          ),
+          _vm._v(" "),
+          _c("div", { staticClass: "form-group" }, [
+            _c("label", { attrs: { for: "" } }, [_vm._v("販売価格")]),
             _vm._v(" "),
-            _c("code", [_vm._v(_vm._s(_vm.errorMessage.name))]),
+            _c(
+              "select",
+              {
+                directives: [
+                  {
+                    name: "model",
+                    rawName: "v-model",
+                    value: _vm.feeSelected,
+                    expression: "feeSelected"
+                  }
+                ],
+                on: {
+                  change: function($event) {
+                    var $$selectedVal = Array.prototype.filter
+                      .call($event.target.options, function(o) {
+                        return o.selected
+                      })
+                      .map(function(o) {
+                        var val = "_value" in o ? o._value : o.value
+                        return val
+                      })
+                    _vm.feeSelected = $event.target.multiple
+                      ? $$selectedVal
+                      : $$selectedVal[0]
+                  }
+                }
+              },
+              _vm._l(_vm.feeOptions, function(feeOption) {
+                return _c(
+                  "option",
+                  {
+                    key: feeOption.value,
+                    domProps: { value: feeOption.value }
+                  },
+                  [
+                    _vm._v(
+                      "\n                    " +
+                        _vm._s(feeOption.text) +
+                        "\n                "
+                    )
+                  ]
+                )
+              }),
+              0
+            ),
             _vm._v(" "),
-            _c("input", {
+            _c("span", [_vm._v("Selected: " + _vm._s(_vm.feeSelected))])
+          ]),
+          _vm._v(" "),
+          _c("div", { staticClass: "form-group" }, [
+            _c("label", { attrs: { for: "" } }, [_vm._v("商品説明")]),
+            _vm._v(" "),
+            _c("code", [_vm._v(_vm._s(_vm.errorMessage.detail))]),
+            _vm._v(" "),
+            _c("textarea", {
               directives: [
                 {
                   name: "model",
                   rawName: "v-model",
-                  value: _vm.name,
-                  expression: "name"
+                  value: _vm.detail,
+                  expression: "detail"
                 }
               ],
               staticClass: "form-control",
-              attrs: { type: "txt" },
-              domProps: { value: _vm.name },
+              attrs: { id: "", rows: "5" },
+              domProps: { value: _vm.detail },
               on: {
-                change: _vm.checkName,
-                blur: _vm.checkName,
+                change: _vm.checkDetail,
+                blur: _vm.checkDetail,
                 input: function($event) {
                   if ($event.target.composing) {
                     return
                   }
-                  _vm.name = $event.target.value
+                  _vm.detail = $event.target.value
                 }
               }
             }),
             _vm._v(" "),
-            _c("p", [_vm._v(_vm._s(_vm.name))])
-          ])
-        ])
-      ]),
-      _vm._v(" "),
-      _c("code", [_vm._v(_vm._s(_vm.errorMessage.file))]),
-      _vm._v(" "),
-      _c(
-        "div",
-        {
-          directives: [
-            {
-              name: "show",
-              rawName: "v-show",
-              value: _vm.previewArea == false,
-              expression: "previewArea==false"
-            }
-          ],
-          staticClass: "drop_area",
-          class: { enter: _vm.isEnter },
-          on: {
-            dragenter: _vm.dragEnter,
-            dragleave: _vm.dragLeave,
-            dragover: function($event) {
-              $event.preventDefault()
-            },
-            drop: function($event) {
-              $event.preventDefault()
-              return _vm.dropFile.apply(null, arguments)
-            }
-          }
-        },
-        [
-          _c("div", [_vm._v("販売する作品をドラッグ＆ドロップ")]),
-          _vm._v(" "),
-          _c("div", [_vm._v("png,jpg,mp4,mov,wav,mp3")]),
-          _vm._v(" "),
-          _c("label", [
-            _c("span", { staticClass: "btn btn-primary" }, [
-              _vm._v("\n                    選択\n                    "),
-              _c("input", {
-                ref: "file",
-                staticClass: "form-control-file ",
-                staticStyle: { display: "none" },
-                attrs: {
-                  type: "file",
-                  accept: ".jpg,.jpeg,.png,.gif,.mp3,.wav,.m4a,.mp4,.mov"
-                },
-                on: { change: _vm.fileSelected }
-              })
+            _c("p", { staticStyle: { "white-space": "pre-line" } }, [
+              _vm._v(_vm._s(_vm.detail))
             ])
-          ])
-        ]
-      ),
-      _vm._v(" "),
-      _c("div", { staticClass: "form-group" }, [
-        _c(
-          "div",
-          {
-            directives: [
-              {
-                name: "show",
-                rawName: "v-show",
-                value: _vm.previewArea,
-                expression: "previewArea"
-              }
-            ],
-            staticClass: "preview"
-          },
-          [
-            _c(
-              "div",
-              { staticClass: "delete-mark", on: { click: _vm.deleteFile } },
-              [_vm._v("×")]
-            ),
-            _vm._v(" "),
-            _vm.genre == "image"
-              ? _c("img", { attrs: { src: _vm.blobUrl } })
-              : _vm._e(),
-            _vm._v(" "),
-            _vm.genre == "video"
-              ? _c("video", {
-                  attrs: {
-                    controls: "",
-                    id: "video",
-                    loop: "",
-                    autoplay: "",
-                    muted: "",
-                    src: _vm.blobUrl
-                  },
-                  domProps: { muted: true },
-                  on: { loadedmetadata: _vm.videoInfo }
-                })
-              : _vm._e(),
-            _vm._v(" "),
-            _vm.genre == "audio"
-              ? _c("audio", {
-                  attrs: { id: "audio", controls: "", src: _vm.blobUrl },
-                  on: { loadedmetadata: _vm.audioInfo }
-                })
-              : _vm._e()
-          ]
-        ),
-        _vm._v("\n            " + _vm._s(_vm.fileName) + "\n        ")
-      ]),
-      _vm._v(" "),
-      _c(
-        "div",
-        { staticClass: "form-group", attrs: { id: "genreSelectForm" } },
-        [
-          _c("label", { attrs: { for: "" } }, [_vm._v("ジャンル")]),
+          ]),
           _vm._v(" "),
-          _c("input", {
-            attrs: {
-              type: "txt",
-              placeholder: "自動選択されます",
-              readonly: ""
-            },
-            domProps: { value: _vm.genreString }
-          })
-        ]
-      ),
-      _vm._v(" "),
-      _c("div", { staticClass: "form-group" }, [
-        _c("label", { attrs: { for: "" } }, [_vm._v("販売価格")]),
-        _vm._v(" "),
-        _c(
-          "select",
-          {
-            directives: [
+          _c("div", { staticClass: "form-submit" }, [
+            _c(
+              "button",
               {
-                name: "model",
-                rawName: "v-model",
-                value: _vm.feeSelected,
-                expression: "feeSelected"
-              }
-            ],
-            on: {
-              change: function($event) {
-                var $$selectedVal = Array.prototype.filter
-                  .call($event.target.options, function(o) {
-                    return o.selected
-                  })
-                  .map(function(o) {
-                    var val = "_value" in o ? o._value : o.value
-                    return val
-                  })
-                _vm.feeSelected = $event.target.multiple
-                  ? $$selectedVal
-                  : $$selectedVal[0]
-              }
-            }
-          },
-          _vm._l(_vm.feeOptions, function(feeOption) {
-            return _c(
-              "option",
-              { key: feeOption.value, domProps: { value: feeOption.value } },
-              [
-                _vm._v(
-                  "\n                    " +
-                    _vm._s(feeOption.text) +
-                    "\n                "
-                )
-              ]
+                staticClass: "btn btn-primary",
+                attrs: { type: "button" },
+                on: { click: _vm.stockCreate }
+              },
+              [_vm._v("投稿する")]
             )
-          }),
-          0
-        ),
-        _vm._v(" "),
-        _c("span", [_vm._v("Selected: " + _vm._s(_vm.feeSelected))])
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "form-group" }, [
-        _c("label", { attrs: { for: "" } }, [_vm._v("商品説明")]),
-        _vm._v(" "),
-        _c("code", [_vm._v(_vm._s(_vm.errorMessage.detail))]),
-        _vm._v(" "),
-        _c("textarea", {
-          directives: [
-            {
-              name: "model",
-              rawName: "v-model",
-              value: _vm.detail,
-              expression: "detail"
-            }
-          ],
-          staticClass: "form-control",
-          attrs: { id: "", rows: "5" },
-          domProps: { value: _vm.detail },
-          on: {
-            change: _vm.checkDetail,
-            blur: _vm.checkDetail,
-            input: function($event) {
-              if ($event.target.composing) {
-                return
-              }
-              _vm.detail = $event.target.value
-            }
-          }
-        }),
-        _vm._v(" "),
-        _c("p", { staticStyle: { "white-space": "pre-line" } }, [
-          _vm._v(_vm._s(_vm.detail))
+          ])
         ])
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "form-submit" }, [
-        _c(
-          "button",
-          {
-            staticClass: "btn btn-primary",
-            attrs: { type: "button" },
-            on: { click: _vm.stockCreate }
-          },
-          [_vm._v("投稿する")]
-        )
       ])
-    ])
-  ])
+    : _vm._e()
 }
 var staticRenderFns = []
 render._withStripped = true

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="isLoggedIn">
         <h1>{{title}}</h1>
         <div id="form">
             <div class="form">
@@ -65,7 +65,6 @@
                 <button type="button" class="btn btn-primary" @click="stockCreate">投稿する</button>
             </div>
         </div>
-
     </div>
 </template>
 <style scoped>
@@ -172,8 +171,7 @@
             }
         },
         mounted() {
-            axios
-                .get("/api/loginCheck")
+            axios.get("/api/loginCheck")
                 .then(response => {
                     this.isLoggedIn = true
                     console.log(response)
@@ -182,6 +180,7 @@
                     console.log(error)
                     this.isLoggedIn = false
                     this.$store.commit("message",'ログインしてください。')
+                    this.$store.commit("jumpTo", this.$route.path)
                     this.$router.push("/login") //ログイン画面にジャンプ
                 })
         },

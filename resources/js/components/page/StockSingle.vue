@@ -1,8 +1,6 @@
 <template>
     <div v-if="stock">
-
         <h1>ID.{{ id }}詳細個別ページです</h1>
-
         <SingleImage v-if="stock.genre=='image'" v-bind:stock="stock" />
         <SingleVideo v-if="stock.genre=='video'" v-bind:stock="stock" />
         <SingleAudio v-if="stock.genre=='audio'" v-bind:stock="stock" />
