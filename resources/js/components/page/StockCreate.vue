@@ -353,13 +353,11 @@
                     this.previewArea = false
                 }
             },
-
             stockCreate() { //投稿とボタンが押されたときに発動するメソッド
                 //投稿直前にも入力に不備がないかチェック
-                var nameResult = this.checkName()
-                var detailResult = this.checkDetail()
-                var fileResult = this.checkFile()
-
+                let nameResult = this.checkName()
+                let detailResult = this.checkDetail()
+                let fileResult = this.checkFile()
 
                 if (nameResult && detailResult && fileResult) { //check項目が全てtrueなら
                     let postData = new FormData()
@@ -369,13 +367,12 @@
                     postData.append('form[genre]', this.genre)
                     postData.append('form[fee]', this.feeSelected)
                     postData.append('form[detail]', this.detail)
+                    postData.append('userId', localStorage.id)
 
                     //バリデーション関数のreturnがどちらもtrueなら下記実行
                     axios.post('/api/stocks/create', postData) //api.phpのルートを指定。第2引数には渡したい変数を入れる（今回は配列postData=入力された内容）
                         .then(response => {
-                            //ここに成功した時に行いたい処理を記載
                             alert('投稿できました');
-                            //console.log(response); //成功してたらデータが返ってくる
                             //投稿に成功したらv-modelを使って書くフォームをクリア
                             this.name = ""
                             this.fileName = ""
@@ -388,7 +385,6 @@
                             this.previewArea = false
                         })
                         .catch(function (error) {
-                            // handle error(axiosの処理にエラーが発生した場合に処理させたいことを記述)
                             alert('あかんかったわ、コンソール見て');
                             console.log(error);
                         })

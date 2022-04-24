@@ -17,8 +17,8 @@ class LoginController extends Controller
 {
     public function login(User $user, Request $request)
     {
-        Log::info('ログを出せた');
-        Log::info(json_decode($request));
+        // Log::info('ログを出せた');
+        // Log::info(json_decode($request));
 
         $credentials = $request->validate([
             'email' => 'required|email',
@@ -29,7 +29,6 @@ class LoginController extends Controller
             $user = User::whereEmail($request->email)->first();
             $user->tokens()->delete();
             $token = $user->createToken("login:user{$user->id}")->plainTextToken;
-
             return response()->json(['token' => $token , 'user'=>$user], Response::HTTP_OK);
         }
 

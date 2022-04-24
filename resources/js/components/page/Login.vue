@@ -1,5 +1,6 @@
 <template>
-    <div v-if="!(isLoggedIn)">
+    <div >
+        <!-- <div v-if=!"isLoggedIn">  -->
         <h1>{{title}}</h1>
         <b-form>
             <b-form-group id="input-group-1" label="メールアドレス" description="">
@@ -53,12 +54,20 @@
             this.message = this.$store.state.message
             //this.jumpTo = this.$store.state.jumpTo //ログインを求められて飛ばされた人が本来アクセスしたかったパス
 
+            //ローカルストレージに値があればvuexに戻そうとしたがうまくいかない
+            // let userInfo = {
+            //     name: localStorage.userName,
+            //     email: localStorage.userEmail,
+            //     token: localStorage.token,
+            // }
+            // this.$store.commit("checkLogin", userInfo)
+
             this.isLoggedIn = localStorage.token //トークンがあればログインしている扱いにする
 
             axios.get("api/loginCheck")
                 .then(response => {
                     //this.$router.push('/');
-                    this.$router.push(this.$router.go(-1))                
+                    this.$router.push(this.$router.go(-1))
                 })
         },
 
@@ -86,17 +95,18 @@
                 if (emailResult && passwordResult) { //check項目が全てtrueなら  
                     axios.post('/api/login', this.form)
                         .then(response => {
-                            const userInfo = {
+                            let userInfo = {
+                                id: response.data.user.id,
                                 name: response.data.user.name,
                                 email: response.data.user.email,
                                 token: response.data.token,
                             }
                             this.$store.commit("checkLogin", userInfo)
                             this.$store.commit("resetState") //vuexに保存されているメッセージをリセット
-                            
+
                             //わざわざ元のページを把握する必要がない説
                             //this.$router.push(this.jumpTo);
-                            this.$router.push(this.$router.go(-1))   
+                            this.$router.push(this.$router.go(-1))
                         })
                         .catch((error => {
                             //console.log(error)

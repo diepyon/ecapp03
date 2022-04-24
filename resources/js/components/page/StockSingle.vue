@@ -13,6 +13,8 @@
             <p>投稿日:{{date}}</p>
         </span>
 
+        <div>created by {{authorName}}</div>
+
         <h2>↓後でキレイにする</h2>
 
         <div class="" style="width:100%; display: flex;justify-content: center;align-items: center;">
@@ -64,8 +66,9 @@
                 },
                 file: "/storage/stock_sample/c9fea342.mp3",
                 filename: null,
-
                 saisei: false,
+                author_id: null,
+                authorName:null,
             }
         },
         methods: {
@@ -103,7 +106,7 @@
             // },
 
             play() {
-                this.$refs.surf.waveSurfer.play()//普通に再生
+                this.$refs.surf.waveSurfer.play() //普通に再生
 
             },
 
@@ -111,15 +114,19 @@
                 this.$refs.surf.waveSurfer.stop()
                 this.playing = this.$refs.surf.waveSurfer.isPlaying()
             }
-
         },
         mounted() {
-            //console.log(this.id)
-            //api.phpに記載された/stocksのルーティングのアクションを発動
             axios.get('/api/stocks/' + this.id)
                 .then(response => {
                     this.stock = response.data.data
                     this.date = fns.format(new Date(this.stock.created_at), 'yyyy/MM/dd')
+
+                    //入れ子にしてもいいのか、めんどくさいけどasyncawait使うべき？
+                    axios.get('/api/hoge/' + this.stock.author_id)
+                        .then(response => {
+                            this.authorName= response.data.name //投稿者名
+                        })
+                        console.log(this.stock.author_id) //投稿者IDはUsercontroller経由しなくても取れる
                 })
         },
         watch: {

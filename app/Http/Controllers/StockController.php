@@ -6,7 +6,9 @@ use Illuminate\Http\Request;
 use App\Http\Resources\StockResource;
 use Illuminate\Support\Facades\Storage;//ファイルアップロード・削除関連
 use Image;
-use App\Models\User;
+//use App\Models\User;
+
+use DB;
 
 class StockController extends Controller
 {
@@ -34,7 +36,7 @@ class StockController extends Controller
         $stock->genre = $request->form['genre'];//ジャンルを登録（html側では改ざん不可）
         $stock->fee =  $request->form['fee'];
         $stock->detail =  $request->form['detail'];
-        $stock->author_id = 1;//認証システムがまだできていないのでいったん仮で1としている
+        $stock->author_id = $request->userId;//投稿者のID
         $stock->path =$filename.'.'.$extention;//ファイル名.拡張子をデータベースに登録
         $stock->filename =$filename;//ファイル名（拡張子なし）をデータベースに登録
         $stock->save();
