@@ -19,6 +19,11 @@ use App\Http\Controllers\Api\Auth\LoginController;//追記
 */
 
 Route::get('/stocks', [StockController::class, 'show']);//StockControllerのshowメソッドを発動
+
+
+Route::get('/stocks',  [StockController::class, 'index']);//20件記事を表示する
+
+
 Route::get('/image', [StockController::class, 'showImage']);//StockControllerのshowImageメソッド発動
 //Route::get('/duration', [StockController::class, 'duration']);//選択されたビデオファイルの時間をlaravel-ffmpegで取得したい
 Route::get('/stocks/{stock_id}', [StockController::class, 'single']);//urlのstock_idの部分に入力された数字をsingleメソッドに渡す
@@ -40,3 +45,5 @@ Route::middleware('auth:sanctum')->get('/loginCheck',function (Request $request)
 });
 
 Route::post('/logout', [LoginController::class, 'logout']);
+
+Route::post('/account/update', [UserController::class, 'update']);

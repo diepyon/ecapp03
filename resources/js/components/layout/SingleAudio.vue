@@ -21,7 +21,8 @@
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item">
                             <font-awesome-icon :icon="['far', 'clock']" />{{stock.info.time}}</li>
-                        <li class="list-group-item"><font-awesome-icon :icon="['fas', 'file']" />{{stock.fileType}}</li>
+                        <li class="list-group-item">
+                            <font-awesome-icon :icon="['fas', 'file']" />{{stock.fileType}}</li>
                         <li class="list-group-item"> {{stock.size}}</li>
                         <li class="list-group-item"> {{stock.info.bitrate}}bit</li>
                         <li class="list-group-item"> {{stock.info.sampringlate}}Hz</li>
@@ -56,27 +57,45 @@
                     height: 90
                 },
                 file: "/storage/stock_sample/" + this.stock.filename + ".mp3",
-                hoge: null
             }
         },
         mounted() {
-             console.log(this.stock.info)
-            //this.getAudioDuration()
+            console.log(this.stock.info)            
+
         },
         methods: {
-            play() {
-                this.$refs.surf.waveSurfer.play()
+            play: async function () {
+                this.$refs.surf.waveSurfer.play() //普通に再生
                 this.playing = this.$refs.surf.waveSurfer.isPlaying()
-                this.$refs.surf.waveSurfer.on('finish', function () {
-                    console.log('終わったから先頭に戻ってほしい')
-                    //this.$refs.surf.waveSurfer.stop()とかを走らせたい
-                    stop()
-                })
+
+                let result = await this.finish()
+                console.log('playメソッドの最後')
+
+                //作戦 
+                //オーディオの秒数を定義
+                // this.currentTime = this.$refs.surf.waveSurfer.getCurrentTime()
+                // this.duration = this.$refs.surf.waveSurfer.getDuration()
+
+
+                //長さと再生位置が一致したら最初に戻る
+                //もしくは再生ボタンを押してからその秒数がたったらストップする
+                //途中で停止された場合はその処理をstop関数側でリセット
+
+            },
+            finish: async function (playing) {
+                console.log('finishメソッドに渡った時点では' + playing)
+                var hage = this.$refs.surf.waveSurfer.on('finish', await
+                    function () {
+                        console.log('owata')
+                    });
+                return 'finish'
             },
             stop() {
                 this.$refs.surf.waveSurfer.stop()
                 this.playing = this.$refs.surf.waveSurfer.isPlaying()
-            },
+                return 'owata'
+            }
+
             //バックエンドでやったほうがいい
             // getAudioDuration() {
             //     var audio = new Audio(); // audioの作成
@@ -87,6 +106,17 @@
             //         console.log(audio.duration); // 総時間の取得
             //     });
             // }
+        },
+        watch: {
+            'playing'(newVal, oldVal) {
+                // 残念ながら最後まで再生し終わった時には変数は変化してくれない
+                console.log(oldVal, '->', newVal)
+                if (newVal === true) {
+                    console.log('再生中だぜ')
+                } else if (newVal === false) {
+                    console.log('再生が終わったぜ')
+                }
+            },
         },
         computed: {
             player() {

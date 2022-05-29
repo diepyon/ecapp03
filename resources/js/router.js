@@ -41,6 +41,11 @@ const router = new Router({
             component: StockArchive
         },
         {
+            path: '/stock?page=:pageid',
+            name: 'stockarchive',
+            component: StockArchive
+        },
+        {
             path: '/image',
             name: 'stockarchiveimage',
             component: StockArchiveImage

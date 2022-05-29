@@ -12,4 +12,8 @@ class UserController extends Controller
         $author =  User::where('id', $author_id)->first(); //作品の投稿者情報     
         return $author;//全部返してもいい？メールアドレス見られちゃう？
     }
+    public function update(User $user,Request $request)
+    {   
+        return 'aaa';
+    }    
 }

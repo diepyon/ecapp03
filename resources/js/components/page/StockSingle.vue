@@ -17,7 +17,7 @@
 
         <h2>↓後でキレイにする</h2>
 
-        <div class="" style="width:100%; display: flex;justify-content: center;align-items: center;">
+        <!-- <div class="" style="width:100%; display: flex;justify-content: center;align-items: center;">
             <div style="magin-top:0;">
                 <b-button v-if="playing" style="margin-top:0;" @click="stop">
                     <font-awesome-icon :icon="['fa', 'stop']" />
@@ -29,7 +29,7 @@
             <div style="width:100%; margin:0 0 0 .5em ;">
                 <wavesurfer :src="file" :options="options" id="wavesurfer" ref="surf"></wavesurfer>
             </div>
-        </div>
+        </div> -->
     </div>
 </template>
 
@@ -61,6 +61,7 @@
                 stock: null,
                 date: null,
                 playing: false,
+                resetFlag: true,
                 options: {
                     height: 90
                 },
@@ -68,11 +69,10 @@
                 filename: null,
                 saisei: false,
                 author_id: null,
-                authorName:null,
+                authorName: null,
             }
         },
         methods: {
-
             // play() {
             //     this.$refs.surf.waveSurfer.play()
             //     this.playing = this.$refs.surf.waveSurfer.isPlaying()
@@ -87,32 +87,41 @@
             //     //asynsc awaitを使ってfinishになったタイミングで変数を取得する
             //     //それをウォッチで監視して、任意の処理を走らせる
             // },
-            finish: async function () {
-                await this.$refs.surf.waveSurfer.on('finish', function () {
-                    return '終わった'
-                })
+            // finish() {
+            //     console.log('終わった')
+            //     this.resetFlag = false
+            //     this.$nextTick(() => (this.resetFlag = true))
+            // },
+            // play: async function () {
+            //     this.$refs.surf.waveSurfer.play() //普通に再生
+            //     this.playing = this.$refs.surf.waveSurfer.isPlaying()
 
-            },
-            // play:async function() {
-            //     this.$refs.surf.waveSurfer.play()//普通に再生
-            //     this.saisei = true
-            //     this.saisei = await this.finish()
-
-            //     console.log(this.saisei)
-
-            //     if(this.saisei=='終わった'){
-            //         console.log('ここだ！！')
-            //     }
+            //     let result = await this.finish()
+            //     console.log('playメソッドの最後')
+            //     //window.addEventListener(this.$refs.surf.waveSurfer.on('oneded'),this.finish(console.log('aaa')))
             // },
 
+            // finish: async function(){
+            //     this.$refs.surf.waveSurfer.on('finish', function () {
+            //         console.log('finishメソッド発火')
+            //         });
+            // },
+
+            hoge() {
+                console.log('aaaa')
+                //console.log('aaa')
+                //this.resetFlag = false
+                //this.$nextTick(() => (this.resetFlag = true))
+            },
             play() {
                 this.$refs.surf.waveSurfer.play() //普通に再生
-
+                this.playing = this.$refs.surf.waveSurfer.isPlaying()
             },
 
             stop() {
+                console.log('stop')
                 this.$refs.surf.waveSurfer.stop()
-                this.playing = this.$refs.surf.waveSurfer.isPlaying()
+                this.playing = this.$refs.surf.waveSurfer.isPlaying()    
             }
         },
         mounted() {
@@ -124,10 +133,12 @@
                     //入れ子にしてもいいのか、めんどくさいけどasyncawait使うべき？
                     axios.get('/api/hoge/' + this.stock.author_id)
                         .then(response => {
-                            this.authorName= response.data.name //投稿者名
+                            this.authorName = response.data.name //投稿者名
                         })
-                        console.log(this.stock.author_id) //投稿者IDはUsercontroller経由しなくても取れる
+                    //console.log(this.stock.author_id) //投稿者IDはUsercontroller経由しなくても取れる
                 })
+
+
         },
         watch: {
             'playing'(newVal, oldVal) {
@@ -141,7 +152,7 @@
             },
             'saisei'(newVal, oldVal) {
                 console.log('変化あり')
-                console.log(newVal, '->', oldVal)
+                console.log(oldVal, '->', newVal)
             },
         },
         computed: {
@@ -149,7 +160,7 @@
                 return this.$refs.surf.waveSurfer
             }
         }
-    };
+    }
 
 </script>
 <style scoped>

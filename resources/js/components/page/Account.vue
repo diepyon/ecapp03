@@ -24,44 +24,44 @@
                                 <div class="form">
                                     <div class="parent" style="width:150px;">
                                         <img class="userIcon" :src="blobUrl" />
-                                    <label style="display:initial;">
-                                        <font-awesome-icon :class="activeStatus" @mouseover="beActive"
-                                            @mouseleave="beInActive" class="child" :icon="['fa', 'camera']" />
-                                        <input type="file" class="form-control-file " ref="file"
-                                            @change="fileSelected" accept=".jpg,.jpeg,.png,.gif"
-                                            style="display:none">
-                                    </label>
+                                        <label style="display:initial;">
+                                            <font-awesome-icon :class="activeStatus" @mouseover="beActive"
+                                                @mouseleave="beInActive" class="child" :icon="['fa', 'camera']" />
+                                            <input type="file" class="form-control-file " ref="file"
+                                                @change="fileSelected" accept=".jpg,.jpeg,.png,.gif"
+                                                style="display:none">
+                                        </label>
                                     </div>
 
                                     <div class="form-group">
                                         <label for="">名前</label>
                                         <!-- <code>{{errorMessage.name}}</code> -->
-                                        <input v-model="user.name" type="txt" class="form-control">
+                                        <input v-model="userNewValue.name" type="txt" class="form-control">
 
                                     </div>
                                     <div class="form-group">
                                         <label for="">メールアドレス</label>
                                         <!-- <code>{{errorMessage.name}}</code> -->
-                                        <input v-model="user.email" type="email" class="form-control">
+                                        <input v-model="userNewValue.email" type="email" class="form-control">
                                     </div>
                                     <div class="form-group">
                                         <label for="">パスワード</label>
                                         <!-- <code>{{errorMessage.name}}</code> -->
-                                        <input v-model="user.password" type="password" placeholder="変更しないときは未記入"
+                                        <input v-model="userNewValue.password" type="password" placeholder="変更しないときは未記入"
                                             class="form-control">
                                     </div>
                                     <div class="form-group">
                                         <label for="">パスワード確認</label>
                                         <!-- <code>{{errorMessage.name}}</code> -->
-                                        <input v-model="user.password" type="password" placeholder="変更しないときは未記入"
-                                            class="form-control">
+                                        <input v-model="userNewValue.passwordConfirm" type="password"
+                                            placeholder="変更しないときは未記入" class="form-control">
                                     </div>
                                 </div>
 
                             </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-primary">保存</button>
+                            <button @click="update" type="button" class="btn btn-primary">保存</button>
                         </div>
                     </div>
                 </div>
@@ -88,12 +88,19 @@
                     name: null,
                     email: null,
                     token: null,
+                    password: null,
+                },
+                userNewValue: {
+                    name: null,
+                    email: null,
+                    password: null,
+                    passwordConfirm: null,
                 },
                 isLoggedIn: false,
 
                 activeStatus: 'inactive',
-                fileInfo:null,
-                blobUrl:'/storage/user_icon/default_icon.jpg',
+                fileInfo: null,
+                blobUrl: '/storage/user_icon/default_icon.jpg',
             }
         },
 
@@ -103,7 +110,12 @@
             this.user.email = localStorage.userEmail
             this.user.token = localStorage.token
 
-            axios.get("/api/loginCheck")
+            this.userNewValue.name = this.user.name
+            this.userNewValue.email = this.user.email
+            this.userNewValue.password = null,
+                this.userNewValue.passwordConfirm = null,
+
+                axios.get("/api/loginCheck")
                 .then(response => {
                     this.isLoggedIn = true
                     console.log(response)
@@ -112,7 +124,6 @@
                     console.log(error)
                     this.isLoggedIn = false
                     this.$store.commit("message", 'ログインしてください。')
-
                     this.$router.push("/login") //ログイン画面にジャンプ
                 })
         },
@@ -148,8 +159,20 @@
                 } else {
                     this.blobUrl = ""
                 }
-                console.log(this.blobUrl)   
+                console.log(this.blobUrl)
+                console.log(event.target.files[0])
             },
+            update() {
+                console.log(this.userNewValue)
+
+                axios.post("/api/account/update",this.userNewValue)
+                    .then(response => {
+                        console.log(response)
+                    })
+                    .catch(error => {
+                        console.log(error)
+                    })
+            }
         },
     }
 
@@ -187,10 +210,10 @@
         object-fit: cover;
     }
 
-    .inactive {
+    .inactive {}
 
-    }
     .active {
         opacity: 0.8;
     }
+
 </style>

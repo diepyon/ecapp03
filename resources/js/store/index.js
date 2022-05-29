@@ -39,15 +39,16 @@ const store = new Vuex.Store({
 
             //更新時にも残すようにローカルストレージに格納
             localStorage.setItem("id", state.id)
-            localStorage.setItem("token", state.token)
+            //localStorage.setItem("token", state.token)
             localStorage.setItem("userName", state.name)
             localStorage.setItem("userEmail", state.email)
+
+            console.log(localStorage.getItem("userName"))
         },
         logout(state) { //vuexの内容を削除
             state.name = null
             state.email = null
             state.token = null
-
             localStorage.clear() //追記
         },
     }

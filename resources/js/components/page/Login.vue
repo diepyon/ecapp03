@@ -1,6 +1,6 @@
 <template>
-    <div >
-        <!-- <div v-if=!"isLoggedIn">  -->
+    <!-- <div > -->
+    <div v-if="!isLoggedIn">
         <h1>{{title}}</h1>
         <b-form>
             <b-form-group id="input-group-1" label="メールアドレス" description="">
@@ -67,7 +67,14 @@
             axios.get("api/loginCheck")
                 .then(response => {
                     //this.$router.push('/');
+                    this.isLoggedIn = true
+
+                    console.log('ログイン済み')
                     this.$router.push(this.$router.go(-1))
+                })
+                .catch(error => {
+                    console.log('未ログイン')
+                    this.isLoggedIn = false
                 })
         },
 

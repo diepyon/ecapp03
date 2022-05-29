@@ -61,27 +61,27 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
-      userName: null,
-      email: "",
+      //email: "",
       isLoggedIn: false
     };
   },
   mounted: function mounted() {
     var _this = this;
 
-    this.$store.watch(function (state, getters) {
-      return getters.getUserName;
-    }, function (newValue, oldValue) {
-      console.log('username changed! %s => %s', oldValue, newValue);
+    axios.get("/api/loginCheck").then(function (response) {
       _this.isLoggedIn = true;
-      _this.userName = newValue;
+    })["catch"](function (error) {
+      _this.isLoggedIn = false;
     });
-    this.userName = localStorage.userName; //これがないとリロードしたときに名前が消える(あっても消えることが発覚)
-
-    console.log(this.userNamme);
+    var userInfo = {
+      name: localStorage.getItem("userName"),
+      email: localStorage.getItem("userEmail")
+    };
+    this.$store.commit("updateUser", userInfo);
   },
   computed: {},
   methods: {}
@@ -100,7 +100,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var wavesurfer_js_vue__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! wavesurfer.js-vue */ "./node_modules/wavesurfer.js-vue/src/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var wavesurfer_js_vue__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! wavesurfer.js-vue */ "./node_modules/wavesurfer.js-vue/src/index.js");
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+//
 //
 //
 //
@@ -149,7 +158,7 @@ __webpack_require__.r(__webpack_exports__);
   name: 'SingleAudio',
   props: ['stock'],
   components: {
-    WaveSurferVue: wavesurfer_js_vue__WEBPACK_IMPORTED_MODULE_0__.default
+    WaveSurferVue: wavesurfer_js_vue__WEBPACK_IMPORTED_MODULE_1__.default
   },
   data: function data() {
     return {
@@ -157,26 +166,87 @@ __webpack_require__.r(__webpack_exports__);
       options: {
         height: 90
       },
-      file: "/storage/stock_sample/" + this.stock.filename + ".mp3",
-      hoge: null
+      file: "/storage/stock_sample/" + this.stock.filename + ".mp3"
     };
   },
   mounted: function mounted() {
-    console.log(this.stock.info); //this.getAudioDuration()
+    console.log(this.stock.info);
   },
   methods: {
-    play: function play() {
-      this.$refs.surf.waveSurfer.play();
-      this.playing = this.$refs.surf.waveSurfer.isPlaying();
-      this.$refs.surf.waveSurfer.on('finish', function () {
-        console.log('終わったから先頭に戻ってほしい'); //this.$refs.surf.waveSurfer.stop()とかを走らせたい
+    play: function () {
+      var _play = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+        var result;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                this.$refs.surf.waveSurfer.play(); //普通に再生
 
-        stop();
-      });
-    },
+                this.playing = this.$refs.surf.waveSurfer.isPlaying();
+                _context.next = 4;
+                return this.finish();
+
+              case 4:
+                result = _context.sent;
+                console.log('playメソッドの最後'); //作戦 
+                //オーディオの秒数を定義
+                // this.currentTime = this.$refs.surf.waveSurfer.getCurrentTime()
+                // this.duration = this.$refs.surf.waveSurfer.getDuration()
+                //長さと再生位置が一致したら最初に戻る
+                //もしくは再生ボタンを押してからその秒数がたったらストップする
+                //途中で停止された場合はその処理をstop関数側でリセット
+
+              case 6:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function play() {
+        return _play.apply(this, arguments);
+      }
+
+      return play;
+    }(),
+    finish: function () {
+      var _finish = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2(playing) {
+        var hage;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                console.log('finishメソッドに渡った時点では' + playing);
+                _context2.t0 = this.$refs.surf.waveSurfer;
+                _context2.next = 4;
+                return function () {
+                  console.log('owata');
+                };
+
+              case 4:
+                _context2.t1 = _context2.sent;
+                hage = _context2.t0.on.call(_context2.t0, 'finish', _context2.t1);
+                return _context2.abrupt("return", 'finish');
+
+              case 7:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function finish(_x) {
+        return _finish.apply(this, arguments);
+      }
+
+      return finish;
+    }(),
     stop: function stop() {
       this.$refs.surf.waveSurfer.stop();
       this.playing = this.$refs.surf.waveSurfer.isPlaying();
+      return 'owata';
     } //バックエンドでやったほうがいい
     // getAudioDuration() {
     //     var audio = new Audio(); // audioの作成
@@ -187,6 +257,18 @@ __webpack_require__.r(__webpack_exports__);
     //     });
     // }
 
+  },
+  watch: {
+    'playing': function playing(newVal, oldVal) {
+      // 残念ながら最後まで再生し終わった時には変数は変化してくれない
+      console.log(oldVal, '->', newVal);
+
+      if (newVal === true) {
+        console.log('再生中だぜ');
+      } else if (newVal === false) {
+        console.log('再生が終わったぜ');
+      }
+    }
   },
   computed: {
     player: function player() {
@@ -450,7 +532,14 @@ __webpack_require__.r(__webpack_exports__);
       user: {
         name: null,
         email: null,
-        token: null
+        token: null,
+        password: null
+      },
+      userNewValue: {
+        name: null,
+        email: null,
+        password: null,
+        passwordConfirm: null
       },
       isLoggedIn: false,
       activeStatus: 'inactive',
@@ -465,7 +554,9 @@ __webpack_require__.r(__webpack_exports__);
     this.user.name = localStorage.userName;
     this.user.email = localStorage.userEmail;
     this.user.token = localStorage.token;
-    axios.get("/api/loginCheck").then(function (response) {
+    this.userNewValue.name = this.user.name;
+    this.userNewValue.email = this.user.email;
+    this.userNewValue.password = null, this.userNewValue.passwordConfirm = null, axios.get("/api/loginCheck").then(function (response) {
       _this.isLoggedIn = true;
       console.log(response);
     })["catch"](function (error) {
@@ -515,6 +606,15 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       console.log(this.blobUrl);
+      console.log(event.target.files[0]);
+    },
+    update: function update() {
+      console.log(this.userNewValue);
+      axios.post("/api/account/update", this.userNewValue).then(function (response) {
+        console.log(response);
+      })["catch"](function (error) {
+        console.log(error);
+      });
     }
   }
 });
@@ -634,7 +734,13 @@ __webpack_require__.r(__webpack_exports__);
 
     axios.get("api/loginCheck").then(function (response) {
       //this.$router.push('/');
+      _this.isLoggedIn = true;
+      console.log('ログイン済み');
+
       _this.$router.push(_this.$router.go(-1));
+    })["catch"](function (error) {
+      console.log('未ログイン');
+      _this.isLoggedIn = false;
     });
   },
   methods: {
@@ -867,8 +973,23 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _layout_Header__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../layout/Header */ "./resources/js/components/layout/Header.vue");
-/* harmony import */ var _layout_Footer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../layout/Footer */ "./resources/js/components/layout/Footer.vue");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _layout_Header__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../layout/Header */ "./resources/js/components/layout/Header.vue");
+/* harmony import */ var _layout_Footer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../layout/Footer */ "./resources/js/components/layout/Footer.vue");
+
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -895,13 +1016,16 @@ __webpack_require__.r(__webpack_exports__);
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {
-    Header: _layout_Header__WEBPACK_IMPORTED_MODULE_0__.default,
-    Footer: _layout_Footer__WEBPACK_IMPORTED_MODULE_1__.default
+    Header: _layout_Header__WEBPACK_IMPORTED_MODULE_1__.default,
+    Footer: _layout_Footer__WEBPACK_IMPORTED_MODULE_2__.default
   },
   data: function data() {
     return {
       title: 'Archive',
-      stocks: null
+      stocks: null,
+      current_page: 1,
+      lists: [],
+      length: null
     };
   },
   mounted: function mounted() {
@@ -911,6 +1035,62 @@ __webpack_require__.r(__webpack_exports__);
     axios.get('/api/stocks').then(function (response) {
       _this.stocks = response.data.data.reverse(); //console.log(this.stocks)
     });
+
+    if (this.$route.query.page) {
+      this.current_page = Number(this.$route.query.page);
+    } else {
+      this.current_page = 1;
+    }
+
+    this.showArchive();
+  },
+  methods: {
+    showArchive: function showArchive() {
+      var _this2 = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+        var result, stocks;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                _context.next = 2;
+                return axios.get("/api/stocks?page=".concat(_this2.current_page));
+
+              case 2:
+                result = _context.sent;
+                stocks = result.data;
+                _this2.stocks = stocks.data;
+                _this2.dialog = {
+                  post: null,
+                  posted: null
+                }; //総ページ数を取得
+
+                _this2.length = Math.ceil(stocks.meta.total / stocks.meta.per_page); //（apiで取得したレコードの総数÷1ページ当たりの表示件数）を繰り上げ
+
+              case 7:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }))();
+    },
+    changePage: function changePage(number) {
+      console.log(number);
+      this.current_page = number;
+      this.showArchive();
+      window.history.pushState({
+        number: number
+      }, "Page".concat(number), "".concat(window.location.origin, "/archive?page=").concat(number));
+      this.moveToTop();
+    },
+    moveToTop: function moveToTop() {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    }
   }
 });
 
@@ -1416,21 +1596,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
-/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _layout_Header__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../layout/Header */ "./resources/js/components/layout/Header.vue");
-/* harmony import */ var _layout_Footer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../layout/Footer */ "./resources/js/components/layout/Footer.vue");
-/* harmony import */ var _layout_SingleImage__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../layout/SingleImage */ "./resources/js/components/layout/SingleImage.vue");
-/* harmony import */ var _layout_SingleVideo__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../layout/SingleVideo */ "./resources/js/components/layout/SingleVideo.vue");
-/* harmony import */ var _layout_SingleAudio__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../layout/SingleAudio */ "./resources/js/components/layout/SingleAudio.vue");
-/* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/format/index.js");
-/* harmony import */ var wavesurfer_js_vue__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! wavesurfer.js-vue */ "./node_modules/wavesurfer.js-vue/src/index.js");
-
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
+/* harmony import */ var _layout_Header__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../layout/Header */ "./resources/js/components/layout/Header.vue");
+/* harmony import */ var _layout_Footer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../layout/Footer */ "./resources/js/components/layout/Footer.vue");
+/* harmony import */ var _layout_SingleImage__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../layout/SingleImage */ "./resources/js/components/layout/SingleImage.vue");
+/* harmony import */ var _layout_SingleVideo__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../layout/SingleVideo */ "./resources/js/components/layout/SingleVideo.vue");
+/* harmony import */ var _layout_SingleAudio__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../layout/SingleAudio */ "./resources/js/components/layout/SingleAudio.vue");
+/* harmony import */ var date_fns__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! date-fns */ "./node_modules/date-fns/esm/format/index.js");
+/* harmony import */ var wavesurfer_js_vue__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! wavesurfer.js-vue */ "./node_modules/wavesurfer.js-vue/src/index.js");
 //
 //
 //
@@ -1478,12 +1650,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     id: Number
   },
   components: {
-    Header: _layout_Header__WEBPACK_IMPORTED_MODULE_1__.default,
-    Footer: _layout_Footer__WEBPACK_IMPORTED_MODULE_2__.default,
-    WaveSurferVue: wavesurfer_js_vue__WEBPACK_IMPORTED_MODULE_6__.default,
-    SingleImage: _layout_SingleImage__WEBPACK_IMPORTED_MODULE_3__.default,
-    SingleVideo: _layout_SingleVideo__WEBPACK_IMPORTED_MODULE_4__.default,
-    SingleAudio: _layout_SingleAudio__WEBPACK_IMPORTED_MODULE_5__.default
+    Header: _layout_Header__WEBPACK_IMPORTED_MODULE_0__.default,
+    Footer: _layout_Footer__WEBPACK_IMPORTED_MODULE_1__.default,
+    WaveSurferVue: wavesurfer_js_vue__WEBPACK_IMPORTED_MODULE_5__.default,
+    SingleImage: _layout_SingleImage__WEBPACK_IMPORTED_MODULE_2__.default,
+    SingleVideo: _layout_SingleVideo__WEBPACK_IMPORTED_MODULE_3__.default,
+    SingleAudio: _layout_SingleAudio__WEBPACK_IMPORTED_MODULE_4__.default
   },
   //title: 'タイトルどうしよう'
   data: function data() {
@@ -1491,6 +1663,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       stock: null,
       date: null,
       playing: false,
+      resetFlag: true,
       options: {
         height: 90
       },
@@ -1515,44 +1688,35 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     //     //asynsc awaitを使ってfinishになったタイミングで変数を取得する
     //     //それをウォッチで監視して、任意の処理を走らせる
     // },
-    finish: function () {
-      var _finish = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                _context.next = 2;
-                return this.$refs.surf.waveSurfer.on('finish', function () {
-                  return '終わった';
-                });
-
-              case 2:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, this);
-      }));
-
-      function finish() {
-        return _finish.apply(this, arguments);
-      }
-
-      return finish;
-    }(),
-    // play:async function() {
-    //     this.$refs.surf.waveSurfer.play()//普通に再生
-    //     this.saisei = true
-    //     this.saisei = await this.finish()
-    //     console.log(this.saisei)
-    //     if(this.saisei=='終わった'){
-    //         console.log('ここだ！！')
-    //     }
+    // finish() {
+    //     console.log('終わった')
+    //     this.resetFlag = false
+    //     this.$nextTick(() => (this.resetFlag = true))
     // },
+    // play: async function () {
+    //     this.$refs.surf.waveSurfer.play() //普通に再生
+    //     this.playing = this.$refs.surf.waveSurfer.isPlaying()
+    //     let result = await this.finish()
+    //     console.log('playメソッドの最後')
+    //     //window.addEventListener(this.$refs.surf.waveSurfer.on('oneded'),this.finish(console.log('aaa')))
+    // },
+    // finish: async function(){
+    //     this.$refs.surf.waveSurfer.on('finish', function () {
+    //         console.log('finishメソッド発火')
+    //         });
+    // },
+    hoge: function hoge() {
+      console.log('aaaa'); //console.log('aaa')
+      //this.resetFlag = false
+      //this.$nextTick(() => (this.resetFlag = true))
+    },
     play: function play() {
       this.$refs.surf.waveSurfer.play(); //普通に再生
+
+      this.playing = this.$refs.surf.waveSurfer.isPlaying();
     },
     stop: function stop() {
+      console.log('stop');
       this.$refs.surf.waveSurfer.stop();
       this.playing = this.$refs.surf.waveSurfer.isPlaying();
     }
@@ -1562,12 +1726,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
     axios.get('/api/stocks/' + this.id).then(function (response) {
       _this.stock = response.data.data;
-      _this.date = date_fns__WEBPACK_IMPORTED_MODULE_7__.default(new Date(_this.stock.created_at), 'yyyy/MM/dd'); //入れ子にしてもいいのか、めんどくさいけどasyncawait使うべき？
+      _this.date = date_fns__WEBPACK_IMPORTED_MODULE_6__.default(new Date(_this.stock.created_at), 'yyyy/MM/dd'); //入れ子にしてもいいのか、めんどくさいけどasyncawait使うべき？
 
       axios.get('/api/hoge/' + _this.stock.author_id).then(function (response) {
         _this.authorName = response.data.name; //投稿者名
-      });
-      console.log(_this.stock.author_id); //投稿者IDはUsercontroller経由しなくても取れる
+      }); //console.log(this.stock.author_id) //投稿者IDはUsercontroller経由しなくても取れる
     });
   },
   watch: {
@@ -1583,7 +1746,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     },
     'saisei': function saisei(newVal, oldVal) {
       console.log('変化あり');
-      console.log(newVal, '->', oldVal);
+      console.log(oldVal, '->', newVal);
     }
   },
   computed: {
@@ -1756,7 +1919,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.parent[data-v-5390e3d8] {\n    position: relative;\n}\n.parent .child[data-v-5390e3d8] {\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    transform: translate(-50%, -50%);\n    margin: 0;\n    /*余計な隙間を除く*/\n    padding: 0;\n    color: white;\n    /*余計な隙間を除く*/\n    font-size: 30px;\n    /*サイズ*/\n}\n.parent img[data-v-5390e3d8] {\n    width: 100%;\n}\n.userIcon[data-v-5390e3d8] {\n    width: 150;\n    height: 150px;\n    border-radius: 50%;\n    /*角丸*/\n    -o-object-fit: cover;\n       object-fit: cover;\n}\n.inactive[data-v-5390e3d8] {\n}\n.active[data-v-5390e3d8] {\n    opacity: 0.8;\n}\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.parent[data-v-5390e3d8] {\n    position: relative;\n}\n.parent .child[data-v-5390e3d8] {\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    transform: translate(-50%, -50%);\n    margin: 0;\n    /*余計な隙間を除く*/\n    padding: 0;\n    color: white;\n    /*余計な隙間を除く*/\n    font-size: 30px;\n    /*サイズ*/\n}\n.parent img[data-v-5390e3d8] {\n    width: 100%;\n}\n.userIcon[data-v-5390e3d8] {\n    width: 150;\n    height: 150px;\n    border-radius: 50%;\n    /*角丸*/\n    -o-object-fit: cover;\n       object-fit: cover;\n}\n.inactive[data-v-5390e3d8] {}\n.active[data-v-5390e3d8] {\n    opacity: 0.8;\n}\n\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -1804,7 +1967,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.b-col img[data-v-8d9c309e] {\n        max-width: 100%;\n}\n.stock_thumbnail[data-v-8d9c309e] {\n    position: relative;\n}\n.genre_icon[data-v-8d9c309e] {\n    color: #adb5bd99;\n    ;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    font-size: 1.5rem;\n    cursor: pointer;\n    position: absolute;\n    bottom: 0%;\n    left: 0%;\n    margin:8px;\n}/*サムネイルの左下に出るジャンル判別アイコン*/\n.stock_thumbnail:hover img[data-v-8d9c309e] {\n    filter: brightness(50%);\n    transition: 0.1s ease-in-out;\n}\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.b-col img[data-v-8d9c309e] {\n    max-width: 100%;\n}\n.stock_thumbnail[data-v-8d9c309e] {\n    position: relative;\n}\n.genre_icon[data-v-8d9c309e] {\n    color: #adb5bd99;\n    ;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    font-size: 1.5rem;\n    cursor: pointer;\n    position: absolute;\n    bottom: 0%;\n    left: 0%;\n    margin: 8px;\n}\n\n/*サムネイルの左下に出るジャンル判別アイコン*/\n.stock_thumbnail:hover img[data-v-8d9c309e] {\n    filter: brightness(50%);\n    transition: 0.1s ease-in-out;\n}\n\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -7620,7 +7783,7 @@ var render = function() {
                         class: { active: _vm.$route.path === "/stocks/create" },
                         attrs: { to: "/stocks/create" }
                       },
-                      [_vm._v("Post\n            ")]
+                      [_vm._v("Post\n                    ")]
                     ),
                     _vm._v(" "),
                     _c(
@@ -7647,7 +7810,7 @@ var render = function() {
                         class: { active: _vm.$route.path === "/register" },
                         attrs: { to: "/register" }
                       },
-                      [_vm._v("Register")]
+                      [_vm._v("Register\n                    ")]
                     ),
                     _vm._v(" "),
                     _c(
@@ -7686,43 +7849,40 @@ var render = function() {
                       1
                     ),
                     _vm._v(" "),
-                    _vm.isLoggedIn
-                      ? _c(
-                          "b-nav-item-dropdown",
+                    _c(
+                      "b-nav-item-dropdown",
+                      {
+                        attrs: { right: "" },
+                        scopedSlots: _vm._u([
                           {
-                            attrs: { right: "" },
-                            scopedSlots: _vm._u(
-                              [
-                                {
-                                  key: "button-content",
-                                  fn: function() {
-                                    return [
-                                      _c("em", [_vm._v(_vm._s(_vm.userName))])
-                                    ]
-                                  },
-                                  proxy: true
-                                }
-                              ],
-                              null,
-                              false,
-                              849289419
-                            )
-                          },
-                          [
-                            _vm._v(" "),
-                            _c("b-dropdown-item", { attrs: { href: "#" } }, [
-                              _vm._v("Profile")
-                            ]),
-                            _vm._v(" "),
-                            _c("b-dropdown-item", { attrs: { href: "#" } }, [
-                              _vm._v("Sign Out")
-                            ])
-                          ],
-                          1
-                        )
-                      : _vm._e(),
+                            key: "button-content",
+                            fn: function() {
+                              return [
+                                _vm.$store.state.name
+                                  ? _c("em", [
+                                      _vm._v(_vm._s(_vm.$store.state.name))
+                                    ])
+                                  : _vm._e()
+                              ]
+                            },
+                            proxy: true
+                          }
+                        ])
+                      },
+                      [
+                        _vm._v(" "),
+                        _c("b-dropdown-item", { attrs: { href: "#" } }, [
+                          _vm._v("Profile")
+                        ]),
+                        _vm._v(" "),
+                        _c("b-dropdown-item", { attrs: { href: "#" } }, [
+                          _vm._v("Sign Out")
+                        ])
+                      ],
+                      1
+                    ),
                     _vm._v(" "),
-                    !_vm.userName
+                    !_vm.$store.state.name
                       ? _c("button", [_vm._v("ログイン")])
                       : _vm._e()
                   ],
@@ -8395,20 +8555,20 @@ var render = function() {
                                 {
                                   name: "model",
                                   rawName: "v-model",
-                                  value: _vm.user.name,
-                                  expression: "user.name"
+                                  value: _vm.userNewValue.name,
+                                  expression: "userNewValue.name"
                                 }
                               ],
                               staticClass: "form-control",
                               attrs: { type: "txt" },
-                              domProps: { value: _vm.user.name },
+                              domProps: { value: _vm.userNewValue.name },
                               on: {
                                 input: function($event) {
                                   if ($event.target.composing) {
                                     return
                                   }
                                   _vm.$set(
-                                    _vm.user,
+                                    _vm.userNewValue,
                                     "name",
                                     $event.target.value
                                   )
@@ -8427,20 +8587,20 @@ var render = function() {
                                 {
                                   name: "model",
                                   rawName: "v-model",
-                                  value: _vm.user.email,
-                                  expression: "user.email"
+                                  value: _vm.userNewValue.email,
+                                  expression: "userNewValue.email"
                                 }
                               ],
                               staticClass: "form-control",
                               attrs: { type: "email" },
-                              domProps: { value: _vm.user.email },
+                              domProps: { value: _vm.userNewValue.email },
                               on: {
                                 input: function($event) {
                                   if ($event.target.composing) {
                                     return
                                   }
                                   _vm.$set(
-                                    _vm.user,
+                                    _vm.userNewValue,
                                     "email",
                                     $event.target.value
                                   )
@@ -8459,8 +8619,8 @@ var render = function() {
                                 {
                                   name: "model",
                                   rawName: "v-model",
-                                  value: _vm.user.password,
-                                  expression: "user.password"
+                                  value: _vm.userNewValue.password,
+                                  expression: "userNewValue.password"
                                 }
                               ],
                               staticClass: "form-control",
@@ -8468,14 +8628,14 @@ var render = function() {
                                 type: "password",
                                 placeholder: "変更しないときは未記入"
                               },
-                              domProps: { value: _vm.user.password },
+                              domProps: { value: _vm.userNewValue.password },
                               on: {
                                 input: function($event) {
                                   if ($event.target.composing) {
                                     return
                                   }
                                   _vm.$set(
-                                    _vm.user,
+                                    _vm.userNewValue,
                                     "password",
                                     $event.target.value
                                   )
@@ -8494,8 +8654,8 @@ var render = function() {
                                 {
                                   name: "model",
                                   rawName: "v-model",
-                                  value: _vm.user.password,
-                                  expression: "user.password"
+                                  value: _vm.userNewValue.passwordConfirm,
+                                  expression: "userNewValue.passwordConfirm"
                                 }
                               ],
                               staticClass: "form-control",
@@ -8503,15 +8663,17 @@ var render = function() {
                                 type: "password",
                                 placeholder: "変更しないときは未記入"
                               },
-                              domProps: { value: _vm.user.password },
+                              domProps: {
+                                value: _vm.userNewValue.passwordConfirm
+                              },
                               on: {
                                 input: function($event) {
                                   if ($event.target.composing) {
                                     return
                                   }
                                   _vm.$set(
-                                    _vm.user,
-                                    "password",
+                                    _vm.userNewValue,
+                                    "passwordConfirm",
                                     $event.target.value
                                   )
                                 }
@@ -8522,7 +8684,17 @@ var render = function() {
                       ])
                     ]),
                     _vm._v(" "),
-                    _vm._m(1)
+                    _c("div", { staticClass: "modal-footer" }, [
+                      _c(
+                        "button",
+                        {
+                          staticClass: "btn btn-primary",
+                          attrs: { type: "button" },
+                          on: { click: _vm.update }
+                        },
+                        [_vm._v("保存")]
+                      )
+                    ])
                   ])
                 ]
               )
@@ -8561,18 +8733,6 @@ var staticRenderFns = [
           }
         },
         [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
-      )
-    ])
-  },
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "modal-footer" }, [
-      _c(
-        "button",
-        { staticClass: "btn btn-primary", attrs: { type: "button" } },
-        [_vm._v("保存")]
       )
     ])
   }
@@ -8631,98 +8791,100 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    [
-      _c("h1", [_vm._v(_vm._s(_vm.title))]),
-      _vm._v(" "),
-      _c(
-        "b-form",
+  return !_vm.isLoggedIn
+    ? _c(
+        "div",
         [
+          _c("h1", [_vm._v(_vm._s(_vm.title))]),
+          _vm._v(" "),
           _c(
-            "b-form-group",
-            {
-              attrs: {
-                id: "input-group-1",
-                label: "メールアドレス",
-                description: ""
-              }
-            },
+            "b-form",
             [
-              _c("code", [_vm._v(_vm._s(_vm.errorMessage.email))]),
-              _vm._v(" "),
-              _c("b-form-input", {
-                attrs: {
-                  id: "input-1",
-                  type: "email",
-                  placeholder: "Enter email",
-                  required: ""
+              _c(
+                "b-form-group",
+                {
+                  attrs: {
+                    id: "input-group-1",
+                    label: "メールアドレス",
+                    description: ""
+                  }
                 },
-                on: { change: _vm.checkEmail, blur: _vm.checkEmail },
-                model: {
-                  value: _vm.form.email,
-                  callback: function($$v) {
-                    _vm.$set(_vm.form, "email", $$v)
-                  },
-                  expression: "form.email"
-                }
-              })
+                [
+                  _c("code", [_vm._v(_vm._s(_vm.errorMessage.email))]),
+                  _vm._v(" "),
+                  _c("b-form-input", {
+                    attrs: {
+                      id: "input-1",
+                      type: "email",
+                      placeholder: "Enter email",
+                      required: ""
+                    },
+                    on: { change: _vm.checkEmail, blur: _vm.checkEmail },
+                    model: {
+                      value: _vm.form.email,
+                      callback: function($$v) {
+                        _vm.$set(_vm.form, "email", $$v)
+                      },
+                      expression: "form.email"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "b-form-group",
+                {
+                  attrs: {
+                    id: "input-group-2",
+                    label: "パスワード",
+                    description: ""
+                  }
+                },
+                [
+                  _c("code", [_vm._v(_vm._s(_vm.errorMessage.password))]),
+                  _vm._v(" "),
+                  _c("b-form-input", {
+                    attrs: {
+                      id: "input-2",
+                      type: "password",
+                      placeholder: "password",
+                      required: ""
+                    },
+                    on: { change: _vm.checkPassword, blur: _vm.checkPassword },
+                    model: {
+                      value: _vm.form.password,
+                      callback: function($$v) {
+                        _vm.$set(_vm.form, "password", $$v)
+                      },
+                      expression: "form.password"
+                    }
+                  })
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _vm.message
+                ? _c("b-alert", { attrs: { show: "", variant: "danger" } }, [
+                    _vm._v(_vm._s(_vm.message))
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _c(
+                "b-button",
+                {
+                  attrs: { type: "button", variant: "primary" },
+                  on: { click: _vm.onSubmit }
+                },
+                [_vm._v("ログイン")]
+              )
             ],
             1
-          ),
-          _vm._v(" "),
-          _c(
-            "b-form-group",
-            {
-              attrs: {
-                id: "input-group-2",
-                label: "パスワード",
-                description: ""
-              }
-            },
-            [
-              _c("code", [_vm._v(_vm._s(_vm.errorMessage.password))]),
-              _vm._v(" "),
-              _c("b-form-input", {
-                attrs: {
-                  id: "input-2",
-                  type: "password",
-                  placeholder: "password",
-                  required: ""
-                },
-                on: { change: _vm.checkPassword, blur: _vm.checkPassword },
-                model: {
-                  value: _vm.form.password,
-                  callback: function($$v) {
-                    _vm.$set(_vm.form, "password", $$v)
-                  },
-                  expression: "form.password"
-                }
-              })
-            ],
-            1
-          ),
-          _vm._v(" "),
-          _vm.message
-            ? _c("b-alert", { attrs: { show: "", variant: "danger" } }, [
-                _vm._v(_vm._s(_vm.message))
-              ])
-            : _vm._e(),
-          _vm._v(" "),
-          _c(
-            "b-button",
-            {
-              attrs: { type: "button", variant: "primary" },
-              on: { click: _vm.onSubmit }
-            },
-            [_vm._v("ログイン")]
           )
         ],
         1
       )
-    ],
-    1
-  )
+    : _vm._e()
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -8996,6 +9158,26 @@ var render = function() {
             ]
           )
         }),
+        1
+      ),
+      _vm._v(" "),
+      _c(
+        "div",
+        { staticClass: "text-center" },
+        [
+          _vm._v("\n        v-paginationなどbootstrapにはない\n        "),
+          _c("v-pagination", {
+            attrs: { length: _vm.length },
+            on: { input: _vm.changePage },
+            model: {
+              value: _vm.current_page,
+              callback: function($$v) {
+                _vm.current_page = $$v
+              },
+              expression: "current_page"
+            }
+          })
+        ],
         1
       )
     ],
@@ -9401,71 +9583,7 @@ var render = function() {
           _vm._v(" "),
           _c("div", [_vm._v("created by " + _vm._s(_vm.authorName))]),
           _vm._v(" "),
-          _c("h2", [_vm._v("↓後でキレイにする")]),
-          _vm._v(" "),
-          _c(
-            "div",
-            {
-              staticStyle: {
-                width: "100%",
-                display: "flex",
-                "justify-content": "center",
-                "align-items": "center"
-              }
-            },
-            [
-              _c(
-                "div",
-                { staticStyle: { "magin-top": "0" } },
-                [
-                  _vm.playing
-                    ? _c(
-                        "b-button",
-                        {
-                          staticStyle: { "margin-top": "0" },
-                          on: { click: _vm.stop }
-                        },
-                        [
-                          _c("font-awesome-icon", {
-                            attrs: { icon: ["fa", "stop"] }
-                          })
-                        ],
-                        1
-                      )
-                    : _c(
-                        "b-button",
-                        {
-                          staticStyle: { "margin-top": "0" },
-                          on: { click: _vm.play }
-                        },
-                        [
-                          _c("font-awesome-icon", {
-                            attrs: { icon: ["fa", "play"] }
-                          })
-                        ],
-                        1
-                      )
-                ],
-                1
-              ),
-              _vm._v(" "),
-              _c(
-                "div",
-                { staticStyle: { width: "100%", margin: "0 0 0 .5em" } },
-                [
-                  _c("wavesurfer", {
-                    ref: "surf",
-                    attrs: {
-                      src: _vm.file,
-                      options: _vm.options,
-                      id: "wavesurfer"
-                    }
-                  })
-                ],
-                1
-              )
-            ]
-          )
+          _c("h2", [_vm._v("↓後でキレイにする")])
         ],
         1
       )
@@ -31502,6 +31620,10 @@ var router = new vue_router__WEBPACK_IMPORTED_MODULE_11__.default({
     component: _components_page_StockCreate_vue__WEBPACK_IMPORTED_MODULE_2__.default
   }, {
     path: '/stocks',
+    name: 'stockarchive',
+    component: _components_page_StockArchive_vue__WEBPACK_IMPORTED_MODULE_3__.default
+  }, {
+    path: '/stock?page=:pageid',
     name: 'stockarchive',
     component: _components_page_StockArchive_vue__WEBPACK_IMPORTED_MODULE_3__.default
   }, {

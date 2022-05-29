@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use App\Models\Stock;
 use Illuminate\Support\Facades\Storage;//ファイルのリネームと削除で必要
 
 use Image;//画像リサイズライブラリ
@@ -364,12 +364,15 @@ class Stock extends Model
             );
             return $info;
         }
-        public function getAudioInfo(){
-            $file =  'private/stocks/5712c66e_convert.wav';
+        public function getAudioInfo($stock_id){
+            $stock = Stock::where('id', $stock_id)->first();
+            $file =  'private/stocks/'.$stock->path;
+            //$file =  'private/stocks/5712c66e_convert.wav';
             $media = FFMpeg::open($file);
             $mediaStreams =  $media->getStreams()[0];
 
             $info=array(
+                'miriSeconds'=>$media->getDurationInMiliseconds(),//詳細な長さ
                 'time'=>$this->sToM($media->getDurationInSeconds()),
                 'bitrate'=>$mediaStreams->get('bit_rate')/$mediaStreams->get('sample_rate')/$mediaStreams->get('channels'),
                 'sampringlate'=>$mediaStreams->get('sample_rate'),

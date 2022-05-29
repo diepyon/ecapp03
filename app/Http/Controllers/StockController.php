@@ -17,9 +17,9 @@ class StockController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
-        //return Stock::all();
+    public function index(){
+        $inquiries =StockResource::collection(Stock::orderBy('created_at', 'desc')->paginate(5));
+        return $inquiries;        
     }
 
     /**
@@ -68,6 +68,8 @@ class StockController extends Controller
      * @param  \App\Models\Stock  $stock
      * @return \Illuminate\Http\Response
      */
+
+
     public function show()
     {
         $stock = Stock::all();//stocksテーブルの情報をすべて取得
@@ -91,7 +93,7 @@ class StockController extends Controller
         }elseif($stock->genre=="video"){
             $stock->info = $stockModel->getVideoInfo($stock->filename);
         }elseif($stock->genre=="audio"){
-            $stock->info = $stockModel->getAudioInfo();
+            $stock->info = $stockModel->getAudioInfo($stock_id);
            
         }
         return new StockResource($stock);
@@ -138,4 +140,8 @@ class StockController extends Controller
         $author = Stock::find($author_id);
         return new StockCollection($stock->stocks);
     }
+    public function hoge()
+    {
+        return 'success';
+    }    
 }
