@@ -48,13 +48,13 @@
                                         <label for="">パスワード</label>
                                         <!-- <code>{{errorMessage.name}}</code> -->
                                         <input v-model="userNewValue.password" type="password" placeholder="変更しないときは未記入"
-                                            class="form-control">
+                                            class="form-control" autocomplete="off" value="">
                                     </div>
                                     <div class="form-group">
                                         <label for="">パスワード確認</label>
                                         <!-- <code>{{errorMessage.name}}</code> -->
                                         <input v-model="userNewValue.passwordConfirm" type="password"
-                                            placeholder="変更しないときは未記入" class="form-control">
+                                            placeholder="変更しないときは未記入" class="form-control" value="">
                                     </div>
                                 </div>
 
@@ -105,27 +105,28 @@
         },
 
         mounted() {
-            //編集される可能性があるからそもそもここはデータベースから引っ張ってくるべきかも？？
-            this.user.name = localStorage.userName
-            this.user.email = localStorage.userEmail
-            this.user.token = localStorage.token
-
-            this.userNewValue.name = this.user.name
-            this.userNewValue.email = this.user.email
-            this.userNewValue.password = null,
-                this.userNewValue.passwordConfirm = null,
-
-                axios.get("/api/loginCheck")
+            axios.get("/api/loginCheck")
                 .then(response => {
                     this.isLoggedIn = true
-                    console.log(response)
+                    let currentUser = response.data
+
+                    //編集される可能性があるからそもそもここはデータベースから引っ張ってくるべきかも？？
+                    this.user.name = currentUser.name
+                    this.user.email = currentUser.email
+
+                    this.userNewValue.name = this.user.name
+                    this.userNewValue.email = this.user.email
+
                 })
                 .catch(error => {
-                    console.log(error)
+                    //console.log(error)
                     this.isLoggedIn = false
                     this.$store.commit("message", 'ログインしてください。')
                     this.$router.push("/login") //ログイン画面にジャンプ
                 })
+
+            this.userNewValue.password = null
+            this.userNewValue.passwordConfirm = null
         },
         methods: {
             beActive() {
@@ -165,7 +166,7 @@
             update() {
                 console.log(this.userNewValue)
 
-                axios.post("/api/account/update",this.userNewValue)
+                axios.post("/api/account/update", this.userNewValue)
                     .then(response => {
                         console.log(response)
                     })

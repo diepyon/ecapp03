@@ -18,10 +18,10 @@ use App\Http\Controllers\Api\Auth\LoginController;//追記
 |
 */
 
-Route::get('/stocks', [StockController::class, 'show']);//StockControllerのshowメソッドを発動
-
+//Route::get('/stocks', [StockController::class, 'show']);//StockControllerのshowメソッドを発動
 
 Route::get('/stocks',  [StockController::class, 'index']);//20件記事を表示する
+
 
 
 Route::get('/image', [StockController::class, 'showImage']);//StockControllerのshowImageメソッド発動
@@ -42,6 +42,7 @@ Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/login', [LoginController::class, 'login']);
 
 Route::middleware('auth:sanctum')->get('/loginCheck',function (Request $request) {
+    return $request->user();
 });
 
 Route::post('/logout', [LoginController::class, 'logout']);

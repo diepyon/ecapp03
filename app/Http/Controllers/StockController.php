@@ -18,10 +18,10 @@ class StockController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index(){
-        $inquiries =StockResource::collection(Stock::orderBy('created_at', 'desc')->paginate(5));
-        return $inquiries;        
+        $stocks =StockResource::collection(Stock::orderBy('created_at', 'desc')->paginate(10));
+        return $stocks;        
     }
-
+    
     /**
      * Show the form for creating a new resource.
      *

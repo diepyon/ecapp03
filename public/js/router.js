@@ -58,24 +58,27 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
-      //email: "",
+      userName: null,
       isLoggedIn: false
     };
   },
   mounted: function mounted() {
     var _this = this;
 
-    axios.get("/api/loginCheck").then(function (response) {
-      _this.isLoggedIn = true;
-    })["catch"](function (error) {
-      _this.isLoggedIn = false;
+    this.$store.watch(function (state, getters) {
+      return getters.getUserName;
+    }, function (newValue, oldValue) {
+      console.log('user changed! %s => %s', oldValue, newValue);
+      _this.userName = newValue; //vuexのユーザー名が変わったことを検知した上でサンクタムのログインチェック処理
+
+      axios.get("/api/loginCheck").then(function (response) {
+        _this.isLoggedIn = true;
+      })["catch"](function (error) {
+        _this.isLoggedIn = false;
+      });
     });
     var userInfo = {
       name: localStorage.getItem("userName"),
@@ -550,17 +553,16 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     var _this = this;
 
-    //編集される可能性があるからそもそもここはデータベースから引っ張ってくるべきかも？？
-    this.user.name = localStorage.userName;
-    this.user.email = localStorage.userEmail;
-    this.user.token = localStorage.token;
-    this.userNewValue.name = this.user.name;
-    this.userNewValue.email = this.user.email;
-    this.userNewValue.password = null, this.userNewValue.passwordConfirm = null, axios.get("/api/loginCheck").then(function (response) {
+    axios.get("/api/loginCheck").then(function (response) {
       _this.isLoggedIn = true;
-      console.log(response);
+      var currentUser = response.data; //編集される可能性があるからそもそもここはデータベースから引っ張ってくるべきかも？？
+
+      _this.user.name = currentUser.name;
+      _this.user.email = currentUser.email;
+      _this.userNewValue.name = _this.user.name;
+      _this.userNewValue.email = _this.user.email;
     })["catch"](function (error) {
-      console.log(error);
+      //console.log(error)
       _this.isLoggedIn = false;
 
       _this.$store.commit("message", 'ログインしてください。');
@@ -568,6 +570,8 @@ __webpack_require__.r(__webpack_exports__);
       _this.$router.push("/login"); //ログイン画面にジャンプ
 
     });
+    this.userNewValue.password = null;
+    this.userNewValue.passwordConfirm = null;
   },
   methods: {
     beActive: function beActive() {
@@ -738,6 +742,8 @@ __webpack_require__.r(__webpack_exports__);
       console.log('ログイン済み');
 
       _this.$router.push(_this.$router.go(-1));
+
+      return response;
     })["catch"](function (error) {
       console.log('未ログイン');
       _this.isLoggedIn = false;
@@ -1012,6 +1018,13 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -1023,19 +1036,20 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     return {
       title: 'Archive',
       stocks: null,
-      current_page: 1,
+      current_page: null,
       lists: [],
-      length: null
+      length: null,
+      parPage: null,
+      totalStocksPer: null
     };
   },
   mounted: function mounted() {
-    var _this = this;
-
     //api.phpに記載された/stocksのルーティングのアクションを発動
-    axios.get('/api/stocks').then(function (response) {
-      _this.stocks = response.data.data.reverse(); //console.log(this.stocks)
-    });
-
+    // axios.get('/api/stocks')
+    //     .then(response => {
+    //         this.stocks = response.data.data.reverse()
+    //         //console.log(this.stocks)
+    //     })            
     if (this.$route.query.page) {
       this.current_page = Number(this.$route.query.page);
     } else {
@@ -1046,7 +1060,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   methods: {
     showArchive: function showArchive() {
-      var _this2 = this;
+      var _this = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
         var result, stocks;
@@ -1054,21 +1068,23 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                _context.next = 2;
-                return axios.get("/api/stocks?page=".concat(_this2.current_page));
+                console.log('url上のページ番号は' + _this.$route.query.page);
+                console.log('カレントページは' + _this.current_page);
+                _context.next = 4;
+                return axios.get("/api/stocks?page=".concat(_this.current_page));
 
-              case 2:
+              case 4:
                 result = _context.sent;
                 stocks = result.data;
-                _this2.stocks = stocks.data;
-                _this2.dialog = {
-                  post: null,
-                  posted: null
-                }; //総ページ数を取得
+                _this.stocks = stocks.data;
+                _this.parPage = stocks.meta.per_page; //1ページ当たりの表示件数
 
-                _this2.length = Math.ceil(stocks.meta.total / stocks.meta.per_page); //（apiで取得したレコードの総数÷1ページ当たりの表示件数）を繰り上げ
+                _this.totalStocksPer = stocks.meta.total; //全部でアイテムが何個あるか
+                //総ページ数を取得
 
-              case 7:
+                _this.length = Math.ceil(_this.totalStocksPer / _this.parPage); //（apiで取得したレコードの総数÷1ページ当たりの表示件数）を繰り上げ
+
+              case 10:
               case "end":
                 return _context.stop();
             }
@@ -1076,13 +1092,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee);
       }))();
     },
+    //犯人はおそらくこいつ
     changePage: function changePage(number) {
-      console.log(number);
+      console.log('ナンバーは' + number);
       this.current_page = number;
       this.showArchive();
       window.history.pushState({
         number: number
-      }, "Page".concat(number), "".concat(window.location.origin, "/archive?page=").concat(number));
+      }, "Page".concat(number), "".concat(window.location.origin, "/stocks?page=").concat(number));
       this.moveToTop();
     },
     moveToTop: function moveToTop() {
@@ -7829,62 +7846,41 @@ var render = function() {
                   "b-navbar-nav",
                   { staticClass: "ml-auto" },
                   [
-                    _c(
-                      "b-nav-form",
-                      [
-                        _c("b-form-input", {
-                          staticClass: "mr-sm-2",
-                          attrs: { size: "sm", placeholder: "Search" }
-                        }),
-                        _vm._v(" "),
-                        _c(
-                          "b-button",
+                    _vm.isLoggedIn
+                      ? _c(
+                          "b-nav-item-dropdown",
                           {
-                            staticClass: "my-2 my-sm-0",
-                            attrs: { size: "sm", type: "submit" }
+                            attrs: { right: "" },
+                            scopedSlots: _vm._u(
+                              [
+                                {
+                                  key: "button-content",
+                                  fn: function() {
+                                    return [
+                                      _c("em", [_vm._v(_vm._s(_vm.userName))])
+                                    ]
+                                  },
+                                  proxy: true
+                                }
+                              ],
+                              null,
+                              false,
+                              849289419
+                            )
                           },
-                          [_vm._v("Search")]
+                          [
+                            _vm._v(" "),
+                            _c("b-dropdown-item", { attrs: { href: "#" } }, [
+                              _vm._v("Profile")
+                            ]),
+                            _vm._v(" "),
+                            _c("b-dropdown-item", { attrs: { href: "#" } }, [
+                              _vm._v("Sign Out")
+                            ])
+                          ],
+                          1
                         )
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-nav-item-dropdown",
-                      {
-                        attrs: { right: "" },
-                        scopedSlots: _vm._u([
-                          {
-                            key: "button-content",
-                            fn: function() {
-                              return [
-                                _vm.$store.state.name
-                                  ? _c("em", [
-                                      _vm._v(_vm._s(_vm.$store.state.name))
-                                    ])
-                                  : _vm._e()
-                              ]
-                            },
-                            proxy: true
-                          }
-                        ])
-                      },
-                      [
-                        _vm._v(" "),
-                        _c("b-dropdown-item", { attrs: { href: "#" } }, [
-                          _vm._v("Profile")
-                        ]),
-                        _vm._v(" "),
-                        _c("b-dropdown-item", { attrs: { href: "#" } }, [
-                          _vm._v("Sign Out")
-                        ])
-                      ],
-                      1
-                    ),
-                    _vm._v(" "),
-                    !_vm.$store.state.name
-                      ? _c("button", [_vm._v("ログイン")])
-                      : _vm._e()
+                      : _c("button", [_vm._v("ログイン")])
                   ],
                   1
                 )
@@ -8626,7 +8622,9 @@ var render = function() {
                               staticClass: "form-control",
                               attrs: {
                                 type: "password",
-                                placeholder: "変更しないときは未記入"
+                                placeholder: "変更しないときは未記入",
+                                autocomplete: "off",
+                                value: ""
                               },
                               domProps: { value: _vm.userNewValue.password },
                               on: {
@@ -8661,7 +8659,8 @@ var render = function() {
                               staticClass: "form-control",
                               attrs: {
                                 type: "password",
-                                placeholder: "変更しないときは未記入"
+                                placeholder: "変更しないときは未記入",
+                                value: ""
                               },
                               domProps: {
                                 value: _vm.userNewValue.passwordConfirm
@@ -9165,20 +9164,31 @@ var render = function() {
         "div",
         { staticClass: "text-center" },
         [
-          _vm._v("\n        v-paginationなどbootstrapにはない\n        "),
-          _c("v-pagination", {
-            attrs: { length: _vm.length },
-            on: { input: _vm.changePage },
-            model: {
-              value: _vm.current_page,
-              callback: function($$v) {
-                _vm.current_page = $$v
-              },
-              expression: "current_page"
-            }
-          })
+          [
+            _c(
+              "div",
+              { staticClass: "overflow-auto" },
+              [
+                _c("b-pagination", {
+                  attrs: {
+                    "total-rows": _vm.totalStocksPer,
+                    "per-page": _vm.parPage
+                  },
+                  on: { input: _vm.changePage },
+                  model: {
+                    value: _vm.current_page,
+                    callback: function($$v) {
+                      _vm.current_page = $$v
+                    },
+                    expression: "current_page"
+                  }
+                })
+              ],
+              1
+            )
+          ]
         ],
-        1
+        2
       )
     ],
     1

@@ -71,6 +71,8 @@
 
                     console.log('ログイン済み')
                     this.$router.push(this.$router.go(-1))
+
+                    return response
                 })
                 .catch(error => {
                     console.log('未ログイン')
@@ -123,7 +125,8 @@
                     alert('入力内容に不備があります。')
                 }
             }
-        }
+        },
+
     }
 
 </script>

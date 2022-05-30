@@ -21,8 +21,15 @@
             </b-col>
         </b-row>
         <div class="text-center">
-            v-paginationなどbootstrapにはない
-            <v-pagination v-model="current_page" :length="length" @input="changePage"></v-pagination>
+            <!-- v-paginationなどbootstrapにはない
+            <v-pagination v-model="current_page" :length="length" @input="changePage"></v-pagination> -->
+
+            <template>
+                <div class="overflow-auto">
+                    <b-pagination  @input="changePage" v-model="current_page" :total-rows="totalStocksPer" :per-page="parPage">
+                    </b-pagination>
+                </div>
+            </template> 
         </div>
     </div>
 </template>
@@ -41,19 +48,21 @@
                 title: 'Archive',
                 stocks: null,
 
-                current_page: 1,
+                current_page: null,
                 lists: [],
                 length: null,
+                parPage:null,
+                totalStocksPer:null,
             }
         },
         mounted() {
             //api.phpに記載された/stocksのルーティングのアクションを発動
-            axios.get('/api/stocks')
-                .then(response => {
-                    this.stocks = response.data.data.reverse()
-                    //console.log(this.stocks)
-                })
-
+            // axios.get('/api/stocks')
+            //     .then(response => {
+            //         this.stocks = response.data.data.reverse()
+            //         //console.log(this.stocks)
+                    
+            //     })            
 
             if (this.$route.query.page) {
                 this.current_page = Number(this.$route.query.page)
@@ -61,41 +70,46 @@
                 this.current_page = 1
             }
             this.showArchive()
-                
+
         },
-  methods: {
+        methods: {
             async showArchive() {
+                console.log('url上のページ番号は'+this.$route.query.page)
+                console.log('カレントページは'+this.current_page)
+                
                 const result = await axios.get(`/api/stocks?page=${this.current_page}`);
                 const stocks = result.data;
                 this.stocks = stocks.data;
-                this.dialog = {
-                    post: null,
-                    posted: null,
-                }
+                
+                this.parPage = stocks.meta.per_page //1ページ当たりの表示件数
+                this.totalStocksPer  = stocks.meta.total //全部でアイテムが何個あるか
+                
                 //総ページ数を取得
-                this.length=(Math.ceil(stocks.meta.total/stocks.meta.per_page)) //（apiで取得したレコードの総数÷1ページ当たりの表示件数）を繰り上げ
+                this.length = (Math.ceil(this.totalStocksPer/ this.parPage)) //（apiで取得したレコードの総数÷1ページ当たりの表示件数）を繰り上げ
             },
+
+            //犯人はおそらくこいつ
             changePage(number) {
-                console.log(number)
+                console.log('ナンバーは'+number)
                 this.current_page = number
                 this.showArchive()
                 window.history.pushState({
                         number
                     },
                     `Page${number}`,
-                    `${window.location.origin}/archive?page=${number}`
+                    `${window.location.origin}/stocks?page=${number}`
                 )
                 this.moveToTop()
-            },   
+            },
             moveToTop() {
                 window.scrollTo({
                     top: 0,
                     behavior: "smooth"
                 });
-            },                     
-  }  
-}      
-        
+            },
+        }
+    }
+
 </script>
 <style scoped>
     .b-col img {
