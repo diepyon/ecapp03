@@ -24,12 +24,77 @@
             <!-- v-paginationなどbootstrapにはない
             <v-pagination v-model="current_page" :length="length" @input="changePage"></v-pagination> -->
 
+            現在のページ：{{current_page}}<br>
+            トータルページ数:{{length}}<br>
+            トータル記事数:{{totalStocksPer}}<br>
+            <p>ページ数が多い時は「・・・」形式にしたい</p>
+
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item"><button class="page-link" @click="changePage(1)">
+                            «</button></li>
+                    <li class="page-item"><button class="page-link" @click="changePage(previous)">
+                            ‹</button></li>
+
+                    <li class="page-item" v-for="page in pages" :key="page.id"
+                        :class="{ active: current_page === page.no }"><button class="page-link"
+                            @click="changePage(page.no)">{{page.no}}</button></li>
+
+                    <li class="page-item"><button class="page-link" @click="changePage(next)">
+                            ›</button></li>
+                    <li class="page-item"><button class="page-link" @click="changePage(length)">
+                            »</button></li>
+                </ul>
+            </nav>
+
+            <p>・・・ありバージョン試作中</p>
+            <p>ケツのほうに行くと存在しないページ番号のボタンも出てくる</p>
+            <p>フロントでめっちゃ細かく条件書けば行けるけどスマートじゃないような・・・・</p>
+            <p>ありバージョンのコメントアウト外したらリロード時に、ページ番号とページネーションのボタンが連動しなくなる</p>
+            <!-- <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item"><button class="page-link" @click="changePage(1)">
+                            «</button></li>
+                    <li class="page-item"><button class="page-link" @click="changePage(previous)">
+                            ‹</button></li>
+
+                    <li role="separator" class="page-item disabled bv-d-xs-down-none"><span class="page-link">…</span>
+                    </li>
+
+                    <li class="page-item"><button class="page-link" v-if="current_page -2 > 0"
+                            @click="changePage(current_page - 2)">{{current_page -2}}</button></li>
+
+                    <li class="page-item"><button class="page-link" v-if="current_page -1 > 0"
+                            @click="changePage(current_page - 1)">{{current_page -1}}</button></li>
+
+                    <li class="page-item active"><button class="page-link"
+                            @click="changePage(current_page)">{{current_page}}</button></li>
+
+                    <li class="page-item"><button class="page-link" v-if="current_page +1 < length"
+                            @click="changePage(current_page + 1)">{{current_page +1}}</button></li>
+
+                    <li class="page-item"><button class="page-link" v-if="current_page +2 < length"
+                            @click="changePage(current_page + 2)">{{current_page +2}}</button></li>
+
+                    <li role="separator" class="page-item disabled bv-d-xs-down-none"><span class="page-link">…</span>
+                    </li>
+
+                    <li class="page-item"><button class="page-link" @click="changePage(next)">
+                            ›</button></li>
+
+                    <li class="page-item"><button class="page-link" @click="changePage(length)">
+                            »</button></li>
+                </ul>
+            </nav> -->
+
+            <!-- <p>お手本</p>
             <template>
                 <div class="overflow-auto">
-                    <b-pagination  @input="changePage" v-model="current_page" :total-rows="totalStocksPer" :per-page="parPage">
+                    <b-pagination @change="changePage" v-model="current_page" :total-rows="totalStocksPer"
+                        :per-page="parPage" align="center">
                     </b-pagination>
                 </div>
-            </template> 
+            </template> -->
         </div>
     </div>
 </template>
@@ -51,8 +116,11 @@
                 current_page: null,
                 lists: [],
                 length: null,
-                parPage:null,
-                totalStocksPer:null,
+                parPage: null,
+                totalStocksPer: null,
+                pages: null,
+                previous: null,
+                next: null,
             }
         },
         mounted() {
@@ -61,36 +129,56 @@
             //     .then(response => {
             //         this.stocks = response.data.data.reverse()
             //         //console.log(this.stocks)
-                    
-            //     })            
 
-            if (this.$route.query.page) {
-                this.current_page = Number(this.$route.query.page)
-            } else {
-                this.current_page = 1
-            }
+            //     })            
+            this.current_page = Number(this.$route.query.page) || 1
             this.showArchive()
 
         },
         methods: {
             async showArchive() {
-                console.log('url上のページ番号は'+this.$route.query.page)
-                console.log('カレントページは'+this.current_page)
-                
                 const result = await axios.get(`/api/stocks?page=${this.current_page}`);
                 const stocks = result.data;
                 this.stocks = stocks.data;
-                
+
                 this.parPage = stocks.meta.per_page //1ページ当たりの表示件数
-                this.totalStocksPer  = stocks.meta.total //全部でアイテムが何個あるか
-                
-                //総ページ数を取得
-                this.length = (Math.ceil(this.totalStocksPer/ this.parPage)) //（apiで取得したレコードの総数÷1ページ当たりの表示件数）を繰り上げ
+                this.totalStocksPer = stocks.meta.total //全部でアイテムが何個あるか
+
+                //総ページ数を取得(これ計算しなくても取得方法ありそうじゃね？)
+                this.length = (Math.ceil(this.totalStocksPer / this.parPage)) //（apiで取得したレコードの総数÷1ページ当たりの表示件数）を繰り上げ
+
+                this.makePagenation()
+
             },
 
-            //犯人はおそらくこいつ
+            makePagenation() {
+                this.pages = []
+                for (let i = 1; i < this.length + 1; i++) {
+                    //ページ番号とリンク先をオブジェクトで追加
+                    this.pages.push({
+                        no: i,
+                    })
+                }
+                //console.log(this.pages)
+
+
+                //1個前のページ
+                if (this.current_page !== 1) {
+                    this.previous = this.current_page - 1
+                } else {
+                    this.previous = 1
+                }
+
+                //次のページ
+                if (this.current_page !== this.length) {
+                    this.next = this.current_page + 1
+                } else {
+                    this.next = this.length
+                }
+            },
+
             changePage(number) {
-                console.log('ナンバーは'+number)
+                //console.log('ナンバーは' + number)
                 this.current_page = number
                 this.showArchive()
                 window.history.pushState({
@@ -104,7 +192,7 @@
             moveToTop() {
                 window.scrollTo({
                     top: 0,
-                    behavior: "smooth"
+                    //behavior: "smooth"
                 });
             },
         }
@@ -135,7 +223,6 @@
     }
 
     /*サムネイルの左下に出るジャンル判別アイコン*/
-
     .stock_thumbnail:hover img {
         filter: brightness(50%);
         -webkit-transition: 0.1s ease-in-out;

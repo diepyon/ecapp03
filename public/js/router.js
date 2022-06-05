@@ -72,10 +72,22 @@ __webpack_require__.r(__webpack_exports__);
       return getters.getUserName;
     }, function (newValue, oldValue) {
       console.log('user changed! %s => %s', oldValue, newValue);
-      _this.userName = newValue; //vuexのユーザー名が変わったことを検知した上でサンクタムのログインチェック処理
+      _this.userName = newValue; //セッション切れ後初回ログインで通らないので2重処理
+      //これでうまくいったらノートに記載して
+
+      if (_this.userName) {
+        _this.isLoggedIn = true;
+      } //vuexのユーザー名が変わったことを検知した上でサンクタムのログインチェック処理
+
 
       axios.get("/api/loginCheck").then(function (response) {
         _this.isLoggedIn = true;
+        var userInfo = {
+          name: _this.$store.getters.getUserName,
+          email: localStorage.getItem("userEmail")
+        };
+
+        _this.$store.commit("updateUser", userInfo);
       })["catch"](function (error) {
         _this.isLoggedIn = false;
       });
@@ -85,6 +97,7 @@ __webpack_require__.r(__webpack_exports__);
       email: localStorage.getItem("userEmail")
     };
     this.$store.commit("updateUser", userInfo);
+    console.log(localStorage.getItem("userName")); //localstorageの値をとる
   },
   computed: {},
   methods: {}
@@ -1025,6 +1038,71 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -1040,7 +1118,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       lists: [],
       length: null,
       parPage: null,
-      totalStocksPer: null
+      totalStocksPer: null,
+      pages: null,
+      previous: null,
+      next: null
     };
   },
   mounted: function mounted() {
@@ -1050,12 +1131,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     //         this.stocks = response.data.data.reverse()
     //         //console.log(this.stocks)
     //     })            
-    if (this.$route.query.page) {
-      this.current_page = Number(this.$route.query.page);
-    } else {
-      this.current_page = 1;
-    }
-
+    this.current_page = Number(this.$route.query.page) || 1;
     this.showArchive();
   },
   methods: {
@@ -1068,23 +1144,23 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                console.log('url上のページ番号は' + _this.$route.query.page);
-                console.log('カレントページは' + _this.current_page);
-                _context.next = 4;
+                _context.next = 2;
                 return axios.get("/api/stocks?page=".concat(_this.current_page));
 
-              case 4:
+              case 2:
                 result = _context.sent;
                 stocks = result.data;
                 _this.stocks = stocks.data;
                 _this.parPage = stocks.meta.per_page; //1ページ当たりの表示件数
 
                 _this.totalStocksPer = stocks.meta.total; //全部でアイテムが何個あるか
-                //総ページ数を取得
+                //総ページ数を取得(これ計算しなくても取得方法ありそうじゃね？)
 
                 _this.length = Math.ceil(_this.totalStocksPer / _this.parPage); //（apiで取得したレコードの総数÷1ページ当たりの表示件数）を繰り上げ
 
-              case 10:
+                _this.makePagenation();
+
+              case 9:
               case "end":
                 return _context.stop();
             }
@@ -1092,9 +1168,33 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         }, _callee);
       }))();
     },
-    //犯人はおそらくこいつ
+    makePagenation: function makePagenation() {
+      this.pages = [];
+
+      for (var i = 1; i < this.length + 1; i++) {
+        //ページ番号とリンク先をオブジェクトで追加
+        this.pages.push({
+          no: i
+        });
+      } //console.log(this.pages)
+      //1個前のページ
+
+
+      if (this.current_page !== 1) {
+        this.previous = this.current_page - 1;
+      } else {
+        this.previous = 1;
+      } //次のページ
+
+
+      if (this.current_page !== this.length) {
+        this.next = this.current_page + 1;
+      } else {
+        this.next = this.length;
+      }
+    },
     changePage: function changePage(number) {
-      console.log('ナンバーは' + number);
+      //console.log('ナンバーは' + number)
       this.current_page = number;
       this.showArchive();
       window.history.pushState({
@@ -1104,8 +1204,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     },
     moveToTop: function moveToTop() {
       window.scrollTo({
-        top: 0,
-        behavior: "smooth"
+        top: 0 //behavior: "smooth"
+
       });
     }
   }
@@ -9160,36 +9260,128 @@ var render = function() {
         1
       ),
       _vm._v(" "),
-      _c(
-        "div",
-        { staticClass: "text-center" },
-        [
-          [
-            _c(
-              "div",
-              { staticClass: "overflow-auto" },
-              [
-                _c("b-pagination", {
-                  attrs: {
-                    "total-rows": _vm.totalStocksPer,
-                    "per-page": _vm.parPage
+      _c("div", { staticClass: "text-center" }, [
+        _vm._v("\n\n        現在のページ：" + _vm._s(_vm.current_page)),
+        _c("br"),
+        _vm._v("\n        トータルページ数:" + _vm._s(_vm.length)),
+        _c("br"),
+        _vm._v("\n        トータル記事数:" + _vm._s(_vm.totalStocksPer)),
+        _c("br"),
+        _vm._v(" "),
+        _c("p", [_vm._v("ページ数が多い時は「・・・」形式にしたい")]),
+        _vm._v(" "),
+        _c("nav", { attrs: { "aria-label": "Page navigation example" } }, [
+          _c(
+            "ul",
+            { staticClass: "pagination justify-content-center" },
+            [
+              _c("li", { staticClass: "page-item" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "page-link",
+                    on: {
+                      click: function($event) {
+                        return _vm.changePage(1)
+                      }
+                    }
                   },
-                  on: { input: _vm.changePage },
-                  model: {
-                    value: _vm.current_page,
-                    callback: function($$v) {
-                      _vm.current_page = $$v
-                    },
-                    expression: "current_page"
-                  }
-                })
-              ],
-              1
-            )
-          ]
-        ],
-        2
-      )
+                  [_vm._v("\n                        «")]
+                )
+              ]),
+              _vm._v(" "),
+              _c("li", { staticClass: "page-item" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "page-link",
+                    on: {
+                      click: function($event) {
+                        return _vm.changePage(_vm.previous)
+                      }
+                    }
+                  },
+                  [_vm._v("\n                        ‹")]
+                )
+              ]),
+              _vm._v(" "),
+              _vm._l(_vm.pages, function(page) {
+                return _c(
+                  "li",
+                  {
+                    key: page.id,
+                    staticClass: "page-item",
+                    class: { active: _vm.current_page === page.no }
+                  },
+                  [
+                    _c(
+                      "button",
+                      {
+                        staticClass: "page-link",
+                        on: {
+                          click: function($event) {
+                            return _vm.changePage(page.no)
+                          }
+                        }
+                      },
+                      [_vm._v(_vm._s(page.no))]
+                    )
+                  ]
+                )
+              }),
+              _vm._v(" "),
+              _c("li", { staticClass: "page-item" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "page-link",
+                    on: {
+                      click: function($event) {
+                        return _vm.changePage(_vm.next)
+                      }
+                    }
+                  },
+                  [_vm._v("\n                        ›")]
+                )
+              ]),
+              _vm._v(" "),
+              _c("li", { staticClass: "page-item" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "page-link",
+                    on: {
+                      click: function($event) {
+                        return _vm.changePage(_vm.length)
+                      }
+                    }
+                  },
+                  [_vm._v("\n                        »")]
+                )
+              ])
+            ],
+            2
+          )
+        ]),
+        _vm._v(" "),
+        _c("p", [_vm._v("・・・ありバージョン試作中")]),
+        _vm._v(" "),
+        _c("p", [
+          _vm._v("ケツのほうに行くと存在しないページ番号のボタンも出てくる")
+        ]),
+        _vm._v(" "),
+        _c("p", [
+          _vm._v(
+            "フロントでめっちゃ細かく条件書けば行けるけどスマートじゃないような・・・・"
+          )
+        ]),
+        _vm._v(" "),
+        _c("p", [
+          _vm._v(
+            "ありバージョンのコメントアウト外したらリロード時に、ページ番号とページネーションのボタンが連動しなくなる"
+          )
+        ])
+      ])
     ],
     1
   )

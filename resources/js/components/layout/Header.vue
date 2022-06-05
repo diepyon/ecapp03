@@ -39,7 +39,7 @@
             return {
                 userName: null,
                 isLoggedIn: false,
-            };
+            }
         },
         mounted() {
             this.$store.watch(
@@ -48,10 +48,21 @@
                     console.log('user changed! %s => %s', oldValue, newValue)
                     this.userName = newValue
 
+                    //セッション切れ後初回ログインで通らないので2重処理
+                    //これでうまくいったらノートに記載して
+                    if(this.userName){
+                        this.isLoggedIn = true
+                    }
+
                     //vuexのユーザー名が変わったことを検知した上でサンクタムのログインチェック処理
                     axios.get("/api/loginCheck")
                         .then(response => {
                             this.isLoggedIn = true
+                            let userInfo = {
+                                name:this.$store.getters.getUserName,
+                                email: localStorage.getItem("userEmail"),
+                            }
+                            this.$store.commit("updateUser", userInfo);
                         })
                         .catch(error => {
                             this.isLoggedIn = false
@@ -63,6 +74,8 @@
                 email: localStorage.getItem("userEmail"),
             }
             this.$store.commit("updateUser", userInfo);
+
+            console.log(localStorage.getItem("userName"))//localstorageの値をとる
         },
 
         computed: {},
