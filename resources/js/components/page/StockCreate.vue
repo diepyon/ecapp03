@@ -175,12 +175,21 @@
                 .then(response => {
                     this.isLoggedIn = true
                     console.log(response)
+
+                    //ログインに成功したら元々行きたかったページを記憶したローカルストレージ削除
                 })
                 .catch(error => {
                     console.log(error)
                     this.isLoggedIn = false
                     this.$store.commit("message",'ログインしてください。')
-                    this.$store.commit("jumpTo", this.$route.path)
+                    // this.$store.commit("jumpTo", this.$route.path)
+
+                    //ローカルストレージにこのurlを記憶
+                    localStorage.setItem('jumpTo',this.$route.path);
+
+                    //vuexバージョン（こっちをLoginlvueで使うとうまくいかない）
+                    this.$store.commit('jumpTo', this.$route.path)
+                    
                     this.$router.push("/login") //ログイン画面にジャンプ
                 })
         },

@@ -14,6 +14,13 @@ class UserController extends Controller
     }
     public function update(User $user,Request $request)
     {   
-        return 'aaa';
+        $userRecord =  User::where('id', $request->id)->first();
+          
+        
+        
+
+        // $userRecord->fill($request->only([
+        //     'name', 'album', 'artist', 'image_path', 'release_date'
+        // ]))->save();
     }    
 }

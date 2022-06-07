@@ -21,13 +21,9 @@
             </b-col>
         </b-row>
         <div class="text-center">
-            <!-- v-paginationなどbootstrapにはない
-            <v-pagination v-model="current_page" :length="length" @input="changePage"></v-pagination> -->
-
             現在のページ：{{current_page}}<br>
             トータルページ数:{{length}}<br>
             トータル記事数:{{totalStocksPer}}<br>
-            <p>ページ数が多い時は「・・・」形式にしたい</p>
 
             <nav aria-label="Page navigation example">
                 <ul class="pagination justify-content-center">
@@ -36,29 +32,8 @@
                     <li class="page-item"><button class="page-link" @click="changePage(previous)">
                             ‹</button></li>
 
-                    <li class="page-item" v-for="page in pages" :key="page.id"
-                        :class="{ active: current_page === page.no }"><button class="page-link"
-                            @click="changePage(page.no)">{{page.no}}</button></li>
-
-                    <li class="page-item"><button class="page-link" @click="changePage(next)">
-                            ›</button></li>
-                    <li class="page-item"><button class="page-link" @click="changePage(length)">
-                            »</button></li>
-                </ul>
-            </nav>
-
-            <p>・・・ありバージョン試作中</p>
-            <p>ケツのほうに行くと存在しないページ番号のボタンも出てくる</p>
-            <p>フロントでめっちゃ細かく条件書けば行けるけどスマートじゃないような・・・・</p>
-            <p>ありバージョンのコメントアウト外したらリロード時に、ページ番号とページネーションのボタンが連動しなくなる</p>
-            <!-- <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item"><button class="page-link" @click="changePage(1)">
-                            «</button></li>
-                    <li class="page-item"><button class="page-link" @click="changePage(previous)">
-                            ‹</button></li>
-
-                    <li role="separator" class="page-item disabled bv-d-xs-down-none"><span class="page-link">…</span>
+                    <li role="separator" class="page-item disabled bv-d-xs-down-none" v-if="current_page > 2"><span
+                            class="page-link">…</span>
                     </li>
 
                     <li class="page-item"><button class="page-link" v-if="current_page -2 > 0"
@@ -70,13 +45,14 @@
                     <li class="page-item active"><button class="page-link"
                             @click="changePage(current_page)">{{current_page}}</button></li>
 
-                    <li class="page-item"><button class="page-link" v-if="current_page +1 < length"
+                    <li class="page-item"><button class="page-link" v-if="current_page +1 <= length"
                             @click="changePage(current_page + 1)">{{current_page +1}}</button></li>
 
                     <li class="page-item"><button class="page-link" v-if="current_page +2 < length"
                             @click="changePage(current_page + 2)">{{current_page +2}}</button></li>
 
-                    <li role="separator" class="page-item disabled bv-d-xs-down-none"><span class="page-link">…</span>
+                    <li role="separator" class="page-item disabled bv-d-xs-down-none" v-if="current_page +1 < length">
+                        <span class="page-link">…</span>
                     </li>
 
                     <li class="page-item"><button class="page-link" @click="changePage(next)">
@@ -85,16 +61,7 @@
                     <li class="page-item"><button class="page-link" @click="changePage(length)">
                             »</button></li>
                 </ul>
-            </nav> -->
-
-            <!-- <p>お手本</p>
-            <template>
-                <div class="overflow-auto">
-                    <b-pagination @change="changePage" v-model="current_page" :total-rows="totalStocksPer"
-                        :per-page="parPage" align="center">
-                    </b-pagination>
-                </div>
-            </template> -->
+            </nav>
         </div>
     </div>
 </template>
@@ -112,7 +79,6 @@
             return {
                 title: 'Archive',
                 stocks: null,
-
                 current_page: null,
                 lists: [],
                 length: null,
@@ -123,14 +89,7 @@
                 next: null,
             }
         },
-        mounted() {
-            //api.phpに記載された/stocksのルーティングのアクションを発動
-            // axios.get('/api/stocks')
-            //     .then(response => {
-            //         this.stocks = response.data.data.reverse()
-            //         //console.log(this.stocks)
-
-            //     })            
+        mounted() {         
             this.current_page = Number(this.$route.query.page) || 1
             this.showArchive()
 
@@ -140,15 +99,11 @@
                 const result = await axios.get(`/api/stocks?page=${this.current_page}`);
                 const stocks = result.data;
                 this.stocks = stocks.data;
-
                 this.parPage = stocks.meta.per_page //1ページ当たりの表示件数
                 this.totalStocksPer = stocks.meta.total //全部でアイテムが何個あるか
-
-                //総ページ数を取得(これ計算しなくても取得方法ありそうじゃね？)
-                this.length = (Math.ceil(this.totalStocksPer / this.parPage)) //（apiで取得したレコードの総数÷1ページ当たりの表示件数）を繰り上げ
+                this.length = stocks.meta.last_page //総ページ数を取得
 
                 this.makePagenation()
-
             },
 
             makePagenation() {
@@ -159,8 +114,6 @@
                         no: i,
                     })
                 }
-                //console.log(this.pages)
-
 
                 //1個前のページ
                 if (this.current_page !== 1) {
@@ -178,7 +131,6 @@
             },
 
             changePage(number) {
-                //console.log('ナンバーは' + number)
                 this.current_page = number
                 this.showArchive()
                 window.history.pushState({
@@ -192,12 +144,10 @@
             moveToTop() {
                 window.scrollTo({
                     top: 0,
-                    //behavior: "smooth"
                 });
             },
         }
     }
-
 </script>
 <style scoped>
     .b-col img {

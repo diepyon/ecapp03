@@ -33,7 +33,8 @@ const router = new Router({
         {
             path: '/stocks/create',
             name: 'stockcreate',
-            component: StockCreate
+            component: StockCreate,
+            
         },
         {
             path: '/stocks',
@@ -75,6 +76,5 @@ const router = new Router({
         },
     ]
 })
-
 
 export default router;

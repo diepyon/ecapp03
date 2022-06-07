@@ -20,7 +20,7 @@ use App\Http\Controllers\Api\Auth\LoginController;//追記
 
 //Route::get('/stocks', [StockController::class, 'show']);//StockControllerのshowメソッドを発動
 
-Route::get('/stocks',  [StockController::class, 'index']);//20件記事を表示する
+Route::get('/stocks',  [StockController::class, 'index']);
 
 
 

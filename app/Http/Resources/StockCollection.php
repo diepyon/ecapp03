@@ -14,13 +14,13 @@ class StockCollection extends ResourceCollection
      */
     public function toArray($request)
     {
-        return [
-            'stock_count' => $this->count(),
-            'hoge' => $this->collection,
-            'links' => [
-                'self' => $request->fullUrl(),
-            ]
-        ];
+        // return [
+        //     'stock_count' => $this->count(),
+        //     'hoge' => $this->collection,
+        //     'links' => [
+        //         'self' => $request->fullUrl(),
+        //     ]
+        // ];
 
     }
 }

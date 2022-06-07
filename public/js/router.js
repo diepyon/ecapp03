@@ -58,6 +58,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
@@ -83,8 +84,8 @@ __webpack_require__.r(__webpack_exports__);
       axios.get("/api/loginCheck").then(function (response) {
         _this.isLoggedIn = true;
         var userInfo = {
-          name: _this.$store.getters.getUserName,
-          email: localStorage.getItem("userEmail")
+          name: _this.$store.getters.getUserName //email: localStorage.getItem("userEmail"),
+
         };
 
         _this.$store.commit("updateUser", userInfo);
@@ -93,11 +94,14 @@ __webpack_require__.r(__webpack_exports__);
       });
     });
     var userInfo = {
-      name: localStorage.getItem("userName"),
-      email: localStorage.getItem("userEmail")
+      name: localStorage.getItem("userName") //email: localStorage.getItem("userEmail"),
+
     };
     this.$store.commit("updateUser", userInfo);
     console.log(localStorage.getItem("userName")); //localstorageの値をとる
+  },
+  beforeUpdate: function beforeUpdate() {
+    console.log('beforeupdate');
   },
   computed: {},
   methods: {}
@@ -552,6 +556,7 @@ __webpack_require__.r(__webpack_exports__);
         password: null
       },
       userNewValue: {
+        id: null,
         name: null,
         email: null,
         password: null,
@@ -574,6 +579,7 @@ __webpack_require__.r(__webpack_exports__);
       _this.user.email = currentUser.email;
       _this.userNewValue.name = _this.user.name;
       _this.userNewValue.email = _this.user.email;
+      _this.userNewValue.id = response.data.id; //カレントユーザーのIDを取得
     })["catch"](function (error) {
       //console.log(error)
       _this.isLoggedIn = false;
@@ -626,7 +632,8 @@ __webpack_require__.r(__webpack_exports__);
       console.log(event.target.files[0]);
     },
     update: function update() {
-      console.log(this.userNewValue);
+      axios.get("/api/loginCheck").then(function (response) {//console.log(response.data.id)
+      });
       axios.post("/api/account/update", this.userNewValue).then(function (response) {
         console.log(response);
       })["catch"](function (error) {
@@ -738,25 +745,20 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     var _this = this;
 
-    this.message = this.$store.state.message; //this.jumpTo = this.$store.state.jumpTo //ログインを求められて飛ばされた人が本来アクセスしたかったパス
-    //ローカルストレージに値があればvuexに戻そうとしたがうまくいかない
-    // let userInfo = {
-    //     name: localStorage.userName,
-    //     email: localStorage.userEmail,
-    //     token: localStorage.token,
-    // }
-    // this.$store.commit("checkLogin", userInfo)
-
-    this.isLoggedIn = localStorage.token; //トークンがあればログインしている扱いにする
+    //console.log('もともとアクセスしたかったページは' + this.$store.state.jumpTo)
+    this.message = this.$store.state.message; //this.isLoggedIn = localStorage.token //トークンがあればログインしている扱いにする
 
     axios.get("api/loginCheck").then(function (response) {
-      //this.$router.push('/');
       _this.isLoggedIn = true;
       console.log('ログイン済み');
 
-      _this.$router.push(_this.$router.go(-1));
+      if (localStorage.getItem('jumpTo')) {
+        _this.$router.push(localStorage.getItem('jumpTo'));
 
-      return response;
+        localStorage.clear();
+      } else {
+        _this.$router.push('/account');
+      }
     })["catch"](function (error) {
       console.log('未ログイン');
       _this.isLoggedIn = false;
@@ -796,11 +798,20 @@ __webpack_require__.r(__webpack_exports__);
           _this2.$store.commit("checkLogin", userInfo);
 
           _this2.$store.commit("resetState"); //vuexに保存されているメッセージをリセット
-          //わざわざ元のページを把握する必要がない説
-          //this.$router.push(this.jumpTo);
+          //ヘッダーのユーザーネームを読み込むため強制リロード
 
 
-          _this2.$router.push(_this2.$router.go(-1));
+          var jumpTo = localStorage.getItem('jumpTo');
+          console.log(jumpTo); //localStorage.clear()
+          //vueだとなぜかうまくいかないZ
+          //let jumpTo = this.$store.state.jumpTo
+
+          console.log('もともとアクセスしたかったページは' + jumpTo);
+
+          _this2.$router.go(jumpTo); //もともとアクセスしたかったページ
+          // console.log('ホームにでも飛ばすか')
+          // this.$router.go(localStorage.getItem('/'))
+
         })["catch"](function (error) {
           //console.log(error)
           _this2.message = 'ユーザー名またはパスワードが違います。';
@@ -1070,39 +1081,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -1125,12 +1103,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     };
   },
   mounted: function mounted() {
-    //api.phpに記載された/stocksのルーティングのアクションを発動
-    // axios.get('/api/stocks')
-    //     .then(response => {
-    //         this.stocks = response.data.data.reverse()
-    //         //console.log(this.stocks)
-    //     })            
     this.current_page = Number(this.$route.query.page) || 1;
     this.showArchive();
   },
@@ -1154,9 +1126,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 _this.parPage = stocks.meta.per_page; //1ページ当たりの表示件数
 
                 _this.totalStocksPer = stocks.meta.total; //全部でアイテムが何個あるか
-                //総ページ数を取得(これ計算しなくても取得方法ありそうじゃね？)
 
-                _this.length = Math.ceil(_this.totalStocksPer / _this.parPage); //（apiで取得したレコードの総数÷1ページ当たりの表示件数）を繰り上げ
+                _this.length = stocks.meta.last_page; //総ページ数を取得
 
                 _this.makePagenation();
 
@@ -1176,8 +1147,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         this.pages.push({
           no: i
         });
-      } //console.log(this.pages)
-      //1個前のページ
+      } //1個前のページ
 
 
       if (this.current_page !== 1) {
@@ -1194,7 +1164,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }
     },
     changePage: function changePage(number) {
-      //console.log('ナンバーは' + number)
       this.current_page = number;
       this.showArchive();
       window.history.pushState({
@@ -1204,8 +1173,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     },
     moveToTop: function moveToTop() {
       window.scrollTo({
-        top: 0 //behavior: "smooth"
-
+        top: 0
       });
     }
   }
@@ -1466,14 +1434,18 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
     axios.get("/api/loginCheck").then(function (response) {
       _this.isLoggedIn = true;
-      console.log(response);
+      console.log(response); //ログインに成功したら元々行きたかったページを記憶したローカルストレージ削除
     })["catch"](function (error) {
       console.log(error);
       _this.isLoggedIn = false;
 
-      _this.$store.commit("message", 'ログインしてください。');
+      _this.$store.commit("message", 'ログインしてください。'); // this.$store.commit("jumpTo", this.$route.path)
+      //ローカルストレージにこのurlを記憶
 
-      _this.$store.commit("jumpTo", _this.$route.path);
+
+      localStorage.setItem('jumpTo', _this.$route.path); //vuexバージョン（こっちをLoginlvueで使うとうまくいかない）
+
+      _this.$store.commit('jumpTo', _this.$route.path);
 
       _this.$router.push("/login"); //ログイン画面にジャンプ
 
@@ -9261,125 +9233,180 @@ var render = function() {
       ),
       _vm._v(" "),
       _c("div", { staticClass: "text-center" }, [
-        _vm._v("\n\n        現在のページ：" + _vm._s(_vm.current_page)),
+        _vm._v("\n        現在のページ：" + _vm._s(_vm.current_page)),
         _c("br"),
         _vm._v("\n        トータルページ数:" + _vm._s(_vm.length)),
         _c("br"),
         _vm._v("\n        トータル記事数:" + _vm._s(_vm.totalStocksPer)),
         _c("br"),
         _vm._v(" "),
-        _c("p", [_vm._v("ページ数が多い時は「・・・」形式にしたい")]),
-        _vm._v(" "),
         _c("nav", { attrs: { "aria-label": "Page navigation example" } }, [
-          _c(
-            "ul",
-            { staticClass: "pagination justify-content-center" },
-            [
-              _c("li", { staticClass: "page-item" }, [
-                _c(
-                  "button",
-                  {
-                    staticClass: "page-link",
-                    on: {
-                      click: function($event) {
-                        return _vm.changePage(1)
-                      }
+          _c("ul", { staticClass: "pagination justify-content-center" }, [
+            _c("li", { staticClass: "page-item" }, [
+              _c(
+                "button",
+                {
+                  staticClass: "page-link",
+                  on: {
+                    click: function($event) {
+                      return _vm.changePage(1)
                     }
-                  },
-                  [_vm._v("\n                        «")]
-                )
-              ]),
-              _vm._v(" "),
-              _c("li", { staticClass: "page-item" }, [
-                _c(
-                  "button",
-                  {
-                    staticClass: "page-link",
-                    on: {
-                      click: function($event) {
-                        return _vm.changePage(_vm.previous)
-                      }
+                  }
+                },
+                [_vm._v("\n                        «")]
+              )
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "page-item" }, [
+              _c(
+                "button",
+                {
+                  staticClass: "page-link",
+                  on: {
+                    click: function($event) {
+                      return _vm.changePage(_vm.previous)
                     }
-                  },
-                  [_vm._v("\n                        ‹")]
-                )
-              ]),
-              _vm._v(" "),
-              _vm._l(_vm.pages, function(page) {
-                return _c(
+                  }
+                },
+                [_vm._v("\n                        ‹")]
+              )
+            ]),
+            _vm._v(" "),
+            _vm.current_page > 2
+              ? _c(
                   "li",
                   {
-                    key: page.id,
-                    staticClass: "page-item",
-                    class: { active: _vm.current_page === page.no }
+                    staticClass: "page-item disabled bv-d-xs-down-none",
+                    attrs: { role: "separator" }
                   },
-                  [
-                    _c(
-                      "button",
-                      {
-                        staticClass: "page-link",
-                        on: {
-                          click: function($event) {
-                            return _vm.changePage(page.no)
-                          }
+                  [_c("span", { staticClass: "page-link" }, [_vm._v("…")])]
+                )
+              : _vm._e(),
+            _vm._v(" "),
+            _c("li", { staticClass: "page-item" }, [
+              _vm.current_page - 2 > 0
+                ? _c(
+                    "button",
+                    {
+                      staticClass: "page-link",
+                      on: {
+                        click: function($event) {
+                          return _vm.changePage(_vm.current_page - 2)
                         }
-                      },
-                      [_vm._v(_vm._s(page.no))]
-                    )
-                  ]
-                )
-              }),
-              _vm._v(" "),
-              _c("li", { staticClass: "page-item" }, [
-                _c(
-                  "button",
-                  {
-                    staticClass: "page-link",
-                    on: {
-                      click: function($event) {
-                        return _vm.changePage(_vm.next)
                       }
-                    }
-                  },
-                  [_vm._v("\n                        ›")]
-                )
-              ]),
-              _vm._v(" "),
-              _c("li", { staticClass: "page-item" }, [
-                _c(
-                  "button",
-                  {
-                    staticClass: "page-link",
-                    on: {
-                      click: function($event) {
-                        return _vm.changePage(_vm.length)
+                    },
+                    [_vm._v(_vm._s(_vm.current_page - 2))]
+                  )
+                : _vm._e()
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "page-item" }, [
+              _vm.current_page - 1 > 0
+                ? _c(
+                    "button",
+                    {
+                      staticClass: "page-link",
+                      on: {
+                        click: function($event) {
+                          return _vm.changePage(_vm.current_page - 1)
+                        }
                       }
+                    },
+                    [_vm._v(_vm._s(_vm.current_page - 1))]
+                  )
+                : _vm._e()
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "page-item active" }, [
+              _c(
+                "button",
+                {
+                  staticClass: "page-link",
+                  on: {
+                    click: function($event) {
+                      return _vm.changePage(_vm.current_page)
                     }
+                  }
+                },
+                [_vm._v(_vm._s(_vm.current_page))]
+              )
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "page-item" }, [
+              _vm.current_page + 1 <= _vm.length
+                ? _c(
+                    "button",
+                    {
+                      staticClass: "page-link",
+                      on: {
+                        click: function($event) {
+                          return _vm.changePage(_vm.current_page + 1)
+                        }
+                      }
+                    },
+                    [_vm._v(_vm._s(_vm.current_page + 1))]
+                  )
+                : _vm._e()
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "page-item" }, [
+              _vm.current_page + 2 < _vm.length
+                ? _c(
+                    "button",
+                    {
+                      staticClass: "page-link",
+                      on: {
+                        click: function($event) {
+                          return _vm.changePage(_vm.current_page + 2)
+                        }
+                      }
+                    },
+                    [_vm._v(_vm._s(_vm.current_page + 2))]
+                  )
+                : _vm._e()
+            ]),
+            _vm._v(" "),
+            _vm.current_page + 1 < _vm.length
+              ? _c(
+                  "li",
+                  {
+                    staticClass: "page-item disabled bv-d-xs-down-none",
+                    attrs: { role: "separator" }
                   },
-                  [_vm._v("\n                        »")]
+                  [_c("span", { staticClass: "page-link" }, [_vm._v("…")])]
                 )
-              ])
-            ],
-            2
-          )
-        ]),
-        _vm._v(" "),
-        _c("p", [_vm._v("・・・ありバージョン試作中")]),
-        _vm._v(" "),
-        _c("p", [
-          _vm._v("ケツのほうに行くと存在しないページ番号のボタンも出てくる")
-        ]),
-        _vm._v(" "),
-        _c("p", [
-          _vm._v(
-            "フロントでめっちゃ細かく条件書けば行けるけどスマートじゃないような・・・・"
-          )
-        ]),
-        _vm._v(" "),
-        _c("p", [
-          _vm._v(
-            "ありバージョンのコメントアウト外したらリロード時に、ページ番号とページネーションのボタンが連動しなくなる"
-          )
+              : _vm._e(),
+            _vm._v(" "),
+            _c("li", { staticClass: "page-item" }, [
+              _c(
+                "button",
+                {
+                  staticClass: "page-link",
+                  on: {
+                    click: function($event) {
+                      return _vm.changePage(_vm.next)
+                    }
+                  }
+                },
+                [_vm._v("\n                        ›")]
+              )
+            ]),
+            _vm._v(" "),
+            _c("li", { staticClass: "page-item" }, [
+              _c(
+                "button",
+                {
+                  staticClass: "page-link",
+                  on: {
+                    click: function($event) {
+                      return _vm.changePage(_vm.length)
+                    }
+                  }
+                },
+                [_vm._v("\n                        »")]
+              )
+            ])
+          ])
         ])
       ])
     ],

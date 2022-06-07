@@ -1,5 +1,6 @@
 <template>
     <header>
+        <!-- aaaaa{{$store.state.hoge}} -->
         <div>
             <b-navbar toggleable="lg" type="dark" variant="dark">
                 <b-navbar-brand href="#">NavBar</b-navbar-brand>
@@ -60,7 +61,7 @@
                             this.isLoggedIn = true
                             let userInfo = {
                                 name:this.$store.getters.getUserName,
-                                email: localStorage.getItem("userEmail"),
+                                //email: localStorage.getItem("userEmail"),
                             }
                             this.$store.commit("updateUser", userInfo);
                         })
@@ -71,14 +72,20 @@
             )
             let userInfo = {
                 name: localStorage.getItem("userName"),
-                email: localStorage.getItem("userEmail"),
+                //email: localStorage.getItem("userEmail"),
             }
             this.$store.commit("updateUser", userInfo);
 
             console.log(localStorage.getItem("userName"))//localstorageの値をとる
         },
 
-        computed: {},
+        beforeUpdate(){
+            console.log('beforeupdate')
+        },
+
+        computed: {
+          
+        },
         methods: {},
     };
 

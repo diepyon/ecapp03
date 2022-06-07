@@ -9,7 +9,8 @@ const store = new Vuex.Store({
         name: null,
         email: null,
         token: null,
-        jumpTo:'/',//ログイン失敗した人は本来どこに行きたかったのかを記憶
+        jumpTo: '/',//ログイン失敗した人は本来どこに行きたかったのかを記憶
+        hoge:true,
     },
     getters: {
         getUserName(state) { return state.name }
@@ -30,6 +31,12 @@ const store = new Vuex.Store({
             state.name = user.name
             state.email = user.email
         },
+        
+        // hoge(state,boolean) {
+        //     state.hoge = boolean
+        // },
+   
+
         checkLogin(state, userInfo) {
             //vuexに格納
             state.id = userInfo.id
@@ -43,7 +50,7 @@ const store = new Vuex.Store({
             localStorage.setItem("userName", state.name)
             localStorage.setItem("userEmail", state.email)
         },
-        logout(state) { //vuexの内容を削除
+        logout(state) { //vuexとローカルストレージの内容を削除
             state.name = null
             state.email = null
             state.token = null

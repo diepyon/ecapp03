@@ -51,28 +51,22 @@
             }
         },
         mounted() {
+            //console.log('もともとアクセスしたかったページは' + this.$store.state.jumpTo)
+
             this.message = this.$store.state.message
-            //this.jumpTo = this.$store.state.jumpTo //ログインを求められて飛ばされた人が本来アクセスしたかったパス
-
-            //ローカルストレージに値があればvuexに戻そうとしたがうまくいかない
-            // let userInfo = {
-            //     name: localStorage.userName,
-            //     email: localStorage.userEmail,
-            //     token: localStorage.token,
-            // }
-            // this.$store.commit("checkLogin", userInfo)
-
-            this.isLoggedIn = localStorage.token //トークンがあればログインしている扱いにする
+            //this.isLoggedIn = localStorage.token //トークンがあればログインしている扱いにする
 
             axios.get("api/loginCheck")
                 .then(response => {
-                    //this.$router.push('/');
                     this.isLoggedIn = true
-
                     console.log('ログイン済み')
-                    this.$router.push(this.$router.go(-1))
-
-                    return response
+                    
+                    if ((localStorage.getItem('jumpTo'))) {
+                        this.$router.push(localStorage.getItem('jumpTo'))
+                        localStorage.clear()
+                    }else{
+                        this.$router.push('/account')
+                    }
                 })
                 .catch(error => {
                     console.log('未ログイン')
@@ -112,10 +106,23 @@
                             }
                             this.$store.commit("checkLogin", userInfo)
                             this.$store.commit("resetState") //vuexに保存されているメッセージをリセット
+                            
 
-                            //わざわざ元のページを把握する必要がない説
-                            //this.$router.push(this.jumpTo);
-                            this.$router.push(this.$router.go(-1))
+                            //ヘッダーのユーザーネームを読み込むため強制リロード
+                            let jumpTo = localStorage.getItem('jumpTo')
+                            console.log(jumpTo)
+                            //localStorage.clear()
+
+                            //vueだとなぜかうまくいかないZ
+                            //let jumpTo = this.$store.state.jumpTo
+
+
+                            console.log('もともとアクセスしたかったページは' + jumpTo)
+                            this.$router.go(jumpTo) //もともとアクセスしたかったページ
+
+                            // console.log('ホームにでも飛ばすか')
+                            // this.$router.go(localStorage.getItem('/'))
+
                         })
                         .catch((error => {
                             //console.log(error)

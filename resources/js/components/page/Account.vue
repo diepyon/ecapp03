@@ -91,6 +91,7 @@
                     password: null,
                 },
                 userNewValue: {
+                    id:null,
                     name: null,
                     email: null,
                     password: null,
@@ -117,6 +118,8 @@
                     this.userNewValue.name = this.user.name
                     this.userNewValue.email = this.user.email
 
+                    this.userNewValue.id = response.data.id //カレントユーザーのIDを取得
+
                 })
                 .catch(error => {
                     //console.log(error)
@@ -139,7 +142,7 @@
                 axios
                     .post("api/logout")
                     .then(response => {
-                        localStorage.clear();
+                        localStorage.clear()
                         this.$store.commit("logout") //vuexの内容をリセット
                         this.$router.push("/login") //ログイン画面にジャンプ
                     })
@@ -164,7 +167,10 @@
                 console.log(event.target.files[0])
             },
             update() {
-                console.log(this.userNewValue)
+                axios.get("/api/loginCheck")
+                    .then(response=>{
+                        //console.log(response.data.id)
+                    })
 
                 axios.post("/api/account/update", this.userNewValue)
                     .then(response => {
