@@ -15,30 +15,24 @@ class UserController extends Controller
     public function update(User $user,Request $request)
     {   
         $userRecord =  User::where('id', $request->id)->first();
+ 
+        $beforeUpdatedAt = $userRecord->updated_at;//更新前のupdated_at
 
-        //拡張子ファイルもまだかりのもの
         if($request->extention){
             //ファイルがあるなら（拡張子があるなら）画像を投稿
             $filename = substr(bin2hex(random_bytes(8)), 0, 8);//ランダムなファイル名を定義
             $userRecord->update(['icon' => $filename.'.'.$request->extention,]);
             $request->file('files')[0]->storeAs('public/user_icon', $filename.'.'.$request->extention);//ランダムなファイル名.拡張子をファイル名に指定
-
-            //古い画像は削除したい
+            //古い画像は削除したい            
         }
 
-        //古い画像は削除したい
-
-
-        
-        $beforeUpdatedAt = $userRecord->updated_at;//更新前のupdated_at
-
         $result = $userRecord->fill($request->only([
-            'name', 'email','icon'
+            'name', 'email'
         ]))->update();
 
-        $afterUpdatedAt = $userRecord->updated_at;
+        $afterUpdatedAt = $userRecord->updated_at; //更新後のupdated_at
 
-        if($beforeUpdatedAt == $afterUpdatedAt) {
+        if($beforeUpdatedAt == $afterUpdatedAt ) {//updated_atに差分があるかをリターン
             return 'nothing';
         }else{
             return 'updated';

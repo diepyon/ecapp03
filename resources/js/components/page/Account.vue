@@ -178,7 +178,7 @@
                 postData.append('id', this.userNewValue.id)
                 postData.append('name', this.userNewValue.name)
                 postData.append('email', this.userNewValue.email)
-                
+
                 //バリデーションを通過しないと更新させなくしたい
                 axios.post("/api/account/update", postData)
                     .then(response => {
@@ -202,14 +202,23 @@
 
                         this.user.name = currentUser.name
                         this.user.email = currentUser.email
+
+                        //let icon = currentUser.icon
+
+                        if (currentUser.icon) {
+                            this.blobUrl = '/storage/user_icon/' + currentUser.icon
+                        }//最新版のユーザーアイコンを取得
+
                         this.userNewValue.name = this.user.name
                         this.userNewValue.email = this.user.email
                         this.userNewValue.id = response.data.id //カレントユーザーのIDを取得
+
 
                         //vuexでリアルタイムにユーザーの情報を更新（ヘッダーが変化を監視）
                         let userInfo = {
                             name: this.userNewValue.name,
                             email: this.userNewValue.name,
+                            //アイコンの情報もヘッダーに表示したいなら必要かも
                         }
                         this.$store.commit("checkLogin", userInfo)
                     })
@@ -269,7 +278,7 @@
         margin: 0;
         /*余計な隙間を除く*/
         padding: 0;
-        color: white;
+        color: rgba(99, 99, 99, 0.721);
         /*余計な隙間を除く*/
         font-size: 30px;
         /*サイズ*/
