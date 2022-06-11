@@ -58,7 +58,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
@@ -69,17 +68,25 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     var _this = this;
 
+    axios.get("/api/loginCheck").then(function (response) {
+      _this.isLoggedIn = true; //this.userName = localStorage.getItem('userName')
+      //email: localStorage.getItem("userEmail"),
+    })["catch"](function (error) {
+      _this.isLoggedIn = false;
+    }); //プロフィール更新時に認識させるから必要
+
     this.$store.watch(function (state, getters) {
       return getters.getUserName;
     }, function (newValue, oldValue) {
       console.log('user changed! %s => %s', oldValue, newValue);
       _this.userName = newValue; //セッション切れ後初回ログインで通らないので2重処理
       //これでうまくいったらノートに記載して
-
-      if (_this.userName) {
-        _this.isLoggedIn = true;
-      } //vuexのユーザー名が変わったことを検知した上でサンクタムのログインチェック処理
-
+      // if (this.userName) {
+      //     this.isLoggedIn = true
+      // } else {
+      //     this.isLoggedIn = false
+      // }
+      //vuexのユーザー名が変わったことを検知した上でサンクタムのログインチェック処理
 
       axios.get("/api/loginCheck").then(function (response) {
         _this.isLoggedIn = true;
@@ -101,7 +108,22 @@ __webpack_require__.r(__webpack_exports__);
     console.log(localStorage.getItem("userName")); //localstorageの値をとる
   },
   beforeUpdate: function beforeUpdate() {
-    console.log('beforeupdate');
+    var _this2 = this;
+
+    console.log('beforeupdate'); //ここに書けばリロードじゃなくも行けるのでは？
+    //これでいけるならmounted直下の axios.get("/api/loginCheck")はいらないんじゃないかな
+
+    axios.get("/api/loginCheck").then(function (response) {
+      _this2.isLoggedIn = true;
+      var userInfo = {
+        name: _this2.$store.getters.getUserName //email: localStorage.getItem("userEmail"),
+
+      };
+
+      _this2.$store.commit("updateUser", userInfo);
+    })["catch"](function (error) {
+      _this2.isLoggedIn = false;
+    });
   },
   computed: {},
   methods: {}
@@ -466,6 +488,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var _layout_Header__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../layout/Header */ "./resources/js/components/layout/Header.vue");
 /* harmony import */ var _layout_Footer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../layout/Footer */ "./resources/js/components/layout/Footer.vue");
+/* harmony import */ var _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../modules/validation.js */ "./resources/js/modules/validation.js");
 //
 //
 //
@@ -539,6 +562,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
+ //バリデーションのモジュールを外部ファイルから読み込み
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -560,35 +585,24 @@ __webpack_require__.r(__webpack_exports__);
         name: null,
         email: null,
         password: null,
-        passwordConfirm: null
+        passwordConfirm: null //file: null,
+
       },
       isLoggedIn: false,
       activeStatus: 'inactive',
       fileInfo: null,
-      blobUrl: '/storage/user_icon/default_icon.jpg'
+      blobUrl: '/storage/user_icon/default_icon.jpg',
+      message: null,
+      //更新にまつわるメッセージ
+      errorMessage: {
+        'name': null,
+        'email': null,
+        'password': null
+      }
     };
   },
   mounted: function mounted() {
-    var _this = this;
-
-    axios.get("/api/loginCheck").then(function (response) {
-      _this.isLoggedIn = true;
-      var currentUser = response.data; //編集される可能性があるからそもそもここはデータベースから引っ張ってくるべきかも？？
-
-      _this.user.name = currentUser.name;
-      _this.user.email = currentUser.email;
-      _this.userNewValue.name = _this.user.name;
-      _this.userNewValue.email = _this.user.email;
-      _this.userNewValue.id = response.data.id; //カレントユーザーのIDを取得
-    })["catch"](function (error) {
-      //console.log(error)
-      _this.isLoggedIn = false;
-
-      _this.$store.commit("message", 'ログインしてください。');
-
-      _this.$router.push("/login"); //ログイン画面にジャンプ
-
-    });
+    this.getUserInfo();
     this.userNewValue.password = null;
     this.userNewValue.passwordConfirm = null;
   },
@@ -600,15 +614,16 @@ __webpack_require__.r(__webpack_exports__);
       this.activeStatus = 'inactive';
     },
     logout: function logout() {
-      var _this2 = this;
+      var _this = this;
 
       axios.post("api/logout").then(function (response) {
         localStorage.clear();
 
-        _this2.$store.commit("logout"); //vuexの内容をリセット
+        _this.$store.commit("logout"); //vuexの内容をリセット
+        //pushに変えてみた。headerのbefore mountedで監視してるから、セッション切れ後もワンチャンいける。
 
 
-        _this2.$router.push("/login"); //ログイン画面にジャンプ
+        _this.$router.push("/login"); //ログイン画面にジャンプ
 
       })["catch"](function (error) {
         console.log(error);
@@ -616,29 +631,103 @@ __webpack_require__.r(__webpack_exports__);
     },
     fileSelected: function fileSelected(event) {
       this.fileInfo = event.target.files[0]; //選択されたファイルの情報を変数に格納
-      // if (this.fileInfo) {
+
+      console.log(this.fileInfo); // if (this.fileInfo) {
       //     this.errorMessage.file = null //ファイル未選択のバリデーションエラーが出てたら消す
       // }
 
       if (event.target.files[0] != undefined) {
         this.blobUrl = URL.createObjectURL(this.fileInfo); //選択されたファイルのURLを取得 
 
-        this.fileName = this.fileInfo.name;
+        this.fileName = this.fileInfo.name; //いらんかも
+
+        this.userNewValue.file = this.fileInfo;
       } else {
         this.blobUrl = "";
       }
-
-      console.log(this.blobUrl);
-      console.log(event.target.files[0]);
     },
     update: function update() {
-      axios.get("/api/loginCheck").then(function (response) {//console.log(response.data.id)
-      });
-      axios.post("/api/account/update", this.userNewValue).then(function (response) {
-        console.log(response);
+      var _this2 = this;
+
+      // axios.get("/api/loginCheck")
+      //     .then(response => {
+      //         this.userNewValue.id = response.data.id
+      //     })
+      this.getUserInfo();
+      var postData = new FormData();
+
+      if (this.fileInfo) {
+        postData.append('files[0]', this.fileInfo); //files配列の先頭はthis.fileInfo
+
+        postData.append('extention', this.fileInfo.name.split('.').pop()); //拡張子を取得
+      }
+
+      postData.append('id', this.userNewValue.id);
+      postData.append('name', this.userNewValue.name);
+      postData.append('email', this.userNewValue.email); //バリデーションを通過しないと更新させなくしたい
+
+      axios.post("/api/account/update", postData).then(function (response) {
+        _this2.message = response.data; //更新されたかどうかの結果を格納したメッセージ
+
+        if (_this2.message == 'updated') {
+          _this2.$bvModal.hide('modal-scoped');
+        } //変化があれば閉じる
+
+
+        _this2.getUserInfo(); //ユーザー情報更新
+
       })["catch"](function (error) {
         console.log(error);
       });
+    },
+    getUserInfo: function getUserInfo() {
+      var _this3 = this;
+
+      axios.get("/api/loginCheck").then(function (response) {
+        _this3.isLoggedIn = true;
+        var currentUser = response.data;
+        _this3.user.name = currentUser.name;
+        _this3.user.email = currentUser.email;
+        _this3.userNewValue.name = _this3.user.name;
+        _this3.userNewValue.email = _this3.user.email;
+        _this3.userNewValue.id = response.data.id; //カレントユーザーのIDを取得
+        //vuexでリアルタイムにユーザーの情報を更新（ヘッダーが変化を監視）
+
+        var userInfo = {
+          name: _this3.userNewValue.name,
+          email: _this3.userNewValue.name
+        };
+
+        _this3.$store.commit("checkLogin", userInfo);
+      })["catch"](function (error) {
+        //console.log(error)
+        _this3.isLoggedIn = false; //this.$store.commit("message", 'ログインしてください。')
+
+        _this3.$router.push("/login"); //ログイン画面にジャンプ
+
+      });
+    },
+    //こいつら、まとめて一つのメソッドにできひん？引数にnameとかemailとかいれたらいいやん
+    checkEmail: function checkEmail() {
+      //モジュールからエラーメッセージを取得
+      this.errorMessage.email = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.email(this.userNewValue).message; //モジュールから真偽を取得
+
+      var result = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.email(this.userNewValue).result;
+      return result;
+    },
+    checkName: function checkName() {
+      //モジュールからエラーメッセージを取得
+      this.errorMessage.name = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.name(this.userNewValue).message; //モジュールから真偽を取得
+
+      var result = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.name(this.userNewValue).result;
+      return result;
+    },
+    //まとめるチャレンジ
+    validation: function validation(input) {// let hoge = input
+      // this.errorMessage.hoge = Validate.hoge(this.userNewValue).message
+      // //モジュールから真偽を取得
+      // var result = Validate.input(this.userNewValue).result
+      // return result
     }
   }
 });
@@ -715,9 +804,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 
- //バリデーションのモジュールを外部ファイルから読み込
+ //バリデーションのモジュールを外部ファイルから読み込み
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -730,7 +818,6 @@ __webpack_require__.r(__webpack_exports__);
     return {
       title: 'Login',
       message: null,
-      //jumpTo: '/', //わざわざリダイレクト前のページを定義る必要がない説
       form: {
         email: '',
         password: ''
@@ -739,29 +826,28 @@ __webpack_require__.r(__webpack_exports__);
         'email': null,
         'password': null
       },
-      isLoggedIn: false
+      isLoggedIn: null
     };
   },
   mounted: function mounted() {
     var _this = this;
 
     //console.log('もともとアクセスしたかったページは' + this.$store.state.jumpTo)
-    this.message = this.$store.state.message; //this.isLoggedIn = localStorage.token //トークンがあればログインしている扱いにする
-
+    this.message = this.$store.state.message;
     axios.get("api/loginCheck").then(function (response) {
-      _this.isLoggedIn = true;
-      console.log('ログイン済み');
+      _this.isLoggedIn = 'yes'; //trueだと判定までの読み込み中に一瞬ログインフォームが表示されてしまう
 
-      if (localStorage.getItem('jumpTo')) {
-        _this.$router.push(localStorage.getItem('jumpTo'));
+      console.log('ログイン済み'); // if ((localStorage.getItem('jumpTo'))) {
+      //     this.$router.push(localStorage.getItem('jumpTo'))
+      //     localStorage.clear()
+      // }else{
+      //     this.$router.push('/account')
+      // }
 
-        localStorage.clear();
-      } else {
-        _this.$router.push('/account');
-      }
+      _this.$router.push('/account');
     })["catch"](function (error) {
       console.log('未ログイン');
-      _this.isLoggedIn = false;
+      _this.isLoggedIn = 'no';
     });
   },
   methods: {
@@ -799,21 +885,25 @@ __webpack_require__.r(__webpack_exports__);
 
           _this2.$store.commit("resetState"); //vuexに保存されているメッセージをリセット
           //ヘッダーのユーザーネームを読み込むため強制リロード
+          //let jumpTo = localStorage.getItem('jumpTo')
+          //console.log(jumpTo)
+          //localStorage.clear()
+          //console.log('もともとアクセスしたかったページは' + jumpTo)
+          //pushに変えてみた。headerのbefore mountedで監視してるから、セッション切れ後もワンチャンいける。
+          //this.$router.push(jumpTo) //もともとアクセスしたかったページ
 
 
-          var jumpTo = localStorage.getItem('jumpTo');
-          console.log(jumpTo); //localStorage.clear()
-          //vueだとなぜかうまくいかないZ
-          //let jumpTo = this.$store.state.jumpTo
+          if (localStorage.getItem('jumpTo')) {
+            _this2.$router.push(localStorage.getItem('jumpTo'));
 
-          console.log('もともとアクセスしたかったページは' + jumpTo);
+            localStorage.clear();
+          } else {
+            _this2.$router.push('/account');
+          }
 
-          _this2.$router.go(jumpTo); //もともとアクセスしたかったページ
-          // console.log('ホームにでも飛ばすか')
-          // this.$router.go(localStorage.getItem('/'))
-
+          localStorage.clear();
         })["catch"](function (error) {
-          //console.log(error)
+          console.log(error);
           _this2.message = 'ユーザー名またはパスワードが違います。';
         });
       } else {
@@ -1644,7 +1734,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         postData.append('form[genre]', this.genre);
         postData.append('form[fee]', this.feeSelected);
         postData.append('form[detail]', this.detail);
-        postData.append('userId', localStorage.id); //バリデーション関数のreturnがどちらもtrueなら下記実行
+        postData.append('userId', localStorage.id); //localstorage書き換えられたらあかんかも？
+        //headerからカレンとユーザーのIDを取得する？
+        //バリデーション関数のreturnがどちらもtrueなら下記実行
 
         axios.post('/api/stocks/create', postData) //api.phpのルートを指定。第2引数には渡したい変数を入れる（今回は配列postData=入力された内容）
         .then(function (response) {
@@ -1856,6 +1948,7 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "name": () => (/* binding */ name),
 /* harmony export */   "email": () => (/* binding */ email),
 /* harmony export */   "password": () => (/* binding */ password)
 /* harmony export */ });
@@ -1907,6 +2000,32 @@ function password(form) {
   } else {
     var result = false;
   } //passwordの入力に問題がなければtrueを返す
+
+
+  return {
+    'result': result,
+    'message': message
+  };
+}
+
+function name(form) {
+  var n = '';
+  var n = form.name.length; //passwordの文字数
+
+  if (n == 0) {
+    var message = "入力してください。";
+  } else if (n > 256) {
+    //文字数を変数にしたい
+    var message = "255文字以内で入力してください。";
+  } else {
+    var message = "";
+  }
+
+  if (message == "") {
+    var result = true;
+  } else {
+    var result = false;
+  } //nameの入力に問題がなければtrueを返す
 
 
   return {
@@ -8527,96 +8646,172 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _vm.isLoggedIn
     ? _c("div", [
-        _c("div", [
-          _c("p", [_vm._v(_vm._s(_vm.user.name))]),
-          _vm._v(" "),
-          _c("p", [_vm._v(_vm._s(_vm.user.email))]),
-          _vm._v(" "),
-          _c(
-            "button",
-            {
-              staticClass: "btn btn-primary",
-              attrs: {
-                type: "button",
-                "data-toggle": "modal",
-                "data-target": "#profilemodal"
-              }
-            },
-            [_vm._v("\n            編集\n        ")]
-          ),
-          _vm._v(" "),
-          _c(
-            "div",
-            {
-              staticClass: "modal fade",
-              attrs: {
-                id: "profilemodal",
-                tabindex: "-1",
-                role: "dialog",
-                "aria-labelledby": "profilemodalTitle",
-                "aria-hidden": "true"
-              }
-            },
+        _c(
+          "div",
+          [
+            _c("p", [_vm._v(_vm._s(_vm.user.name))]),
+            _vm._v(" "),
+            _c("p", [_vm._v(_vm._s(_vm.user.email))]),
+            _vm._v(" "),
             [
               _c(
-                "div",
+                "b-button",
                 {
-                  staticClass: "modal-dialog modal-dialog-centered",
-                  attrs: { role: "document" }
+                  directives: [
+                    {
+                      name: "b-modal",
+                      rawName: "v-b-modal.modal-center",
+                      modifiers: { "modal-center": true }
+                    }
+                  ],
+                  attrs: { variant: "primary" },
+                  on: {
+                    click: function($event) {
+                      return _vm.$bvModal.show("modal-scoped")
+                    }
+                  }
+                },
+                [_vm._v("編集")]
+              ),
+              _vm._v(" "),
+              _c(
+                "b-modal",
+                {
+                  attrs: { centered: "", id: "modal-scoped" },
+                  scopedSlots: _vm._u(
+                    [
+                      {
+                        key: "modal-header",
+                        fn: function(ref) {
+                          var close = ref.close
+                          return [
+                            _c(
+                              "h5",
+                              {
+                                staticClass: "modal-title",
+                                attrs: { id: "profilemodalTitle" }
+                              },
+                              [_vm._v("プロフィール編集")]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "b-button",
+                              {
+                                staticClass: "close",
+                                on: {
+                                  click: function($event) {
+                                    return close()
+                                  }
+                                }
+                              },
+                              [
+                                _c(
+                                  "span",
+                                  { attrs: { "aria-hidden": "true" } },
+                                  [_vm._v("×")]
+                                )
+                              ]
+                            )
+                          ]
+                        }
+                      },
+                      {
+                        key: "modal-footer",
+                        fn: function(ref) {
+                          var cancel = ref.cancel
+                          return [
+                            _c(
+                              "b-button",
+                              {
+                                attrs: { type: "button", variant: "primary" },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.update()
+                                  }
+                                }
+                              },
+                              [_vm._v("保存")]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "b-button",
+                              {
+                                attrs: { variant: "secondary" },
+                                on: {
+                                  click: function($event) {
+                                    return cancel()
+                                  }
+                                }
+                              },
+                              [
+                                _vm._v(
+                                  "\n                        キャンセル\n                    "
+                                )
+                              ]
+                            )
+                          ]
+                        }
+                      }
+                    ],
+                    null,
+                    false,
+                    1218670896
+                  )
                 },
                 [
-                  _c("div", { staticClass: "modal-content" }, [
-                    _vm._m(0),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "modal-body" }, [
-                      _c("div", { attrs: { id: "form" } }, [
-                        _c("div", { staticClass: "form" }, [
-                          _c(
-                            "div",
-                            {
-                              staticClass: "parent",
-                              staticStyle: { width: "150px" }
-                            },
-                            [
-                              _c("img", {
-                                staticClass: "userIcon",
-                                attrs: { src: _vm.blobUrl }
-                              }),
-                              _vm._v(" "),
-                              _c(
-                                "label",
-                                { staticStyle: { display: "initial" } },
-                                [
-                                  _c("font-awesome-icon", {
-                                    staticClass: "child",
-                                    class: _vm.activeStatus,
-                                    attrs: { icon: ["fa", "camera"] },
-                                    on: {
-                                      mouseover: _vm.beActive,
-                                      mouseleave: _vm.beInActive
-                                    }
-                                  }),
-                                  _vm._v(" "),
-                                  _c("input", {
-                                    ref: "file",
-                                    staticClass: "form-control-file ",
-                                    staticStyle: { display: "none" },
-                                    attrs: {
-                                      type: "file",
-                                      accept: ".jpg,.jpeg,.png,.gif"
-                                    },
-                                    on: { change: _vm.fileSelected }
-                                  })
-                                ],
-                                1
-                              )
-                            ]
-                          ),
-                          _vm._v(" "),
-                          _c("div", { staticClass: "form-group" }, [
-                            _c("label", { attrs: { for: "" } }, [
-                              _vm._v("名前")
-                            ]),
+                  _vm._v(" "),
+                  [
+                    _c(
+                      "b-form",
+                      { attrs: { id: "form" } },
+                      [
+                        _c(
+                          "div",
+                          {
+                            staticClass: "parent",
+                            staticStyle: { width: "150px" }
+                          },
+                          [
+                            _c("img", {
+                              staticClass: "userIcon",
+                              attrs: { src: _vm.blobUrl }
+                            }),
+                            _vm._v(" "),
+                            _c(
+                              "label",
+                              { staticStyle: { display: "initial" } },
+                              [
+                                _c("font-awesome-icon", {
+                                  staticClass: "child",
+                                  class: _vm.activeStatus,
+                                  attrs: { icon: ["fa", "camera"] },
+                                  on: {
+                                    mouseover: _vm.beActive,
+                                    mouseleave: _vm.beInActive
+                                  }
+                                }),
+                                _vm._v(" "),
+                                _c("input", {
+                                  ref: "file",
+                                  staticClass: "form-control-file ",
+                                  staticStyle: { display: "none" },
+                                  attrs: {
+                                    type: "file",
+                                    accept: ".jpg,.jpeg,.png,.gif"
+                                  },
+                                  on: { change: _vm.fileSelected }
+                                })
+                              ],
+                              1
+                            )
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          { attrs: { id: "", label: "名前", description: "" } },
+                          [
+                            _c("code", [_vm._v(_vm._s(_vm.errorMessage.name))]),
                             _vm._v(" "),
                             _c("input", {
                               directives: [
@@ -8631,6 +8826,8 @@ var render = function() {
                               attrs: { type: "txt" },
                               domProps: { value: _vm.userNewValue.name },
                               on: {
+                                change: _vm.checkName,
+                                blur: _vm.checkName,
                                 input: function($event) {
                                   if ($event.target.composing) {
                                     return
@@ -8643,11 +8840,21 @@ var render = function() {
                                 }
                               }
                             })
-                          ]),
-                          _vm._v(" "),
-                          _c("div", { staticClass: "form-group" }, [
-                            _c("label", { attrs: { for: "" } }, [
-                              _vm._v("メールアドレス")
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              id: "",
+                              label: "メールアドレス",
+                              description: ""
+                            }
+                          },
+                          [
+                            _c("code", [
+                              _vm._v(_vm._s(_vm.errorMessage.email))
                             ]),
                             _vm._v(" "),
                             _c("input", {
@@ -8663,6 +8870,8 @@ var render = function() {
                               attrs: { type: "email" },
                               domProps: { value: _vm.userNewValue.email },
                               on: {
+                                change: _vm.checkEmail,
+                                blur: _vm.checkEmail,
                                 input: function($event) {
                                   if ($event.target.composing) {
                                     return
@@ -8675,13 +8884,19 @@ var render = function() {
                                 }
                               }
                             })
-                          ]),
-                          _vm._v(" "),
-                          _c("div", { staticClass: "form-group" }, [
-                            _c("label", { attrs: { for: "" } }, [
-                              _vm._v("パスワード")
-                            ]),
-                            _vm._v(" "),
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              id: "",
+                              label: "パスワード",
+                              description: ""
+                            }
+                          },
+                          [
                             _c("input", {
                               directives: [
                                 {
@@ -8712,13 +8927,19 @@ var render = function() {
                                 }
                               }
                             })
-                          ]),
-                          _vm._v(" "),
-                          _c("div", { staticClass: "form-group" }, [
-                            _c("label", { attrs: { for: "" } }, [
-                              _vm._v("パスワード確認")
-                            ]),
-                            _vm._v(" "),
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _c(
+                          "b-form-group",
+                          {
+                            attrs: {
+                              id: "",
+                              label: "パスワード確認",
+                              description: ""
+                            }
+                          },
+                          [
                             _c("input", {
                               directives: [
                                 {
@@ -8750,64 +8971,43 @@ var render = function() {
                                 }
                               }
                             })
-                          ])
-                        ])
-                      ])
-                    ]),
-                    _vm._v(" "),
-                    _c("div", { staticClass: "modal-footer" }, [
-                      _c(
-                        "button",
-                        {
-                          staticClass: "btn btn-primary",
-                          attrs: { type: "button" },
-                          on: { click: _vm.update }
-                        },
-                        [_vm._v("保存")]
-                      )
-                    ])
-                  ])
-                ]
+                          ]
+                        ),
+                        _vm._v(" "),
+                        _vm.message == "nothing"
+                          ? _c(
+                              "b-alert",
+                              { attrs: { show: "", variant: "warning" } },
+                              [_vm._v("変更はありませんでした。")]
+                            )
+                          : _vm._e()
+                      ],
+                      1
+                    )
+                  ]
+                ],
+                2
               )
-            ]
-          ),
-          _vm._v(" "),
-          _c(
-            "button",
-            { attrs: { type: "button" }, on: { click: _vm.logout } },
-            [_vm._v("ログアウト")]
-          )
-        ])
+            ],
+            _vm._v(" "),
+            _c(
+              "button",
+              { attrs: { type: "button" }, on: { click: _vm.logout } },
+              [_vm._v("ログアウト")]
+            ),
+            _vm._v(" "),
+            _vm.message == "updated"
+              ? _c("b-alert", { attrs: { show: "", variant: "success" } }, [
+                  _vm._v("更新しました。")
+                ])
+              : _vm._e()
+          ],
+          2
+        )
       ])
     : _vm._e()
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "modal-header" }, [
-      _c(
-        "h5",
-        { staticClass: "modal-title", attrs: { id: "profilemodalTitle" } },
-        [_vm._v("プロフィール編集")]
-      ),
-      _vm._v(" "),
-      _c(
-        "button",
-        {
-          staticClass: "close",
-          attrs: {
-            type: "button",
-            "data-dismiss": "modal",
-            "aria-label": "Close"
-          }
-        },
-        [_c("span", { attrs: { "aria-hidden": "true" } }, [_vm._v("×")])]
-      )
-    ])
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 
 
@@ -8862,7 +9062,7 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return !_vm.isLoggedIn
+  return _vm.isLoggedIn == "no"
     ? _c(
         "div",
         [

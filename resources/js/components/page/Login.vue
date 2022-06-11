@@ -1,6 +1,5 @@
 <template>
-    <!-- <div > -->
-    <div v-if="!isLoggedIn">
+    <div v-if="isLoggedIn=='no'">
         <h1>{{title}}</h1>
         <b-form>
             <b-form-group id="input-group-1" label="メールアドレス" description="">
@@ -24,7 +23,7 @@
     import Header from '../layout/Header'
     import Footer from '../layout/Footer'
 
-    //バリデーションのモジュールを外部ファイルから読み込
+    //バリデーションのモジュールを外部ファイルから読み込み
     import * as Validate from '../../modules/validation.js'
     export default {
         components: {
@@ -38,7 +37,6 @@
                 title: 'Login',
                 message: null,
 
-                //jumpTo: '/', //わざわざリダイレクト前のページを定義る必要がない説
                 form: {
                     email: '',
                     password: '',
@@ -47,30 +45,31 @@
                     'email': null,
                     'password': null,
                 },
-                isLoggedIn: false,
+                isLoggedIn: null,
             }
         },
         mounted() {
             //console.log('もともとアクセスしたかったページは' + this.$store.state.jumpTo)
 
             this.message = this.$store.state.message
-            //this.isLoggedIn = localStorage.token //トークンがあればログインしている扱いにする
 
             axios.get("api/loginCheck")
                 .then(response => {
-                    this.isLoggedIn = true
+                    this.isLoggedIn = 'yes' //trueだと判定までの読み込み中に一瞬ログインフォームが表示されてしまう
                     console.log('ログイン済み')
-                    
-                    if ((localStorage.getItem('jumpTo'))) {
-                        this.$router.push(localStorage.getItem('jumpTo'))
-                        localStorage.clear()
-                    }else{
-                        this.$router.push('/account')
-                    }
+
+                    // if ((localStorage.getItem('jumpTo'))) {
+                    //     this.$router.push(localStorage.getItem('jumpTo'))
+                    //     localStorage.clear()
+                    // }else{
+                    //     this.$router.push('/account')
+                    // }
+
+                    this.$router.push('/account')
                 })
                 .catch(error => {
                     console.log('未ログイン')
-                    this.isLoggedIn = false
+                    this.isLoggedIn = 'no'
                 })
         },
 
@@ -106,26 +105,31 @@
                             }
                             this.$store.commit("checkLogin", userInfo)
                             this.$store.commit("resetState") //vuexに保存されているメッセージをリセット
-                            
+
+
 
                             //ヘッダーのユーザーネームを読み込むため強制リロード
-                            let jumpTo = localStorage.getItem('jumpTo')
-                            console.log(jumpTo)
+                            //let jumpTo = localStorage.getItem('jumpTo')
+                            //console.log(jumpTo)
                             //localStorage.clear()
 
-                            //vueだとなぜかうまくいかないZ
-                            //let jumpTo = this.$store.state.jumpTo
+                            //console.log('もともとアクセスしたかったページは' + jumpTo)
 
+                            //pushに変えてみた。headerのbefore mountedで監視してるから、セッション切れ後もワンチャンいける。
+                            //this.$router.push(jumpTo) //もともとアクセスしたかったページ
 
-                            console.log('もともとアクセスしたかったページは' + jumpTo)
-                            this.$router.go(jumpTo) //もともとアクセスしたかったページ
-
-                            // console.log('ホームにでも飛ばすか')
-                            // this.$router.go(localStorage.getItem('/'))
-
+                            if ((localStorage.getItem('jumpTo'))) {
+                                this.$router.push(localStorage.getItem('jumpTo'))
+                                localStorage.clear()
+                            } else {
+                                this.$router.push('/account')
+                            }
+                            localStorage.clear()
+                            
+                            
                         })
                         .catch((error => {
-                            //console.log(error)
+                            console.log(error)
                             this.message = 'ユーザー名またはパスワードが違います。'
                         }))
                 } else {

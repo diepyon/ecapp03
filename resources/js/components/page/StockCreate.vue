@@ -376,7 +376,8 @@
                     postData.append('form[genre]', this.genre)
                     postData.append('form[fee]', this.feeSelected)
                     postData.append('form[detail]', this.detail)
-                    postData.append('userId', localStorage.id)
+                    postData.append('userId', localStorage.id)//localstorage書き換えられたらあかんかも？
+                    //headerからカレンとユーザーのIDを取得する？
 
                     //バリデーション関数のreturnがどちらもtrueなら下記実行
                     axios.post('/api/stocks/create', postData) //api.phpのルートを指定。第2引数には渡したい変数を入れる（今回は配列postData=入力された内容）

@@ -1,6 +1,5 @@
 <template>
     <header>
-        <!-- aaaaa{{$store.state.hoge}} -->
         <div>
             <b-navbar toggleable="lg" type="dark" variant="dark">
                 <b-navbar-brand href="#">NavBar</b-navbar-brand>
@@ -43,6 +42,19 @@
             }
         },
         mounted() {
+            axios.get("/api/loginCheck")
+                .then(response => {
+                    this.isLoggedIn = true
+
+                    //this.userName = localStorage.getItem('userName')
+                    //email: localStorage.getItem("userEmail"),
+
+                })
+                .catch(error => {
+                    this.isLoggedIn = false
+                })
+
+            //プロフィール更新時に認識させるから必要
             this.$store.watch(
                 (state, getters) => getters.getUserName,
                 (newValue, oldValue) => {
@@ -51,16 +63,18 @@
 
                     //セッション切れ後初回ログインで通らないので2重処理
                     //これでうまくいったらノートに記載して
-                    if(this.userName){
-                        this.isLoggedIn = true
-                    }
+                    // if (this.userName) {
+                    //     this.isLoggedIn = true
+                    // } else {
+                    //     this.isLoggedIn = false
+                    // }
 
                     //vuexのユーザー名が変わったことを検知した上でサンクタムのログインチェック処理
                     axios.get("/api/loginCheck")
                         .then(response => {
                             this.isLoggedIn = true
                             let userInfo = {
-                                name:this.$store.getters.getUserName,
+                                name: this.$store.getters.getUserName,
                                 //email: localStorage.getItem("userEmail"),
                             }
                             this.$store.commit("updateUser", userInfo);
@@ -70,21 +84,38 @@
                         })
                 }
             )
+
+
             let userInfo = {
                 name: localStorage.getItem("userName"),
                 //email: localStorage.getItem("userEmail"),
             }
             this.$store.commit("updateUser", userInfo);
 
-            console.log(localStorage.getItem("userName"))//localstorageの値をとる
+            console.log(localStorage.getItem("userName")) //localstorageの値をとる
         },
 
-        beforeUpdate(){
+        beforeUpdate() {
             console.log('beforeupdate')
+
+            //ここに書けばリロードじゃなくも行けるのでは？
+            //これでいけるならmounted直下の axios.get("/api/loginCheck")はいらないんじゃないかな
+            axios.get("/api/loginCheck")
+                .then(response => {
+                    this.isLoggedIn = true
+                    let userInfo = {
+                        name: this.$store.getters.getUserName,
+                        //email: localStorage.getItem("userEmail"),
+                    }
+                    this.$store.commit("updateUser", userInfo);
+                })
+                .catch(error => {
+                    this.isLoggedIn = false
+                })
         },
 
         computed: {
-          
+
         },
         methods: {},
     };

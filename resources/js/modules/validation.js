@@ -50,7 +50,31 @@ function password(form) {
     }
 }
 
+function name(form) {
+    var n = ''
+    var n = form.name.length //passwordの文字数
+
+    if (n == 0) {
+        var message = "入力してください。"
+    } else if (n > 256) {//文字数を変数にしたい
+        var message = "255文字以内で入力してください。"
+    } else {
+        var message = ""
+    }
+
+    if (message == "") {
+        var result = true
+    } else {
+        var result = false
+    } //nameの入力に問題がなければtrueを返す
+    return {
+        'result': result,
+        'message': message
+    }
+}
+
 export {
+    name,
     email,
     password
 }
