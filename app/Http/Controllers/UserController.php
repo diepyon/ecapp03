@@ -15,15 +15,19 @@ class UserController extends Controller
     public function update(User $user,Request $request)
     {   
         $userRecord =  User::where('id', $request->id)->first();
- 
         $beforeUpdatedAt = $userRecord->updated_at;//更新前のupdated_at
 
-        if($request->extention){
-            //ファイルがあるなら（拡張子があるなら）画像を投稿
+        //アイコンを最低限のサイズに縮小したい
+        if($request->extention || $userRecord->icon == null){
+            //ファイルがあるなら（拡張子があるなら）画像を投稿            
             $filename = substr(bin2hex(random_bytes(8)), 0, 8);//ランダムなファイル名を定義
             $userRecord->update(['icon' => $filename.'.'.$request->extention,]);
-            $request->file('files')[0]->storeAs('public/user_icon', $filename.'.'.$request->extention);//ランダムなファイル名.拡張子をファイル名に指定
-            //古い画像は削除したい            
+            $request->file('files')[0]->storeAs('public/user_icon', $filename.'.'.$request->extention);//ランダムなファイル名.拡張子をファイル名に指定                 
+        }elseif($request->extention){
+            //ファイルありかつ既にアイコン設定済みなら上書き
+            $filename = $userRecord->icon;
+            $userRecord->update(['icon' => $filename.'.'.$request->extention,]);
+            $request->file('files')[0]->storeAs('public/user_icon', $filename.'.'.$request->extention);//ランダムなファイル名.拡張子をファイル名に指定                 
         }
 
         $result = $userRecord->fill($request->only([

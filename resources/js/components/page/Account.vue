@@ -1,21 +1,9 @@
 <template>
     <div v-if="isLoggedIn">
         <div>
-            <p>{{ user.name }}</p>
-            <p>{{ user.email }}</p>
-            <template>
-                <b-button variant="primary" v-b-modal.modal-center @click="$bvModal.show('modal-scoped')">編集</b-button>
-
-                <b-modal centered id="modal-scoped">
-                    <template #modal-header="{ close }">
-                        <!-- Emulate built in modal header close button action -->
-                        <h5 class="modal-title" id="profilemodalTitle">プロフィール編集</h5>
-                        <b-button class="close" @click="close()">
-                            <span aria-hidden="true">&times;</span>
-                        </b-button>
-                    </template>
-
-                    <template>
+            <b-card no-body>
+                <b-tabs pills card vertical>
+                    <b-tab title="ユーザー情報" active>
                         <b-form id="form">
                             <div class="parent" style="width:150px;">
                                 <img class="userIcon" :src="blobUrl" />
@@ -27,18 +15,75 @@
                                 </label>
                             </div>
 
+                            <b-form-group id="" description="254文字まで">
+                                <code>{{errorMessage.name}}</code>
+                                <input v-model="userNewValue.name" @change="checkName" @blur="checkName" type="txt"
+                                    class="form-control" placeholder="表示名">
+                            </b-form-group>
+
+                            <b-form-group id="" description="">
+                                <code>{{errorMessage.email}}</code>
+                                <input v-model="userNewValue.email" @change="checkEmail" @blur="checkEmail" type="email"
+                                    class="form-control" placeholder="メールアドレス">
+                            </b-form-group>
+                        </b-form>
+                    </b-tab>
+                    <b-tab title="セキュリティ">
+                        <template>
+                            <div>
+                                <b-form-input type="password" v-model="text" placeholder="現在のパスワード"></b-form-input>
+                                <div class="mt-2">{{ text }}</div>
+                            </div>
+                            <div>
+                                <b-form-input type="password" v-model="text" placeholder="新しいパスワード"></b-form-input>
+                                <div class="mt-2">{{ text }}</div>
+                            </div>
+                            <div>
+                                <b-form-input type="password" v-model="text" placeholder="新しいパスワード再入力"></b-form-input>
+                                <div class="mt-2">{{ text }}</div>
+                            </div>
+                        </template>
+                    </b-tab>
+                    <b-tab title="Tab 3">
+                        <b-card-text>なにかしら</b-card-text>
+                    </b-tab>
+                </b-tabs>
+            </b-card>
+        </div>
+
+        <div>
+            <template>
+                <b-button variant="primary" v-b-modal.modal-center @click="$bvModal.show('modal-scoped')">編集</b-button>
+
+                <b-modal centered id="modal-scoped">
+                    <template #modal-header="{ close }">
+                        <!-- Emulate built in modal header close button action -->
+                        <h5 class="modal-title" id="profilemodalTitle">プロフィール編集</h5>
+                        <b-button class="close" @click="close()">
+                            <span aria-hidden="true">&times;</span>
+                        </b-button>
+                    </template>
+                    <template>
+                        <b-form id="form">
+                            <div class="parent" style="width:150px;">
+                                <img class="userIcon" :src="blobUrl" />
+                                <label style="display:initial;">
+                                    <font-awesome-icon :class="activeStatus" @mouseover="beActive"
+                                        @mouseleave="beInActive" class="child" :icon="['fa', 'camera']" />
+                                    <input type="file" class="form-control-file " ref="file" @change="fileSelected"
+                                        accept=".jpg,.jpeg,.png,.gif" style="display:none">
+                                </label>
+                            </div>
                             <b-form-group id="" label="名前" description="">
                                 <code>{{errorMessage.name}}</code>
                                 <input v-model="userNewValue.name" @change="checkName" @blur="checkName" type="txt"
                                     class="form-control">
                             </b-form-group>
-
                             <b-form-group id="" label="メールアドレス" description="">
                                 <code>{{errorMessage.email}}</code>
                                 <input v-model="userNewValue.email" @change="checkEmail" @blur="checkEmail" type="email"
                                     class="form-control">
                             </b-form-group>
-
                             <b-form-group id="" label="パスワード" description="">
                                 <!-- <code>{{errorMessage.name}}</code> -->
                                 <input v-model="userNewValue.password" type="password" placeholder="変更しないときは未記入"
@@ -207,7 +252,7 @@
 
                         if (currentUser.icon) {
                             this.blobUrl = '/storage/user_icon/' + currentUser.icon
-                        }//最新版のユーザーアイコンを取得
+                        } //最新版のユーザーアイコンを取得
 
                         this.userNewValue.name = this.user.name
                         this.userNewValue.email = this.user.email

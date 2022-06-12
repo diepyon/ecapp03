@@ -562,6 +562,51 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
  //バリデーションのモジュールを外部ファイルから読み込み
 
@@ -8656,10 +8701,249 @@ var render = function() {
         _c(
           "div",
           [
-            _c("p", [_vm._v(_vm._s(_vm.user.name))]),
-            _vm._v(" "),
-            _c("p", [_vm._v(_vm._s(_vm.user.email))]),
-            _vm._v(" "),
+            _c(
+              "b-card",
+              { attrs: { "no-body": "" } },
+              [
+                _c(
+                  "b-tabs",
+                  { attrs: { pills: "", card: "", vertical: "" } },
+                  [
+                    _c(
+                      "b-tab",
+                      { attrs: { title: "ユーザー情報", active: "" } },
+                      [
+                        _c(
+                          "b-form",
+                          { attrs: { id: "form" } },
+                          [
+                            _c(
+                              "div",
+                              {
+                                staticClass: "parent",
+                                staticStyle: { width: "150px" }
+                              },
+                              [
+                                _c("img", {
+                                  staticClass: "userIcon",
+                                  attrs: { src: _vm.blobUrl }
+                                }),
+                                _vm._v(" "),
+                                _c(
+                                  "label",
+                                  { staticStyle: { display: "initial" } },
+                                  [
+                                    _c("font-awesome-icon", {
+                                      staticClass: "child",
+                                      class: _vm.activeStatus,
+                                      attrs: { icon: ["fa", "camera"] },
+                                      on: {
+                                        mouseover: _vm.beActive,
+                                        mouseleave: _vm.beInActive
+                                      }
+                                    }),
+                                    _vm._v(" "),
+                                    _c("input", {
+                                      ref: "file",
+                                      staticClass: "form-control-file ",
+                                      staticStyle: { display: "none" },
+                                      attrs: {
+                                        type: "file",
+                                        accept: ".jpg,.jpeg,.png,.gif"
+                                      },
+                                      on: { change: _vm.fileSelected }
+                                    })
+                                  ],
+                                  1
+                                )
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "b-form-group",
+                              { attrs: { id: "", description: "254文字まで" } },
+                              [
+                                _c("code", [
+                                  _vm._v(_vm._s(_vm.errorMessage.name))
+                                ]),
+                                _vm._v(" "),
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: _vm.userNewValue.name,
+                                      expression: "userNewValue.name"
+                                    }
+                                  ],
+                                  staticClass: "form-control",
+                                  attrs: { type: "txt", placeholder: "表示名" },
+                                  domProps: { value: _vm.userNewValue.name },
+                                  on: {
+                                    change: _vm.checkName,
+                                    blur: _vm.checkName,
+                                    input: function($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.$set(
+                                        _vm.userNewValue,
+                                        "name",
+                                        $event.target.value
+                                      )
+                                    }
+                                  }
+                                })
+                              ]
+                            ),
+                            _vm._v(" "),
+                            _c(
+                              "b-form-group",
+                              { attrs: { id: "", description: "" } },
+                              [
+                                _c("code", [
+                                  _vm._v(_vm._s(_vm.errorMessage.email))
+                                ]),
+                                _vm._v(" "),
+                                _c("input", {
+                                  directives: [
+                                    {
+                                      name: "model",
+                                      rawName: "v-model",
+                                      value: _vm.userNewValue.email,
+                                      expression: "userNewValue.email"
+                                    }
+                                  ],
+                                  staticClass: "form-control",
+                                  attrs: {
+                                    type: "email",
+                                    placeholder: "メールアドレス"
+                                  },
+                                  domProps: { value: _vm.userNewValue.email },
+                                  on: {
+                                    change: _vm.checkEmail,
+                                    blur: _vm.checkEmail,
+                                    input: function($event) {
+                                      if ($event.target.composing) {
+                                        return
+                                      }
+                                      _vm.$set(
+                                        _vm.userNewValue,
+                                        "email",
+                                        $event.target.value
+                                      )
+                                    }
+                                  }
+                                })
+                              ]
+                            )
+                          ],
+                          1
+                        )
+                      ],
+                      1
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "b-tab",
+                      { attrs: { title: "セキュリティ" } },
+                      [
+                        [
+                          _c(
+                            "div",
+                            [
+                              _c("b-form-input", {
+                                attrs: {
+                                  type: "password",
+                                  placeholder: "現在のパスワード"
+                                },
+                                model: {
+                                  value: _vm.text,
+                                  callback: function($$v) {
+                                    _vm.text = $$v
+                                  },
+                                  expression: "text"
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "mt-2" }, [
+                                _vm._v(_vm._s(_vm.text))
+                              ])
+                            ],
+                            1
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "div",
+                            [
+                              _c("b-form-input", {
+                                attrs: {
+                                  type: "password",
+                                  placeholder: "新しいパスワード"
+                                },
+                                model: {
+                                  value: _vm.text,
+                                  callback: function($$v) {
+                                    _vm.text = $$v
+                                  },
+                                  expression: "text"
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "mt-2" }, [
+                                _vm._v(_vm._s(_vm.text))
+                              ])
+                            ],
+                            1
+                          ),
+                          _vm._v(" "),
+                          _c(
+                            "div",
+                            [
+                              _c("b-form-input", {
+                                attrs: {
+                                  type: "password",
+                                  placeholder: "新しいパスワード再入力"
+                                },
+                                model: {
+                                  value: _vm.text,
+                                  callback: function($$v) {
+                                    _vm.text = $$v
+                                  },
+                                  expression: "text"
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "mt-2" }, [
+                                _vm._v(_vm._s(_vm.text))
+                              ])
+                            ],
+                            1
+                          )
+                        ]
+                      ],
+                      2
+                    ),
+                    _vm._v(" "),
+                    _c(
+                      "b-tab",
+                      { attrs: { title: "Tab 3" } },
+                      [_c("b-card-text", [_vm._v("なにかしら")])],
+                      1
+                    )
+                  ],
+                  1
+                )
+              ],
+              1
+            )
+          ],
+          1
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          [
             [
               _c(
                 "b-button",
