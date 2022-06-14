@@ -557,56 +557,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
  //バリデーションのモジュールを外部ファイルから読み込み
 
@@ -623,15 +573,9 @@ __webpack_require__.r(__webpack_exports__);
         name: null,
         email: null,
         token: null,
-        password: null
-      },
-      userNewValue: {
-        id: null,
-        name: null,
-        email: null,
-        password: null,
-        passwordConfirm: null //file: null,
-
+        currentPassword: null,
+        newPassword: null,
+        newPasswordConfirm: null
       },
       isLoggedIn: false,
       activeStatus: 'inactive',
@@ -642,14 +586,16 @@ __webpack_require__.r(__webpack_exports__);
       errorMessage: {
         'name': null,
         'email': null,
-        'password': null
+        'currentPassword': null,
+        'newPassword': null,
+        'newPasswordConfirm': null
       }
     };
   },
   mounted: function mounted() {
     this.getUserInfo();
-    this.userNewValue.password = null;
-    this.userNewValue.passwordConfirm = null;
+    this.user.password = null;
+    this.user.passwordConfirm = null;
   },
   methods: {
     beActive: function beActive() {
@@ -686,7 +632,7 @@ __webpack_require__.r(__webpack_exports__);
 
         this.fileName = this.fileInfo.name; //いらんかも
 
-        this.userNewValue.file = this.fileInfo;
+        this.user.file = this.fileInfo;
       } else {
         this.blobUrl = "";
       }
@@ -696,7 +642,7 @@ __webpack_require__.r(__webpack_exports__);
 
       // axios.get("/api/loginCheck")
       //     .then(response => {
-      //         this.userNewValue.id = response.data.id
+      //         this.user.id = response.data.id
       //     })
       this.getUserInfo();
       var postData = new FormData();
@@ -707,9 +653,9 @@ __webpack_require__.r(__webpack_exports__);
         postData.append('extention', this.fileInfo.name.split('.').pop()); //拡張子を取得
       }
 
-      postData.append('id', this.userNewValue.id);
-      postData.append('name', this.userNewValue.name);
-      postData.append('email', this.userNewValue.email); //バリデーションを通過しないと更新させなくしたい
+      postData.append('id', this.user.id);
+      postData.append('name', this.user.name);
+      postData.append('email', this.user.email); //バリデーションを通過しないと更新させなくしたい
 
       axios.post("/api/account/update", postData).then(function (response) {
         _this2.message = response.data; //更新されたかどうかの結果を格納したメッセージ
@@ -739,14 +685,14 @@ __webpack_require__.r(__webpack_exports__);
         } //最新版のユーザーアイコンを取得
 
 
-        _this3.userNewValue.name = _this3.user.name;
-        _this3.userNewValue.email = _this3.user.email;
-        _this3.userNewValue.id = response.data.id; //カレントユーザーのIDを取得
+        _this3.user.name = _this3.user.name;
+        _this3.user.email = _this3.user.email;
+        _this3.user.id = response.data.id; //カレントユーザーのIDを取得
         //vuexでリアルタイムにユーザーの情報を更新（ヘッダーが変化を監視）
 
         var userInfo = {
-          name: _this3.userNewValue.name,
-          email: _this3.userNewValue.name //アイコンの情報もヘッダーに表示したいなら必要かも
+          name: _this3.user.name,
+          email: _this3.user.name //アイコンの情報もヘッダーに表示したいなら必要かも
 
         };
 
@@ -760,19 +706,59 @@ __webpack_require__.r(__webpack_exports__);
       });
     },
     //こいつら、まとめて一つのメソッドにできひん？引数にnameとかemailとかいれたらいいやん
+    //なんかうまくいかんから、発火するメソッドをifで分岐したら良いと思う
+    //引数にバリデーションチェックしたい項目の名前
+    //if文に発動するモジュール
     checkEmail: function checkEmail() {
       //モジュールからエラーメッセージを取得
-      this.errorMessage.email = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.email(this.userNewValue).message; //モジュールから真偽を取得
+      this.errorMessage.email = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.email(this.user).message; //モジュールから真偽を取得
 
-      var result = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.email(this.userNewValue).result;
+      var result = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.email(this.user).result;
       return result;
     },
     checkName: function checkName() {
       //モジュールからエラーメッセージを取得
-      this.errorMessage.name = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.name(this.userNewValue).message; //モジュールから真偽を取得
+      this.errorMessage.name = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.name(this.user).message; //モジュールから真偽を取得
 
-      var result = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.name(this.userNewValue).result;
+      var result = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.name(this.user).result;
       return result;
+    },
+    //こいつらは1つのメソッドにまとめられる。
+    //どの引数でどのフォームかを判定してifでメッセージの格納先を分ければ良い
+    checkCurrentPassword: function checkCurrentPassword() {
+      this.errorMessage.currentPassword = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.checkhoge(this.user.currentPassword);
+    },
+    checkNewPassword: function checkNewPassword() {
+      this.errorMessage.newPassword = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.checkhoge(this.user.newPassword);
+    },
+    checknewPasswordConfirm: function checknewPasswordConfirm() {
+      this.errorMessage.newPasswordConfirm = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.checkhoge(this.user.newPasswordConfirm);
+    },
+    //まとめた版のメソッド
+    checkhogehoge: function checkhogehoge(value) {
+      if (value == currentPassowrd) {
+        this.errorMessage.currentPassword = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.checkhoge(this.user.currentPassword);
+      } else if (value == newPassword) {
+        this.errorMessage.newPassword = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.checkhoge(this.user.newPassword);
+      } else if (value == newPasswordConfirm) {
+        this.errorMessage.newPasswordConfirm = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.checkhoge(this.user.newPasswordConfirm);
+      }
+    },
+    passwordUpdate: function passwordUpdate() {
+      if (this.user.newPassword == this.user.newPasswordConfirm) {
+        console.log('パスワード一致');
+      } else {
+        console.log('パスワード不一致');
+      }
+
+      axios.get("/api/account/checkOldPassword", {
+        params: {
+          oldPassword: this.user.oldPassword,
+          userId: this.user.id
+        }
+      }).then(function (response) {
+        console.log(response.data);
+      });
     },
     //まとめるチャレンジ
     validation: function validation(input) {// let hoge = input
@@ -2002,7 +1988,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "name": () => (/* binding */ name),
 /* harmony export */   "email": () => (/* binding */ email),
-/* harmony export */   "password": () => (/* binding */ password)
+/* harmony export */   "password": () => (/* binding */ password),
+/* harmony export */   "checkhoge": () => (/* binding */ checkhoge)
 /* harmony export */ });
 //共通バリデーションモジュール
 function email(form) {
@@ -2036,8 +2023,11 @@ function email(form) {
 }
 
 function password(form) {
+  //主にログインや新規登録時のパスワードのバリデーション 
   var n = '';
   var n = form.password.length; //passwordの文字数
+
+  console.log(n);
 
   if (n == 0) {
     var message = "入力してください。";
@@ -2058,6 +2048,17 @@ function password(form) {
     'result': result,
     'message': message
   };
+}
+
+function checkhoge(value) {
+  //主にパスワード変更時に使う
+  if (value == null || value.length == 0) {
+    return "入力してください。";
+  } else if (value.length > 256) {
+    return "255文字以内で入力してください。";
+  } else {
+    return "";
+  }
 }
 
 function name(form) {
@@ -8772,13 +8773,13 @@ var render = function() {
                                     {
                                       name: "model",
                                       rawName: "v-model",
-                                      value: _vm.userNewValue.name,
-                                      expression: "userNewValue.name"
+                                      value: _vm.user.name,
+                                      expression: "user.name"
                                     }
                                   ],
                                   staticClass: "form-control",
                                   attrs: { type: "txt", placeholder: "表示名" },
-                                  domProps: { value: _vm.userNewValue.name },
+                                  domProps: { value: _vm.user.name },
                                   on: {
                                     change: _vm.checkName,
                                     blur: _vm.checkName,
@@ -8787,7 +8788,7 @@ var render = function() {
                                         return
                                       }
                                       _vm.$set(
-                                        _vm.userNewValue,
+                                        _vm.user,
                                         "name",
                                         $event.target.value
                                       )
@@ -8810,8 +8811,8 @@ var render = function() {
                                     {
                                       name: "model",
                                       rawName: "v-model",
-                                      value: _vm.userNewValue.email,
-                                      expression: "userNewValue.email"
+                                      value: _vm.user.email,
+                                      expression: "user.email"
                                     }
                                   ],
                                   staticClass: "form-control",
@@ -8819,7 +8820,7 @@ var render = function() {
                                     type: "email",
                                     placeholder: "メールアドレス"
                                   },
-                                  domProps: { value: _vm.userNewValue.email },
+                                  domProps: { value: _vm.user.email },
                                   on: {
                                     change: _vm.checkEmail,
                                     blur: _vm.checkEmail,
@@ -8828,7 +8829,7 @@ var render = function() {
                                         return
                                       }
                                       _vm.$set(
-                                        _vm.userNewValue,
+                                        _vm.user,
                                         "email",
                                         $event.target.value
                                       )
@@ -8836,6 +8837,35 @@ var render = function() {
                                   }
                                 })
                               ]
+                            ),
+                            _vm._v(" "),
+                            _vm.message == "updated"
+                              ? _c(
+                                  "b-alert",
+                                  { attrs: { show: "", variant: "success" } },
+                                  [_vm._v("更新しました。")]
+                                )
+                              : _vm._e(),
+                            _vm._v(" "),
+                            _vm.message == "nothing"
+                              ? _c(
+                                  "b-alert",
+                                  { attrs: { show: "", variant: "warning" } },
+                                  [_vm._v("変更はありませんでした。")]
+                                )
+                              : _vm._e(),
+                            _vm._v(" "),
+                            _c(
+                              "b-button",
+                              {
+                                attrs: { type: "button", variant: "primary" },
+                                on: {
+                                  click: function($event) {
+                                    return _vm.update()
+                                  }
+                                }
+                              },
+                              [_vm._v("更新")]
                             )
                           ],
                           1
@@ -8852,23 +8882,29 @@ var render = function() {
                           _c(
                             "div",
                             [
+                              _c("code", [
+                                _vm._v(_vm._s(_vm.errorMessage.currentPassword))
+                              ]),
+                              _vm._v(" "),
                               _c("b-form-input", {
                                 attrs: {
                                   type: "password",
                                   placeholder: "現在のパスワード"
                                 },
+                                on: {
+                                  change: _vm.checkCurrentPassword,
+                                  blur: _vm.checkCurrentPassword
+                                },
                                 model: {
-                                  value: _vm.text,
+                                  value: _vm.user.currentPassword,
                                   callback: function($$v) {
-                                    _vm.text = $$v
+                                    _vm.$set(_vm.user, "currentPassword", $$v)
                                   },
-                                  expression: "text"
+                                  expression: "user.currentPassword"
                                 }
                               }),
                               _vm._v(" "),
-                              _c("div", { staticClass: "mt-2" }, [
-                                _vm._v(_vm._s(_vm.text))
-                              ])
+                              _c("div", { staticClass: "mt-2" })
                             ],
                             1
                           ),
@@ -8876,23 +8912,29 @@ var render = function() {
                           _c(
                             "div",
                             [
+                              _c("code", [
+                                _vm._v(_vm._s(_vm.errorMessage.newPassword))
+                              ]),
+                              _vm._v(" "),
                               _c("b-form-input", {
                                 attrs: {
                                   type: "password",
                                   placeholder: "新しいパスワード"
                                 },
+                                on: {
+                                  change: _vm.checkCurrentPassword,
+                                  blur: _vm.checkNewPassword
+                                },
                                 model: {
-                                  value: _vm.text,
+                                  value: _vm.user.newPassword,
                                   callback: function($$v) {
-                                    _vm.text = $$v
+                                    _vm.$set(_vm.user, "newPassword", $$v)
                                   },
-                                  expression: "text"
+                                  expression: "user.newPassword"
                                 }
                               }),
                               _vm._v(" "),
-                              _c("div", { staticClass: "mt-2" }, [
-                                _vm._v(_vm._s(_vm.text))
-                              ])
+                              _c("div", { staticClass: "mt-2" })
                             ],
                             1
                           ),
@@ -8900,27 +8942,56 @@ var render = function() {
                           _c(
                             "div",
                             [
+                              _c("code", [
+                                _vm._v(
+                                  _vm._s(_vm.errorMessage.newPasswordConfirm)
+                                )
+                              ]),
+                              _vm._v(" "),
                               _c("b-form-input", {
                                 attrs: {
                                   type: "password",
                                   placeholder: "新しいパスワード再入力"
                                 },
+                                on: {
+                                  change: _vm.checknewPasswordConfirm,
+                                  blur: _vm.checknewPasswordConfirm
+                                },
                                 model: {
-                                  value: _vm.text,
+                                  value: _vm.user.newPasswordConfirm,
                                   callback: function($$v) {
-                                    _vm.text = $$v
+                                    _vm.$set(
+                                      _vm.user,
+                                      "newPasswordConfirm",
+                                      $$v
+                                    )
                                   },
-                                  expression: "text"
+                                  expression: "user.newPasswordConfirm"
                                 }
                               }),
                               _vm._v(" "),
-                              _c("div", { staticClass: "mt-2" }, [
-                                _vm._v(_vm._s(_vm.text))
-                              ])
+                              _c("div", { staticClass: "mt-2" })
                             ],
                             1
                           )
-                        ]
+                        ],
+                        _vm._v(
+                          "\n                    " +
+                            _vm._s(_vm.user.id) +
+                            "\n                    "
+                        ),
+                        _c(
+                          "b-button",
+                          {
+                            attrs: { type: "button", variant: "primary" },
+                            on: {
+                              click: function($event) {
+                                return _vm.passwordUpdate()
+                              }
+                            }
+                          },
+                          [_vm._v("更新")]
+                        )
                       ],
                       2
                     ),
@@ -8939,361 +9010,6 @@ var render = function() {
             )
           ],
           1
-        ),
-        _vm._v(" "),
-        _c(
-          "div",
-          [
-            [
-              _c(
-                "b-button",
-                {
-                  directives: [
-                    {
-                      name: "b-modal",
-                      rawName: "v-b-modal.modal-center",
-                      modifiers: { "modal-center": true }
-                    }
-                  ],
-                  attrs: { variant: "primary" },
-                  on: {
-                    click: function($event) {
-                      return _vm.$bvModal.show("modal-scoped")
-                    }
-                  }
-                },
-                [_vm._v("編集")]
-              ),
-              _vm._v(" "),
-              _c(
-                "b-modal",
-                {
-                  attrs: { centered: "", id: "modal-scoped" },
-                  scopedSlots: _vm._u(
-                    [
-                      {
-                        key: "modal-header",
-                        fn: function(ref) {
-                          var close = ref.close
-                          return [
-                            _c(
-                              "h5",
-                              {
-                                staticClass: "modal-title",
-                                attrs: { id: "profilemodalTitle" }
-                              },
-                              [_vm._v("プロフィール編集")]
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-button",
-                              {
-                                staticClass: "close",
-                                on: {
-                                  click: function($event) {
-                                    return close()
-                                  }
-                                }
-                              },
-                              [
-                                _c(
-                                  "span",
-                                  { attrs: { "aria-hidden": "true" } },
-                                  [_vm._v("×")]
-                                )
-                              ]
-                            )
-                          ]
-                        }
-                      },
-                      {
-                        key: "modal-footer",
-                        fn: function(ref) {
-                          var cancel = ref.cancel
-                          return [
-                            _c(
-                              "b-button",
-                              {
-                                attrs: { type: "button", variant: "primary" },
-                                on: {
-                                  click: function($event) {
-                                    return _vm.update()
-                                  }
-                                }
-                              },
-                              [_vm._v("保存")]
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "b-button",
-                              {
-                                attrs: { variant: "secondary" },
-                                on: {
-                                  click: function($event) {
-                                    return cancel()
-                                  }
-                                }
-                              },
-                              [
-                                _vm._v(
-                                  "\n                        キャンセル\n                    "
-                                )
-                              ]
-                            )
-                          ]
-                        }
-                      }
-                    ],
-                    null,
-                    false,
-                    1218670896
-                  )
-                },
-                [
-                  _vm._v(" "),
-                  [
-                    _c(
-                      "b-form",
-                      { attrs: { id: "form" } },
-                      [
-                        _c(
-                          "div",
-                          {
-                            staticClass: "parent",
-                            staticStyle: { width: "150px" }
-                          },
-                          [
-                            _c("img", {
-                              staticClass: "userIcon",
-                              attrs: { src: _vm.blobUrl }
-                            }),
-                            _vm._v(" "),
-                            _c(
-                              "label",
-                              { staticStyle: { display: "initial" } },
-                              [
-                                _c("font-awesome-icon", {
-                                  staticClass: "child",
-                                  class: _vm.activeStatus,
-                                  attrs: { icon: ["fa", "camera"] },
-                                  on: {
-                                    mouseover: _vm.beActive,
-                                    mouseleave: _vm.beInActive
-                                  }
-                                }),
-                                _vm._v(" "),
-                                _c("input", {
-                                  ref: "file",
-                                  staticClass: "form-control-file ",
-                                  staticStyle: { display: "none" },
-                                  attrs: {
-                                    type: "file",
-                                    accept: ".jpg,.jpeg,.png,.gif"
-                                  },
-                                  on: { change: _vm.fileSelected }
-                                })
-                              ],
-                              1
-                            )
-                          ]
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "b-form-group",
-                          { attrs: { id: "", label: "名前", description: "" } },
-                          [
-                            _c("code", [_vm._v(_vm._s(_vm.errorMessage.name))]),
-                            _vm._v(" "),
-                            _c("input", {
-                              directives: [
-                                {
-                                  name: "model",
-                                  rawName: "v-model",
-                                  value: _vm.userNewValue.name,
-                                  expression: "userNewValue.name"
-                                }
-                              ],
-                              staticClass: "form-control",
-                              attrs: { type: "txt" },
-                              domProps: { value: _vm.userNewValue.name },
-                              on: {
-                                change: _vm.checkName,
-                                blur: _vm.checkName,
-                                input: function($event) {
-                                  if ($event.target.composing) {
-                                    return
-                                  }
-                                  _vm.$set(
-                                    _vm.userNewValue,
-                                    "name",
-                                    $event.target.value
-                                  )
-                                }
-                              }
-                            })
-                          ]
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "b-form-group",
-                          {
-                            attrs: {
-                              id: "",
-                              label: "メールアドレス",
-                              description: ""
-                            }
-                          },
-                          [
-                            _c("code", [
-                              _vm._v(_vm._s(_vm.errorMessage.email))
-                            ]),
-                            _vm._v(" "),
-                            _c("input", {
-                              directives: [
-                                {
-                                  name: "model",
-                                  rawName: "v-model",
-                                  value: _vm.userNewValue.email,
-                                  expression: "userNewValue.email"
-                                }
-                              ],
-                              staticClass: "form-control",
-                              attrs: { type: "email" },
-                              domProps: { value: _vm.userNewValue.email },
-                              on: {
-                                change: _vm.checkEmail,
-                                blur: _vm.checkEmail,
-                                input: function($event) {
-                                  if ($event.target.composing) {
-                                    return
-                                  }
-                                  _vm.$set(
-                                    _vm.userNewValue,
-                                    "email",
-                                    $event.target.value
-                                  )
-                                }
-                              }
-                            })
-                          ]
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "b-form-group",
-                          {
-                            attrs: {
-                              id: "",
-                              label: "パスワード",
-                              description: ""
-                            }
-                          },
-                          [
-                            _c("input", {
-                              directives: [
-                                {
-                                  name: "model",
-                                  rawName: "v-model",
-                                  value: _vm.userNewValue.password,
-                                  expression: "userNewValue.password"
-                                }
-                              ],
-                              staticClass: "form-control",
-                              attrs: {
-                                type: "password",
-                                placeholder: "変更しないときは未記入",
-                                autocomplete: "off",
-                                value: ""
-                              },
-                              domProps: { value: _vm.userNewValue.password },
-                              on: {
-                                input: function($event) {
-                                  if ($event.target.composing) {
-                                    return
-                                  }
-                                  _vm.$set(
-                                    _vm.userNewValue,
-                                    "password",
-                                    $event.target.value
-                                  )
-                                }
-                              }
-                            })
-                          ]
-                        ),
-                        _vm._v(" "),
-                        _c(
-                          "b-form-group",
-                          {
-                            attrs: {
-                              id: "",
-                              label: "パスワード確認",
-                              description: ""
-                            }
-                          },
-                          [
-                            _c("input", {
-                              directives: [
-                                {
-                                  name: "model",
-                                  rawName: "v-model",
-                                  value: _vm.userNewValue.passwordConfirm,
-                                  expression: "userNewValue.passwordConfirm"
-                                }
-                              ],
-                              staticClass: "form-control",
-                              attrs: {
-                                type: "password",
-                                placeholder: "変更しないときは未記入",
-                                value: ""
-                              },
-                              domProps: {
-                                value: _vm.userNewValue.passwordConfirm
-                              },
-                              on: {
-                                input: function($event) {
-                                  if ($event.target.composing) {
-                                    return
-                                  }
-                                  _vm.$set(
-                                    _vm.userNewValue,
-                                    "passwordConfirm",
-                                    $event.target.value
-                                  )
-                                }
-                              }
-                            })
-                          ]
-                        ),
-                        _vm._v(" "),
-                        _vm.message == "nothing"
-                          ? _c(
-                              "b-alert",
-                              { attrs: { show: "", variant: "warning" } },
-                              [_vm._v("変更はありませんでした。")]
-                            )
-                          : _vm._e()
-                      ],
-                      1
-                    )
-                  ]
-                ],
-                2
-              )
-            ],
-            _vm._v(" "),
-            _c(
-              "button",
-              { attrs: { type: "button" }, on: { click: _vm.logout } },
-              [_vm._v("ログアウト")]
-            ),
-            _vm._v(" "),
-            _vm.message == "updated"
-              ? _c("b-alert", { attrs: { show: "", variant: "success" } }, [
-                  _vm._v("更新しました。")
-                ])
-              : _vm._e()
-          ],
-          2
         )
       ])
     : _vm._e()

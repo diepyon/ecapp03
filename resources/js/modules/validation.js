@@ -28,8 +28,11 @@ function email(form) {
 }
 
 function password(form) {
+    //主にログインや新規登録時のパスワードのバリデーション 
     var n = ''
     var n = form.password.length //passwordの文字数
+
+    console.log(n)
 
     if (n == 0) {
         var message = "入力してください。"
@@ -50,13 +53,24 @@ function password(form) {
     }
 }
 
+function checkhoge(value) {
+    //主にパスワード変更時に使う
+    if (value == null || value.length == 0) {
+        return "入力してください。"
+    } else if (value.length > 256) {
+        return "255文字以内で入力してください。"
+    } else {
+        return ""
+    }
+}
+
 function name(form) {
     var n = ''
     var n = form.name.length //passwordの文字数
 
     if (n == 0) {
         var message = "入力してください。"
-    } else if (n > 256) {//文字数を変数にしたい
+    } else if (n > 256) { //文字数を変数にしたい
         var message = "255文字以内で入力してください。"
     } else {
         var message = ""
@@ -76,5 +90,6 @@ function name(form) {
 export {
     name,
     email,
-    password
+    password,
+    checkhoge,
 }

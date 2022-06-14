@@ -48,3 +48,5 @@ Route::middleware('auth:sanctum')->get('/loginCheck',function (Request $request)
 Route::post('/logout', [LoginController::class, 'logout']);
 
 Route::post('/account/update', [UserController::class, 'update']);
+
+Route::get('/account/checkOldPassword', [UserController::class, 'checkOldPassword']);

@@ -17,101 +17,51 @@
 
                             <b-form-group id="" description="254文字まで">
                                 <code>{{errorMessage.name}}</code>
-                                <input v-model="userNewValue.name" @change="checkName" @blur="checkName" type="txt"
+                                <input v-model="user.name" @change="checkName" @blur="checkName" type="txt"
                                     class="form-control" placeholder="表示名">
                             </b-form-group>
 
                             <b-form-group id="" description="">
                                 <code>{{errorMessage.email}}</code>
-                                <input v-model="userNewValue.email" @change="checkEmail" @blur="checkEmail" type="email"
+                                <input v-model="user.email" @change="checkEmail" @blur="checkEmail" type="email"
                                     class="form-control" placeholder="メールアドレス">
                             </b-form-group>
+                            <b-alert show variant="success" v-if="message=='updated'">更新しました。</b-alert>
+                            <b-alert show variant="warning" v-if="message=='nothing'">変更はありませんでした。</b-alert>
+                            <b-button @click="update();" type="button" variant="primary">更新</b-button>
                         </b-form>
                     </b-tab>
                     <b-tab title="セキュリティ">
                         <template>
                             <div>
-                                <b-form-input type="password" v-model="text" placeholder="現在のパスワード"></b-form-input>
-                                <div class="mt-2">{{ text }}</div>
+                                <code>{{errorMessage.currentPassword}}</code>
+                                <b-form-input type="password" v-model="user.currentPassword" @change="checkCurrentPassword"
+                                    @blur="checkCurrentPassword" placeholder="現在のパスワード">
+                                </b-form-input>
+                                <div class="mt-2"></div>
                             </div>
                             <div>
-                                <b-form-input type="password" v-model="text" placeholder="新しいパスワード"></b-form-input>
-                                <div class="mt-2">{{ text }}</div>
+                                <code>{{errorMessage.newPassword}}</code>
+                                <b-form-input type="password" @change="checkCurrentPassword"
+                                    @blur="checkNewPassword" v-model="user.newPassword" placeholder="新しいパスワード">
+                                </b-form-input>
+                                <div class="mt-2"></div>
                             </div>
                             <div>
-                                <b-form-input type="password" v-model="text" placeholder="新しいパスワード再入力"></b-form-input>
-                                <div class="mt-2">{{ text }}</div>
+                                <code>{{errorMessage.newPasswordConfirm}}</code>
+                                <b-form-input type="password" v-model="user.newPasswordConfirm"
+                                     @change="checknewPasswordConfirm" @blur="checknewPasswordConfirm" placeholder="新しいパスワード再入力"></b-form-input>
+                                <div class="mt-2"></div>
                             </div>
                         </template>
+                        {{user.id}}
+                        <b-button @click="passwordUpdate();" type="button" variant="primary">更新</b-button>
                     </b-tab>
                     <b-tab title="Tab 3">
                         <b-card-text>なにかしら</b-card-text>
                     </b-tab>
                 </b-tabs>
             </b-card>
-        </div>
-
-        <div>
-            <template>
-                <b-button variant="primary" v-b-modal.modal-center @click="$bvModal.show('modal-scoped')">編集</b-button>
-
-                <b-modal centered id="modal-scoped">
-                    <template #modal-header="{ close }">
-                        <!-- Emulate built in modal header close button action -->
-                        <h5 class="modal-title" id="profilemodalTitle">プロフィール編集</h5>
-                        <b-button class="close" @click="close()">
-                            <span aria-hidden="true">&times;</span>
-                        </b-button>
-                    </template>
-                    <template>
-                        <b-form id="form">
-                            <div class="parent" style="width:150px;">
-                                <img class="userIcon" :src="blobUrl" />
-                                <label style="display:initial;">
-                                    <font-awesome-icon :class="activeStatus" @mouseover="beActive"
-                                        @mouseleave="beInActive" class="child" :icon="['fa', 'camera']" />
-                                    <input type="file" class="form-control-file " ref="file" @change="fileSelected"
-                                        accept=".jpg,.jpeg,.png,.gif" style="display:none">
-                                </label>
-                            </div>
-                            <b-form-group id="" label="名前" description="">
-                                <code>{{errorMessage.name}}</code>
-                                <input v-model="userNewValue.name" @change="checkName" @blur="checkName" type="txt"
-                                    class="form-control">
-                            </b-form-group>
-                            <b-form-group id="" label="メールアドレス" description="">
-                                <code>{{errorMessage.email}}</code>
-                                <input v-model="userNewValue.email" @change="checkEmail" @blur="checkEmail" type="email"
-                                    class="form-control">
-                            </b-form-group>
-                            <b-form-group id="" label="パスワード" description="">
-                                <!-- <code>{{errorMessage.name}}</code> -->
-                                <input v-model="userNewValue.password" type="password" placeholder="変更しないときは未記入"
-                                    class="form-control" autocomplete="off" value="">
-                            </b-form-group>
-
-                            <b-form-group id="" label="パスワード確認" description="">
-                                <!-- <code>{{errorMessage.name}}</code> -->
-                                <input v-model="userNewValue.passwordConfirm" type="password" placeholder="変更しないときは未記入"
-                                    class="form-control" value="">
-                            </b-form-group>
-
-                            <b-alert show variant="warning" v-if="message=='nothing'">変更はありませんでした。</b-alert>
-                        </b-form>
-                    </template>
-
-                    <template #modal-footer="{cancel }">
-                        <b-button @click="update();" type="button" variant="primary">保存</b-button>
-
-                        <b-button variant="secondary" @click="cancel()">
-                            キャンセル
-                        </b-button>
-
-                    </template>
-                </b-modal>
-            </template>
-            <button type="button" @click="logout">ログアウト</button>
-            <b-alert show variant="success" v-if="message=='updated'">更新しました。</b-alert>
         </div>
     </div>
 </template>
@@ -136,16 +86,11 @@
                     name: null,
                     email: null,
                     token: null,
-                    password: null,
+                    currentPassword: null,
+                    newPassword: null,
+                    newPasswordConfirm: null,
                 },
-                userNewValue: {
-                    id: null,
-                    name: null,
-                    email: null,
-                    password: null,
-                    passwordConfirm: null,
-                    //file: null,
-                },
+
                 isLoggedIn: false,
 
                 activeStatus: 'inactive',
@@ -157,16 +102,17 @@
                 errorMessage: {
                     'name': null,
                     'email': null,
-                    'password': null,
+                    'currentPassword': null,
+                    'newPassword':null,
+                    'newPasswordConfirm':null,
                 },
             }
         },
 
         mounted() {
             this.getUserInfo()
-
-            this.userNewValue.password = null
-            this.userNewValue.passwordConfirm = null
+            this.user.password = null
+            this.user.passwordConfirm = null
         },
         methods: {
             beActive() {
@@ -201,7 +147,7 @@
                     this.blobUrl = URL.createObjectURL(this.fileInfo) //選択されたファイルのURLを取得 
 
                     this.fileName = this.fileInfo.name //いらんかも
-                    this.userNewValue.file = this.fileInfo
+                    this.user.file = this.fileInfo
                 } else {
                     this.blobUrl = ""
                 }
@@ -209,20 +155,22 @@
             update() {
                 // axios.get("/api/loginCheck")
                 //     .then(response => {
-                //         this.userNewValue.id = response.data.id
+                //         this.user.id = response.data.id
                 //     })
+
+
                 this.getUserInfo()
 
                 let postData = new FormData()
-
                 if (this.fileInfo) {
                     postData.append('files[0]', this.fileInfo) //files配列の先頭はthis.fileInfo
                     postData.append('extention', this.fileInfo.name.split('.').pop()) //拡張子を取得
                 }
 
-                postData.append('id', this.userNewValue.id)
-                postData.append('name', this.userNewValue.name)
-                postData.append('email', this.userNewValue.email)
+                postData.append('id', this.user.id)
+                postData.append('name', this.user.name)
+                postData.append('email', this.user.email)
+
 
                 //バリデーションを通過しないと更新させなくしたい
                 axios.post("/api/account/update", postData)
@@ -254,15 +202,14 @@
                             this.blobUrl = '/storage/user_icon/' + currentUser.icon
                         } //最新版のユーザーアイコンを取得
 
-                        this.userNewValue.name = this.user.name
-                        this.userNewValue.email = this.user.email
-                        this.userNewValue.id = response.data.id //カレントユーザーのIDを取得
-
+                        this.user.name = this.user.name
+                        this.user.email = this.user.email
+                        this.user.id = response.data.id //カレントユーザーのIDを取得
 
                         //vuexでリアルタイムにユーザーの情報を更新（ヘッダーが変化を監視）
                         let userInfo = {
-                            name: this.userNewValue.name,
-                            email: this.userNewValue.name,
+                            name: this.user.name,
+                            email: this.user.name,
                             //アイコンの情報もヘッダーに表示したいなら必要かも
                         }
                         this.$store.commit("checkLogin", userInfo)
@@ -276,21 +223,69 @@
             },
 
             //こいつら、まとめて一つのメソッドにできひん？引数にnameとかemailとかいれたらいいやん
+            //なんかうまくいかんから、発火するメソッドをifで分岐したら良いと思う
+            //引数にバリデーションチェックしたい項目の名前
+            //if文に発動するモジュール
+
             checkEmail() {
                 //モジュールからエラーメッセージを取得
-                this.errorMessage.email = Validate.email(this.userNewValue).message
+                this.errorMessage.email = Validate.email(this.user).message
 
                 //モジュールから真偽を取得
-                var result = Validate.email(this.userNewValue).result
+                var result = Validate.email(this.user).result
                 return result
             },
             checkName() {
                 //モジュールからエラーメッセージを取得
-                this.errorMessage.name = Validate.name(this.userNewValue).message
+                this.errorMessage.name = Validate.name(this.user).message
 
                 //モジュールから真偽を取得
-                var result = Validate.name(this.userNewValue).result
+                var result = Validate.name(this.user).result
                 return result
+            },
+
+
+            //こいつらは1つのメソッドにまとめられる。
+            //どの引数でどのフォームかを判定してifでメッセージの格納先を分ければ良い
+            checkCurrentPassword() {
+                this.errorMessage.currentPassword = Validate.checkhoge(this.user.currentPassword)
+            },
+            checkNewPassword() {
+                this.errorMessage.newPassword = Validate.checkhoge(this.user.newPassword)
+            },           
+            checknewPasswordConfirm(){
+                this.errorMessage.newPasswordConfirm = Validate.checkhoge(this.user.newPasswordConfirm)
+            }, 
+
+            //まとめた版のメソッド
+            checkhogehoge(value){
+                if(value == currentPassowrd){
+                    this.errorMessage.currentPassword = Validate.checkhoge(this.user.currentPassword)
+                }else if(value ==newPassword){
+                    this.errorMessage.newPassword = Validate.checkhoge(this.user.newPassword)
+                }else if(value == newPasswordConfirm){
+                     this.errorMessage.newPasswordConfirm = Validate.checkhoge(this.user.newPasswordConfirm)
+                }
+
+            },
+
+
+
+            passwordUpdate() {
+                if (this.user.newPassword == this.user.newPasswordConfirm) {
+                    console.log('パスワード一致')
+                } else {
+                    console.log('パスワード不一致')
+                }
+                axios.get("/api/account/checkOldPassword", {
+                        params: {
+                            oldPassword: this.user.oldPassword,
+                            userId: this.user.id,
+                        }
+                    })
+                    .then(response => {
+                        console.log(response.data)
+                    })
             },
 
             //まとめるチャレンジ
