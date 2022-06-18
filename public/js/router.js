@@ -602,7 +602,6 @@ __webpack_require__.r(__webpack_exports__);
         newPassword: null,
         newPasswordConfirm: null
       },
-      today: null,
       isLoggedIn: false,
       activeStatus: 'inactive',
       fileInfo: null,
@@ -622,14 +621,8 @@ __webpack_require__.r(__webpack_exports__);
     this.getUserInfo();
     this.user.password = null;
     this.user.passwordConfirm = null;
-    this.getToday(); //画像キャッシュ対策にほんじつの日付取得
   },
   methods: {
-    getToday: function getToday() {
-      var date = new Date();
-      this.today = date.getFullYear() + '' + ('0' + (date.getMonth() + 1)).slice(-2) + '' + ('0' + date.getDate()).slice(-2) + '' + ('0' + date.getHours()).slice(-2) + '' + ('0' + date.getMinutes()).slice(-2) + //'' + ('0' + date.getSeconds()).slice(-2) + '' //+ date.getMilliseconds()
-      console.log(this.today);
-    },
     beActive: function beActive() {
       this.activeStatus = 'active';
     },
@@ -2213,7 +2206,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.parent[data-v-5390e3d8] {\n    position: relative;\n}\n.parent .child[data-v-5390e3d8] {\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    transform: translate(-50%, -50%);\n    margin: 0;\n    /*余計な隙間を除く*/\n    padding: 0;\n    color: rgba(99, 99, 99, 0.721);\n    /*余計な隙間を除く*/\n    font-size: 30px;\n    /*サイズ*/\n}\n.parent img[data-v-5390e3d8] {\n    width: 100%;\n}\n.userIcon[data-v-5390e3d8] {\n    width: 150;\n    height: 150px;\n    border-radius: 50%;\n    /*角丸*/\n    -o-object-fit: cover;\n       object-fit: cover;\n\n    margin-bottom: .7em;\n}\n.inactive[data-v-5390e3d8] {}\n.active[data-v-5390e3d8] {\n    opacity: 0.8;\n}\n\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.parent[data-v-5390e3d8] {\n    position: relative;\n}\n.parent .child[data-v-5390e3d8] {\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    transform: translate(-50%, -50%);\n    margin: 0;\n    /*余計な隙間を除く*/\n    padding: 0;\n    color: rgba(99, 99, 99, 0.721);\n    /*余計な隙間を除く*/\n    font-size: 30px;\n    /*サイズ*/\n}\n.parent img[data-v-5390e3d8] {\n    width: 100%;\n}\n.userIcon[data-v-5390e3d8] {\n    width: 150;\n    height: 150px;\n    background: #ffffff;\n    border-radius: 50%;\n    -o-object-fit: cover;\n       object-fit: cover;\n    margin-bottom: .7em;\n    border: 1px solid rgba(0, 0, 0, 0.125);\n}\n.inactive[data-v-5390e3d8] {\n    opacity: 0.8;\n}\n.active[data-v-5390e3d8] {}\n\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 

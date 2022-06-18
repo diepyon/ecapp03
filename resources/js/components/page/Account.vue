@@ -99,11 +99,7 @@
                     newPassword: null,
                     newPasswordConfirm: null,
                 },
-
-                today: null,
-
                 isLoggedIn: false,
-
                 activeStatus: 'inactive',
                 fileInfo: null,
                 blobUrl: '/storage/user_icon/default_icon.jpg',
@@ -124,18 +120,8 @@
             this.getUserInfo()
             this.user.password = null
             this.user.passwordConfirm = null
-
-            this.getToday() //画像キャッシュ対策にほんじつの日付取得
         },
         methods: {
-            getToday() {
-                let date = new Date()
-                this.today = date.getFullYear() + '' + ('0' + (date.getMonth() + 1)).slice(-2) + '' + ('0' + date.getDate()).slice(
-                        -2) + '' + ('0' + date.getHours()).slice(-2) + '' + ('0' + date.getMinutes()).slice(-2) +
-                    //'' + ('0' + date.getSeconds()).slice(-2) + '' //+ date.getMilliseconds()
-                console.log(this.today)
-                
-            },
             beActive() {
                 this.activeStatus = 'active'
             },
@@ -214,7 +200,8 @@
                         //let icon = currentUser.icon
 
                         if (currentUser.icon) {
-                            this.blobUrl = '/storage/user_icon/' + currentUser.icon + '?' +  Math.random().toString(32).substring(2)
+                            this.blobUrl = '/storage/user_icon/' + currentUser.icon + '?' + Math.random().toString(
+                                32).substring(2)
                         } //最新版のユーザーアイコンを取得
 
                         this.user.name = this.user.name
@@ -263,10 +250,8 @@
             checkPasswords(value) {
                 if (value == 'currentPassowrd') {
                     this.errorMessage.currentPassword = Validate.password(this.user.currentPassword).message
-
                 } else if (value == 'newPassword') {
                     this.errorMessage.newPassword = Validate.password(this.user.newPassword).message
-
                 } else if (value == 'newPasswordConfirm') {
                     this.errorMessage.newPasswordConfirm = Validate.password(this.user.newPasswordConfirm).message
 
@@ -359,17 +344,17 @@
     .userIcon {
         width: 150;
         height: 150px;
+        background: #ffffff;
         border-radius: 50%;
-        /*角丸*/
         object-fit: cover;
-
         margin-bottom: .7em;
+        border: 1px solid rgba(0, 0, 0, 0.125);
     }
 
-    .inactive {}
-
-    .active {
+    .inactive {
         opacity: 0.8;
     }
+
+    .active {}
 
 </style>

@@ -23,9 +23,6 @@ class UserController extends Controller
     {           
         $userRecord =  User::where('id', $request->id)->first();
         $beforeUpdatedAt = $userRecord->updated_at;//更新前のupdated_at
-
-        
-       
         
         //アイコンを最低限のサイズに縮小したい
         if($request->extention && $userRecord->icon == null){
@@ -67,8 +64,6 @@ class UserController extends Controller
     public function checkOldPassword(User $user,Request $request){
         $userRecord =  User::where('id', $request->userId)->first();
         $currentPassword =  $userRecord->password;
-
-        //return  Hash::make(($request->password);
         
         if (Hash::check($request->currentPassword, $currentPassword)) {
             $userRecord->update(['password' =>  Hash::make($request->password)]);
