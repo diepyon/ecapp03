@@ -84,13 +84,14 @@
             },
             checkPassword() {
                 //モジュールからエラーメッセージを取得
-                this.errorMessage.password = Validate.password(this.form).message
+                this.errorMessage.password = Validate.password(this.form.password).message
 
                 //モジュールから真偽を取得
-                var result = Validate.password(this.form).result
-                return result
+                 return Validate.password(this.form.password).result
+               
             },
             onSubmit() {
+                this.message = null
                 var emailResult = this.checkEmail()
                 var passwordResult = this.checkPassword()
 
@@ -105,8 +106,6 @@
                             }
                             this.$store.commit("checkLogin", userInfo)
                             this.$store.commit("resetState") //vuexに保存されているメッセージをリセット
-
-
 
                             //ヘッダーのユーザーネームを読み込むため強制リロード
                             //let jumpTo = localStorage.getItem('jumpTo')
@@ -125,15 +124,15 @@
                                 this.$router.push('/account')
                             }
                             localStorage.clear()
-                            
-                            
+
+
                         })
                         .catch((error => {
                             console.log(error)
                             this.message = 'ユーザー名またはパスワードが違います。'
                         }))
                 } else {
-                    alert('入力内容に不備があります。')
+                    this.message = '入力内容に不備があります。'
                 }
             }
         },

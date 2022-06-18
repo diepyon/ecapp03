@@ -57,7 +57,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   data: function data() {
     return {
@@ -126,7 +125,24 @@ __webpack_require__.r(__webpack_exports__);
     });
   },
   computed: {},
-  methods: {}
+  methods: {
+    logout: function logout() {
+      var _this3 = this;
+
+      axios.post("api/logout").then(function (response) {
+        localStorage.clear();
+
+        _this3.$store.commit("logout"); //vuexの内容をリセット
+        //pushに変えてみた。headerのbefore mountedで監視してるから、セッション切れ後もワンチャンいける。
+
+
+        _this3.$router.push("/login"); //ログイン画面にジャンプ
+
+      })["catch"](function (error) {
+        console.log(error);
+      });
+    }
+  }
 });
 
 /***/ }),
@@ -557,6 +573,15 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
  //バリデーションのモジュールを外部ファイルから読み込み
 
@@ -577,18 +602,19 @@ __webpack_require__.r(__webpack_exports__);
         newPassword: null,
         newPasswordConfirm: null
       },
+      today: null,
       isLoggedIn: false,
       activeStatus: 'inactive',
       fileInfo: null,
       blobUrl: '/storage/user_icon/default_icon.jpg',
-      message: null,
-      //更新にまつわるメッセージ
       errorMessage: {
         'name': null,
         'email': null,
         'currentPassword': null,
         'newPassword': null,
-        'newPasswordConfirm': null
+        'newPasswordConfirm': null,
+        'passwordUpdate': null,
+        'userUpdate': null
       }
     };
   },
@@ -596,29 +622,19 @@ __webpack_require__.r(__webpack_exports__);
     this.getUserInfo();
     this.user.password = null;
     this.user.passwordConfirm = null;
+    this.getToday(); //画像キャッシュ対策にほんじつの日付取得
   },
   methods: {
+    getToday: function getToday() {
+      var date = new Date();
+      this.today = date.getFullYear() + '' + ('0' + (date.getMonth() + 1)).slice(-2) + '' + ('0' + date.getDate()).slice(-2) + '' + ('0' + date.getHours()).slice(-2) + '' + ('0' + date.getMinutes()).slice(-2) + //'' + ('0' + date.getSeconds()).slice(-2) + '' //+ date.getMilliseconds()
+      console.log(this.today);
+    },
     beActive: function beActive() {
       this.activeStatus = 'active';
     },
     beInActive: function beInActive() {
       this.activeStatus = 'inactive';
-    },
-    logout: function logout() {
-      var _this = this;
-
-      axios.post("api/logout").then(function (response) {
-        localStorage.clear();
-
-        _this.$store.commit("logout"); //vuexの内容をリセット
-        //pushに変えてみた。headerのbefore mountedで監視してるから、セッション切れ後もワンチャンいける。
-
-
-        _this.$router.push("/login"); //ログイン画面にジャンプ
-
-      })["catch"](function (error) {
-        console.log(error);
-      });
     },
     fileSelected: function fileSelected(event) {
       this.fileInfo = event.target.files[0]; //選択されたファイルの情報を変数に格納
@@ -638,13 +654,14 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     update: function update() {
-      var _this2 = this;
+      var _this = this;
 
       // axios.get("/api/loginCheck")
       //     .then(response => {
       //         this.user.id = response.data.id
       //     })
-      this.getUserInfo();
+      //this.getUserInfo()
+      this.errorMessage.userUpdate = null;
       var postData = new FormData();
 
       if (this.fileInfo) {
@@ -655,53 +672,60 @@ __webpack_require__.r(__webpack_exports__);
 
       postData.append('id', this.user.id);
       postData.append('name', this.user.name);
-      postData.append('email', this.user.email); //バリデーションを通過しないと更新させなくしたい
-
+      postData.append('email', this.user.email);
       axios.post("/api/account/update", postData).then(function (response) {
-        _this2.message = response.data; //更新されたかどうかの結果を格納したメッセージ
+        _this.errorMessage.userUpdate = response.data; //更新されたかどうかの結果を格納したメッセージ
+        //イランと思う
 
-        if (_this2.message == 'updated') {
-          _this2.$bvModal.hide('modal-scoped');
+        if (_this.errorMessage.userUpdate == 'updated') {
+          _this.$bvModal.hide('modal-scoped');
         } //変化があれば閉じる
 
 
-        _this2.getUserInfo(); //ユーザー情報更新
+        _this.getUserInfo(); //ユーザー情報更新
 
       })["catch"](function (error) {
-        console.log(error);
+        console.log(error.response.data.message);
+
+        if (error.response.data.message.match(/Duplicate/)) {
+          //strにhogeを含む場合の処理
+          console.log('メールアドレス重複');
+          _this.errorMessage.userUpdate = 'duplicate';
+        } //console.log(error.response.data.errors.email[0])
+
       });
     },
     getUserInfo: function getUserInfo() {
-      var _this3 = this;
+      var _this2 = this;
 
       axios.get("/api/loginCheck").then(function (response) {
-        _this3.isLoggedIn = true;
+        _this2.isLoggedIn = true;
         var currentUser = response.data;
-        _this3.user.name = currentUser.name;
-        _this3.user.email = currentUser.email; //let icon = currentUser.icon
+        _this2.user.name = currentUser.name;
+        _this2.user.email = currentUser.email; //let icon = currentUser.icon
 
         if (currentUser.icon) {
-          _this3.blobUrl = '/storage/user_icon/' + currentUser.icon;
+          _this2.blobUrl = '/storage/user_icon/' + currentUser.icon + '?' + Math.random().toString(32).substring(2);
         } //最新版のユーザーアイコンを取得
 
 
-        _this3.user.name = _this3.user.name;
-        _this3.user.email = _this3.user.email;
-        _this3.user.id = response.data.id; //カレントユーザーのIDを取得
+        _this2.user.name = _this2.user.name;
+        _this2.user.email = _this2.user.email;
+        _this2.user.id = response.data.id; //カレントユーザーのIDを取得
         //vuexでリアルタイムにユーザーの情報を更新（ヘッダーが変化を監視）
 
         var userInfo = {
-          name: _this3.user.name,
-          email: _this3.user.name //アイコンの情報もヘッダーに表示したいなら必要かも
+          name: _this2.user.name,
+          email: _this2.user.name //アイコンの情報もヘッダーに表示したいなら必要かも
 
         };
 
-        _this3.$store.commit("checkLogin", userInfo);
+        _this2.$store.commit("checkLogin", userInfo);
       })["catch"](function (error) {
         //console.log(error)
-        _this3.isLoggedIn = false; //this.$store.commit("message", 'ログインしてください。')
+        _this2.isLoggedIn = false; //this.$store.commit("message", 'ログインしてください。')
 
-        _this3.$router.push("/login"); //ログイン画面にジャンプ
+        _this2.$router.push("/login"); //ログイン画面にジャンプ
 
       });
     },
@@ -723,49 +747,65 @@ __webpack_require__.r(__webpack_exports__);
       var result = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.name(this.user).result;
       return result;
     },
-    //こいつらは1つのメソッドにまとめられる。
-    //どの引数でどのフォームかを判定してifでメッセージの格納先を分ければ良い
-    checkCurrentPassword: function checkCurrentPassword() {
-      this.errorMessage.currentPassword = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.checkhoge(this.user.currentPassword);
-    },
-    checkNewPassword: function checkNewPassword() {
-      this.errorMessage.newPassword = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.checkhoge(this.user.newPassword);
-    },
-    checknewPasswordConfirm: function checknewPasswordConfirm() {
-      this.errorMessage.newPasswordConfirm = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.checkhoge(this.user.newPasswordConfirm);
-    },
-    //まとめた版のメソッド
-    checkhogehoge: function checkhogehoge(value) {
-      if (value == currentPassowrd) {
-        this.errorMessage.currentPassword = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.checkhoge(this.user.currentPassword);
-      } else if (value == newPassword) {
-        this.errorMessage.newPassword = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.checkhoge(this.user.newPassword);
-      } else if (value == newPasswordConfirm) {
-        this.errorMessage.newPasswordConfirm = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.checkhoge(this.user.newPasswordConfirm);
+    //パスワードバリデーションチェック
+    checkPasswords: function checkPasswords(value) {
+      if (value == 'currentPassowrd') {
+        this.errorMessage.currentPassword = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.password(this.user.currentPassword).message;
+      } else if (value == 'newPassword') {
+        this.errorMessage.newPassword = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.password(this.user.newPassword).message;
+      } else if (value == 'newPasswordConfirm') {
+        this.errorMessage.newPasswordConfirm = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.password(this.user.newPasswordConfirm).message;
+      }
+
+      if (_modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.password(this.user.currentPassword).result && _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.password(this.user.newPassword).result && _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.password(this.user.newPasswordConfirm).result) {
+        console.log('全部入力されている');
+        return true;
+      } else {
+        console.log('入力されていない項目がある');
+        return false;
       }
     },
     passwordUpdate: function passwordUpdate() {
-      if (this.user.newPassword == this.user.newPasswordConfirm) {
-        console.log('パスワード一致');
-      } else {
-        console.log('パスワード不一致');
-      }
+      var _this3 = this;
 
-      axios.get("/api/account/checkOldPassword", {
-        params: {
-          oldPassword: this.user.oldPassword,
-          userId: this.user.id
-        }
-      }).then(function (response) {
-        console.log(response.data);
-      });
-    },
-    //まとめるチャレンジ
-    validation: function validation(input) {// let hoge = input
-      // this.errorMessage.hoge = Validate.hoge(this.userNewValue).message
-      // //モジュールから真偽を取得
-      // var result = Validate.input(this.userNewValue).result
-      // return result
+      this.errorMessage.passwordUpdate = null;
+      var currentPassowrd = this.checkPasswords('currentPassowrd');
+      var newPassword = this.checkPasswords('newPassword');
+      var newPasswordConfirm = this.checkPasswords('newPasswordConfirm');
+
+      if (currentPassowrd && newPassword && newPasswordConfirm && this.user.newPassword == this.user.newPasswordConfirm) {
+        console.log('全部trueかつ新しい2つのパスワードも一致');
+        axios.post("/api/account/checkOldPassword", {
+          userId: this.user.id,
+          currentPassword: this.user.currentPassword,
+          password: this.user.newPassword
+        }).then(function (response) {
+          console.log('フロントは問題なし。apiに投げるぜ');
+          _this3.errorMessage.passwordUpdate = response.data;
+
+          if (_this3.errorMessage.passwordUpdate == 'success') {
+            _this3.user.currentPassword = null;
+            _this3.user.newPassword = null;
+            _this3.user.newPasswordConfirm = null;
+          }
+        });
+      } else if (this.user.newPassword != this.user.newPasswordConfirm) {
+        console.log('新しいパスワード不一致');
+      } // if (this.user.newPassword == this.user.newPasswordConfirm) {
+      //     console.log('パスワード一致')
+      //     axios.get("/api/account/checkOldPassword", {
+      //             params: {
+      //                 oldPassword: this.user.oldPassword,
+      //                 userId: this.user.id,
+      //             }
+      //         })
+      //         .then(response => {
+      //             console.log(response.data)
+      //         })
+      // } else {
+      //     console.log('パスワード不一致')
+      // }
+
     }
   }
 });
@@ -898,14 +938,14 @@ __webpack_require__.r(__webpack_exports__);
     },
     checkPassword: function checkPassword() {
       //モジュールからエラーメッセージを取得
-      this.errorMessage.password = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.password(this.form).message; //モジュールから真偽を取得
+      this.errorMessage.password = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.password(this.form.password).message; //モジュールから真偽を取得
 
-      var result = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.password(this.form).result;
-      return result;
+      return _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.password(this.form.password).result;
     },
     onSubmit: function onSubmit() {
       var _this2 = this;
 
+      this.message = null;
       var emailResult = this.checkEmail();
       var passwordResult = this.checkPassword();
 
@@ -945,7 +985,7 @@ __webpack_require__.r(__webpack_exports__);
           _this2.message = 'ユーザー名またはパスワードが違います。';
         });
       } else {
-        alert('入力内容に不備があります。');
+        this.message = '入力内容に不備があります。';
       }
     }
   }
@@ -1046,8 +1086,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
 
  //バリデーションのモジュールを外部ファイルから読み込
 
@@ -1068,11 +1106,25 @@ __webpack_require__.r(__webpack_exports__);
       },
       errorMessage: {
         'email': null,
-        'password': null
-      }
+        'password': null,
+        'submit': null
+      },
+      isLoggedIn: null
     };
   },
-  mounted: function mounted() {//必ず通過するフック
+  mounted: function mounted() {
+    var _this = this;
+
+    axios.get("api/loginCheck").then(function (response) {
+      _this.isLoggedIn = 'yes'; //trueだと判定までの読み込み中にフォームが表示されてしまう
+
+      console.log('ログイン済み');
+
+      _this.$router.push('/account');
+    })["catch"](function (error) {
+      console.log('未ログイン');
+      _this.isLoggedIn = 'no';
+    });
   },
   methods: {
     checkEmail: function checkEmail() {
@@ -1084,35 +1136,36 @@ __webpack_require__.r(__webpack_exports__);
     },
     checkPassword: function checkPassword() {
       //モジュールからエラーメッセージを取得
-      this.errorMessage.password = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.password(this.form).message; //モジュールから真偽を取得
+      this.errorMessage.password = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.password(this.form.password).message; //モジュールから真偽を取得
 
-      var result = _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.password(this.form).result;
-      return result;
+      return _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.password(this.form.password).result;
     },
     register: function register() {
-      //投稿とボタンが押されたときに発動するメソッド
+      var _this2 = this;
+
+      this.errorMessage.submit = null; //投稿とボタンが押されたときに発動するメソッド
       //投稿直前にも入力に不備がないかチェック
+
       var emailResult = this.checkEmail();
       var passwordResult = this.checkPassword();
+      console.log(passwordResult);
 
       if (emailResult && passwordResult) {
         //check項目が全てtrueなら      
         //バリデーション関数のreturnがどちらもtrueなら下記実行
         axios.post('/api/register', this.form) //apiのルートを指定。第2引数には渡したい変数を入れる
         .then(function (response) {
-          //ここに成功した時に行いたい処理を記載
-          alert('登録できました。ダッシュボードに移管させたい！');
+          alert('登録できました。ログイン状態にしてダッシュボードに移管させたい！');
         })["catch"](function (error) {
-          // handle error(axiosの処理にエラーが発生した場合に処理させたいことを記述)
           if (error.response.data.errors.email[0] == 'The email has already been taken.') {
             console.log(error.response.data.errors.email[0]);
-            alert('このメールアドレスはすでに登録されています。');
+            _this2.errorMessage.submit = 'このメールアドレスはすでに登録されています。';
           } else {
             alert('あかんかったわ、コンソール見て');
           }
         });
       } else {
-        alert('入力に不備があります。');
+        this.errorMessage.submit = '入力内容に不備があります。';
       }
     }
   }
@@ -1988,8 +2041,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "name": () => (/* binding */ name),
 /* harmony export */   "email": () => (/* binding */ email),
-/* harmony export */   "password": () => (/* binding */ password),
-/* harmony export */   "checkhoge": () => (/* binding */ checkhoge)
+/* harmony export */   "password": () => (/* binding */ password)
 /* harmony export */ });
 //共通バリデーションモジュール
 function email(form) {
@@ -2022,42 +2074,23 @@ function email(form) {
   };
 }
 
-function password(form) {
-  //主にログインや新規登録時のパスワードのバリデーション 
-  var n = '';
-  var n = form.password.length; //passwordの文字数
-
-  console.log(n);
-
-  if (n == 0) {
-    var message = "入力してください。";
-  } else if (n > 256) {
-    var message = "255文字以内で入力してください。";
-  } else {
-    var message = "";
-  }
-
-  if (message == "") {
-    var result = true;
-  } else {
-    var result = false;
-  } //passwordの入力に問題がなければtrueを返す
-
-
-  return {
-    'result': result,
-    'message': message
-  };
-}
-
-function checkhoge(value) {
+function password(value) {
   //主にパスワード変更時に使う
   if (value == null || value.length == 0) {
-    return "入力してください。";
+    return {
+      'result': false,
+      'message': "入力してください。"
+    };
   } else if (value.length > 256) {
-    return "255文字以内で入力してください。";
+    return {
+      'result': false,
+      'message': "255文字以内で入力してください。"
+    };
   } else {
-    return "";
+    return {
+      'result': true,
+      'message': null
+    };
   }
 }
 
@@ -2180,7 +2213,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.parent[data-v-5390e3d8] {\n    position: relative;\n}\n.parent .child[data-v-5390e3d8] {\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    transform: translate(-50%, -50%);\n    margin: 0;\n    /*余計な隙間を除く*/\n    padding: 0;\n    color: rgba(99, 99, 99, 0.721);\n    /*余計な隙間を除く*/\n    font-size: 30px;\n    /*サイズ*/\n}\n.parent img[data-v-5390e3d8] {\n    width: 100%;\n}\n.userIcon[data-v-5390e3d8] {\n    width: 150;\n    height: 150px;\n    border-radius: 50%;\n    /*角丸*/\n    -o-object-fit: cover;\n       object-fit: cover;\n}\n.inactive[data-v-5390e3d8] {}\n.active[data-v-5390e3d8] {\n    opacity: 0.8;\n}\n\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.parent[data-v-5390e3d8] {\n    position: relative;\n}\n.parent .child[data-v-5390e3d8] {\n    position: absolute;\n    top: 50%;\n    left: 50%;\n    transform: translate(-50%, -50%);\n    margin: 0;\n    /*余計な隙間を除く*/\n    padding: 0;\n    color: rgba(99, 99, 99, 0.721);\n    /*余計な隙間を除く*/\n    font-size: 30px;\n    /*サイズ*/\n}\n.parent img[data-v-5390e3d8] {\n    width: 100%;\n}\n.userIcon[data-v-5390e3d8] {\n    width: 150;\n    height: 150px;\n    border-radius: 50%;\n    /*角丸*/\n    -o-object-fit: cover;\n       object-fit: cover;\n\n    margin-bottom: .7em;\n}\n.inactive[data-v-5390e3d8] {}\n.active[data-v-5390e3d8] {\n    opacity: 0.8;\n}\n\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -8009,7 +8042,7 @@ var render = function() {
           "b-navbar",
           { attrs: { toggleable: "lg", type: "dark", variant: "dark" } },
           [
-            _c("b-navbar-brand", { attrs: { href: "#" } }, [_vm._v("NavBar")]),
+            _c("b-navbar-brand", { attrs: { to: "/" } }, [_vm._v("NavBar")]),
             _vm._v(" "),
             _c("b-navbar-toggle", { attrs: { target: "nav-collapse" } }),
             _vm._v(" "),
@@ -8072,15 +8105,6 @@ var render = function() {
                         attrs: { to: "/register" }
                       },
                       [_vm._v("Register\n                    ")]
-                    ),
-                    _vm._v(" "),
-                    _c(
-                      "b-nav-item",
-                      {
-                        class: { active: _vm.$route.path === "/account" },
-                        attrs: { to: "/account" }
-                      },
-                      [_vm._v("アカウント")]
                     )
                   ],
                   1
@@ -8114,13 +8138,17 @@ var render = function() {
                           },
                           [
                             _vm._v(" "),
-                            _c("b-dropdown-item", { attrs: { href: "#" } }, [
-                              _vm._v("Profile")
-                            ]),
+                            _c(
+                              "b-dropdown-item",
+                              { attrs: { to: "/account" } },
+                              [_vm._v("Account")]
+                            ),
                             _vm._v(" "),
-                            _c("b-dropdown-item", { attrs: { href: "#" } }, [
-                              _vm._v("Sign Out")
-                            ])
+                            _c(
+                              "b-dropdown-item",
+                              { on: { click: _vm.logout } },
+                              [_vm._v("Logout")]
+                            )
                           ],
                           1
                         )
@@ -8839,7 +8867,7 @@ var render = function() {
                               ]
                             ),
                             _vm._v(" "),
-                            _vm.message == "updated"
+                            _vm.errorMessage.userUpdate == "updated"
                               ? _c(
                                   "b-alert",
                                   { attrs: { show: "", variant: "success" } },
@@ -8847,11 +8875,27 @@ var render = function() {
                                 )
                               : _vm._e(),
                             _vm._v(" "),
-                            _vm.message == "nothing"
+                            _vm.errorMessage.userUpdate == "nothing"
                               ? _c(
                                   "b-alert",
                                   { attrs: { show: "", variant: "warning" } },
-                                  [_vm._v("変更はありませんでした。")]
+                                  [
+                                    _vm._v(
+                                      "変更はありませんでした。\n                        "
+                                    )
+                                  ]
+                                )
+                              : _vm._e(),
+                            _vm._v(" "),
+                            _vm.errorMessage.userUpdate == "duplicate"
+                              ? _c(
+                                  "b-alert",
+                                  { attrs: { show: "", variant: "warning" } },
+                                  [
+                                    _vm._v(
+                                      "\n                            そのメールアドレスは既にほかのアカウントで利用されています。"
+                                    )
+                                  ]
                                 )
                               : _vm._e(),
                             _vm._v(" "),
@@ -8882,9 +8926,13 @@ var render = function() {
                           _c(
                             "div",
                             [
-                              _c("code", [
-                                _vm._v(_vm._s(_vm.errorMessage.currentPassword))
-                              ]),
+                              _vm.errorMessage.currentPassword
+                                ? _c("code", [
+                                    _vm._v(
+                                      _vm._s(_vm.errorMessage.currentPassword)
+                                    )
+                                  ])
+                                : _vm._e(),
                               _vm._v(" "),
                               _c("b-form-input", {
                                 attrs: {
@@ -8892,8 +8940,12 @@ var render = function() {
                                   placeholder: "現在のパスワード"
                                 },
                                 on: {
-                                  change: _vm.checkCurrentPassword,
-                                  blur: _vm.checkCurrentPassword
+                                  change: function($event) {
+                                    return _vm.checkPasswords("currentPassowrd")
+                                  },
+                                  blur: function($event) {
+                                    return _vm.checkPasswords("currentPassowrd")
+                                  }
                                 },
                                 model: {
                                   value: _vm.user.currentPassword,
@@ -8912,9 +8964,11 @@ var render = function() {
                           _c(
                             "div",
                             [
-                              _c("code", [
-                                _vm._v(_vm._s(_vm.errorMessage.newPassword))
-                              ]),
+                              _vm.errorMessage.newPassword
+                                ? _c("code", [
+                                    _vm._v(_vm._s(_vm.errorMessage.newPassword))
+                                  ])
+                                : _vm._e(),
                               _vm._v(" "),
                               _c("b-form-input", {
                                 attrs: {
@@ -8922,8 +8976,12 @@ var render = function() {
                                   placeholder: "新しいパスワード"
                                 },
                                 on: {
-                                  change: _vm.checkCurrentPassword,
-                                  blur: _vm.checkNewPassword
+                                  change: function($event) {
+                                    return _vm.checkPasswords("newPassword")
+                                  },
+                                  blur: function($event) {
+                                    return _vm.checkPasswords("newPassword")
+                                  }
                                 },
                                 model: {
                                   value: _vm.user.newPassword,
@@ -8942,11 +9000,15 @@ var render = function() {
                           _c(
                             "div",
                             [
-                              _c("code", [
-                                _vm._v(
-                                  _vm._s(_vm.errorMessage.newPasswordConfirm)
-                                )
-                              ]),
+                              _vm.errorMessage.newPasswordConfirm
+                                ? _c("code", [
+                                    _vm._v(
+                                      _vm._s(
+                                        _vm.errorMessage.newPasswordConfirm
+                                      )
+                                    )
+                                  ])
+                                : _vm._e(),
                               _vm._v(" "),
                               _c("b-form-input", {
                                 attrs: {
@@ -8954,8 +9016,16 @@ var render = function() {
                                   placeholder: "新しいパスワード再入力"
                                 },
                                 on: {
-                                  change: _vm.checknewPasswordConfirm,
-                                  blur: _vm.checknewPasswordConfirm
+                                  change: function($event) {
+                                    return _vm.checkPasswords(
+                                      "newPasswordConfirm"
+                                    )
+                                  },
+                                  blur: function($event) {
+                                    return _vm.checkPasswords(
+                                      "newPasswordConfirm"
+                                    )
+                                  }
                                 },
                                 model: {
                                   value: _vm.user.newPasswordConfirm,
@@ -8975,11 +9045,27 @@ var render = function() {
                             1
                           )
                         ],
-                        _vm._v(
-                          "\n                    " +
-                            _vm._s(_vm.user.id) +
-                            "\n                    "
-                        ),
+                        _vm._v(" "),
+                        _vm.errorMessage.passwordUpdate == "success"
+                          ? _c(
+                              "b-alert",
+                              { attrs: { show: "", variant: "success" } },
+                              [_vm._v("更新しました。")]
+                            )
+                          : _vm._e(),
+                        _vm._v(" "),
+                        _vm.errorMessage.passwordUpdate == "oldPasswordError"
+                          ? _c(
+                              "b-alert",
+                              { attrs: { show: "", variant: "warning" } },
+                              [
+                                _vm._v(
+                                  "\n                        現在のパスワードが間違っています。"
+                                )
+                              ]
+                            )
+                          : _vm._e(),
+                        _vm._v(" "),
                         _c(
                           "b-button",
                           {
@@ -9212,91 +9298,100 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [
-    _c("h1", [_vm._v(_vm._s(_vm.title))]),
-    _vm._v(" "),
-    _c("div", { attrs: { id: "form" } }, [
-      _c("div", { staticClass: "form" }, [
-        _c("div", {}, [
-          _c("div", { staticClass: "form-group" }, [
-            _c("label", { attrs: { for: "" } }, [_vm._v("Email")]),
-            _vm._v(" "),
-            _c("code", [_vm._v(_vm._s(_vm.errorMessage.email))]),
-            _vm._v(" "),
-            _c("input", {
-              directives: [
-                {
-                  name: "model",
-                  rawName: "v-model",
-                  value: _vm.form.email,
-                  expression: "form.email"
-                }
-              ],
-              staticClass: "form-control",
-              attrs: { type: "email" },
-              domProps: { value: _vm.form.email },
-              on: {
-                change: _vm.checkEmail,
-                blur: _vm.checkEmail,
-                input: function($event) {
-                  if ($event.target.composing) {
-                    return
-                  }
-                  _vm.$set(_vm.form, "email", $event.target.value)
-                }
-              }
-            }),
-            _vm._v(" "),
-            _c("p", [_vm._v(_vm._s(_vm.form.email))])
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: "form-group" }, [
-            _c("label", { attrs: { for: "" } }, [_vm._v("password")]),
-            _vm._v(" "),
-            _c("code", [_vm._v(_vm._s(_vm.errorMessage.password))]),
-            _vm._v(" "),
-            _c("input", {
-              directives: [
-                {
-                  name: "model",
-                  rawName: "v-model",
-                  value: _vm.form.password,
-                  expression: "form.password"
-                }
-              ],
-              staticClass: "form-control",
-              attrs: { type: "password" },
-              domProps: { value: _vm.form.password },
-              on: {
-                change: _vm.checkPassword,
-                blur: _vm.checkPassword,
-                input: function($event) {
-                  if ($event.target.composing) {
-                    return
-                  }
-                  _vm.$set(_vm.form, "password", $event.target.value)
-                }
-              }
-            }),
-            _vm._v(" "),
-            _c("p", [_vm._v(_vm._s(_vm.form.password))])
-          ])
-        ])
-      ]),
-      _vm._v(" "),
-      _c("div", { staticClass: "form-submit" }, [
+  return _vm.isLoggedIn
+    ? _c("div", [
+        _c("h1", [_vm._v(_vm._s(_vm.title))]),
+        _vm._v(" "),
         _c(
-          "button",
-          {
-            staticClass: "btn btn-primary",
-            attrs: { type: "button" },
-            on: { click: _vm.register }
-          },
-          [_vm._v("登録")]
+          "div",
+          { attrs: { id: "form" } },
+          [
+            _c("div", { staticClass: "form" }, [
+              _c("div", {}, [
+                _c("div", { staticClass: "form-group" }, [
+                  _c("label", { attrs: { for: "" } }, [_vm._v("Email")]),
+                  _vm._v(" "),
+                  _c("code", [_vm._v(_vm._s(_vm.errorMessage.email))]),
+                  _vm._v(" "),
+                  _c("input", {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.form.email,
+                        expression: "form.email"
+                      }
+                    ],
+                    staticClass: "form-control",
+                    attrs: { type: "email" },
+                    domProps: { value: _vm.form.email },
+                    on: {
+                      change: _vm.checkEmail,
+                      blur: _vm.checkEmail,
+                      input: function($event) {
+                        if ($event.target.composing) {
+                          return
+                        }
+                        _vm.$set(_vm.form, "email", $event.target.value)
+                      }
+                    }
+                  })
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "form-group" }, [
+                  _c("label", { attrs: { for: "" } }, [_vm._v("password")]),
+                  _vm._v(" "),
+                  _vm.errorMessage.password
+                    ? _c("code", [_vm._v(_vm._s(_vm.errorMessage.password))])
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _c("input", {
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.form.password,
+                        expression: "form.password"
+                      }
+                    ],
+                    staticClass: "form-control",
+                    attrs: { type: "password" },
+                    domProps: { value: _vm.form.password },
+                    on: {
+                      change: _vm.checkPassword,
+                      blur: _vm.checkPassword,
+                      input: function($event) {
+                        if ($event.target.composing) {
+                          return
+                        }
+                        _vm.$set(_vm.form, "password", $event.target.value)
+                      }
+                    }
+                  })
+                ])
+              ])
+            ]),
+            _vm._v(" "),
+            _vm.errorMessage.submit
+              ? _c("b-alert", { attrs: { show: "", variant: "danger" } }, [
+                  _vm._v(_vm._s(_vm.errorMessage.submit))
+                ])
+              : _vm._e(),
+            _vm._v(" "),
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-primary",
+                attrs: { type: "button" },
+                on: { click: _vm.register }
+              },
+              [_vm._v("登録")]
+            )
+          ],
+          1
         )
       ])
-    ])
-  ])
+    : _vm._e()
 }
 var staticRenderFns = []
 render._withStripped = true

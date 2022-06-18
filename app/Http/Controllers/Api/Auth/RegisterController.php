@@ -20,7 +20,7 @@ class RegisterController extends Controller
         $defaultName = explode("@", $request->email);
        
         User::create([
-            'name' =>  $defaultName[0],//初期値はemailの@マークより右側を入れたい
+            'name' =>  $defaultName[0],//初期値はemailの@マークより左側を入れたい
             'email' =>  $request->email,
             'password' => Hash::make($request->password),
         ]);

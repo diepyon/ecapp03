@@ -73,7 +73,6 @@ class Stock extends Model
 
     public static function ConversionImage($file, $filename)
     {//画像変換メソッド
-
         /*----------
         縮小サイズで保存（ループ一覧用）
         ----------*/

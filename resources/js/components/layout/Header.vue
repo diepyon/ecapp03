@@ -2,7 +2,7 @@
     <header>
         <div>
             <b-navbar toggleable="lg" type="dark" variant="dark">
-                <b-navbar-brand href="#">NavBar</b-navbar-brand>
+                <b-navbar-brand to="/">NavBar</b-navbar-brand>
                 <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
                 <b-collapse id="nav-collapse" is-nav>
                     <b-navbar-nav>
@@ -14,7 +14,6 @@
                         <b-nav-item :class="{ active: $route.path === '/login' }" to="/login">Login</b-nav-item>
                         <b-nav-item :class="{ active: $route.path === '/register' }" to="/register">Register
                         </b-nav-item>
-                        <b-nav-item :class="{ active: $route.path === '/account' }" to="/account">アカウント</b-nav-item>
                     </b-navbar-nav>
                     <!-- Right aligned nav items -->
                     <b-navbar-nav class="ml-auto">
@@ -23,8 +22,8 @@
                             <template #button-content>
                                 <em>{{ userName}}</em>
                             </template>
-                            <b-dropdown-item href="#">Profile</b-dropdown-item>
-                            <b-dropdown-item href="#">Sign Out</b-dropdown-item>
+                            <b-dropdown-item to="/account" >Account</b-dropdown-item>
+                            <b-dropdown-item @click="logout" >Logout</b-dropdown-item>
                         </b-nav-item-dropdown>
                         <button v-else>ログイン</button>
                     </b-navbar-nav>
@@ -117,7 +116,22 @@
         computed: {
 
         },
-        methods: {},
+        methods: {
+            logout() {
+                axios
+                    .post("api/logout")
+                    .then(response => {
+                        localStorage.clear()
+                        this.$store.commit("logout") //vuexの内容をリセット
+
+                        //pushに変えてみた。headerのbefore mountedで監視してるから、セッション切れ後もワンチャンいける。
+                        this.$router.push("/login") //ログイン画面にジャンプ
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+            },
+        },
     };
 
 </script>

@@ -14,7 +14,6 @@
                                         accept=".jpg,.jpeg,.png,.gif" style="display:none">
                                 </label>
                             </div>
-
                             <b-form-group id="" description="254文字まで">
                                 <code>{{errorMessage.name}}</code>
                                 <input v-model="user.name" @change="checkName" @blur="checkName" type="txt"
@@ -26,35 +25,45 @@
                                 <input v-model="user.email" @change="checkEmail" @blur="checkEmail" type="email"
                                     class="form-control" placeholder="メールアドレス">
                             </b-form-group>
-                            <b-alert show variant="success" v-if="message=='updated'">更新しました。</b-alert>
-                            <b-alert show variant="warning" v-if="message=='nothing'">変更はありませんでした。</b-alert>
+
+                            <b-alert show variant="success" v-if="errorMessage.userUpdate=='updated'">更新しました。</b-alert>
+                            <b-alert show variant="warning" v-if="errorMessage.userUpdate=='nothing'">変更はありませんでした。
+                            </b-alert>
+                            <b-alert show variant="warning" v-if="errorMessage.userUpdate=='duplicate'">
+                                そのメールアドレスは既にほかのアカウントで利用されています。</b-alert>
                             <b-button @click="update();" type="button" variant="primary">更新</b-button>
                         </b-form>
                     </b-tab>
                     <b-tab title="セキュリティ">
                         <template>
                             <div>
-                                <code>{{errorMessage.currentPassword}}</code>
-                                <b-form-input type="password" v-model="user.currentPassword" @change="checkCurrentPassword"
-                                    @blur="checkCurrentPassword" placeholder="現在のパスワード">
+                                <code v-if="errorMessage.currentPassword">{{errorMessage.currentPassword}}</code>
+                                <b-form-input type="password" v-model="user.currentPassword"
+                                    @change="checkPasswords('currentPassowrd')"
+                                    @blur="checkPasswords('currentPassowrd')" placeholder="現在のパスワード">
                                 </b-form-input>
                                 <div class="mt-2"></div>
                             </div>
                             <div>
-                                <code>{{errorMessage.newPassword}}</code>
-                                <b-form-input type="password" @change="checkCurrentPassword"
-                                    @blur="checkNewPassword" v-model="user.newPassword" placeholder="新しいパスワード">
+                                <code v-if="errorMessage.newPassword">{{errorMessage.newPassword}}</code>
+                                <b-form-input type="password" @change="checkPasswords('newPassword')"
+                                    @blur="checkPasswords('newPassword')" v-model="user.newPassword"
+                                    placeholder="新しいパスワード">
                                 </b-form-input>
                                 <div class="mt-2"></div>
                             </div>
                             <div>
-                                <code>{{errorMessage.newPasswordConfirm}}</code>
+                                <code v-if="errorMessage.newPasswordConfirm">{{errorMessage.newPasswordConfirm}}</code>
                                 <b-form-input type="password" v-model="user.newPasswordConfirm"
-                                     @change="checknewPasswordConfirm" @blur="checknewPasswordConfirm" placeholder="新しいパスワード再入力"></b-form-input>
+                                    @change="checkPasswords('newPasswordConfirm')"
+                                    @blur="checkPasswords('newPasswordConfirm')" placeholder="新しいパスワード再入力">
+                                </b-form-input>
                                 <div class="mt-2"></div>
                             </div>
                         </template>
-                        {{user.id}}
+                        <b-alert show variant="success" v-if="errorMessage.passwordUpdate=='success'">更新しました。</b-alert>
+                        <b-alert show variant="warning" v-if="errorMessage.passwordUpdate=='oldPasswordError'">
+                            現在のパスワードが間違っています。</b-alert>
                         <b-button @click="passwordUpdate();" type="button" variant="primary">更新</b-button>
                     </b-tab>
                     <b-tab title="Tab 3">
@@ -91,20 +100,22 @@
                     newPasswordConfirm: null,
                 },
 
+                today: null,
+
                 isLoggedIn: false,
 
                 activeStatus: 'inactive',
                 fileInfo: null,
                 blobUrl: '/storage/user_icon/default_icon.jpg',
 
-                message: null, //更新にまつわるメッセージ
-
                 errorMessage: {
                     'name': null,
                     'email': null,
                     'currentPassword': null,
-                    'newPassword':null,
-                    'newPasswordConfirm':null,
+                    'newPassword': null,
+                    'newPasswordConfirm': null,
+                    'passwordUpdate': null,
+                    'userUpdate': null,
                 },
             }
         },
@@ -113,27 +124,23 @@
             this.getUserInfo()
             this.user.password = null
             this.user.passwordConfirm = null
+
+            this.getToday() //画像キャッシュ対策にほんじつの日付取得
         },
         methods: {
+            getToday() {
+                let date = new Date()
+                this.today = date.getFullYear() + '' + ('0' + (date.getMonth() + 1)).slice(-2) + '' + ('0' + date.getDate()).slice(
+                        -2) + '' + ('0' + date.getHours()).slice(-2) + '' + ('0' + date.getMinutes()).slice(-2) +
+                    //'' + ('0' + date.getSeconds()).slice(-2) + '' //+ date.getMilliseconds()
+                console.log(this.today)
+                
+            },
             beActive() {
                 this.activeStatus = 'active'
             },
             beInActive() {
                 this.activeStatus = 'inactive'
-            },
-            logout() {
-                axios
-                    .post("api/logout")
-                    .then(response => {
-                        localStorage.clear()
-                        this.$store.commit("logout") //vuexの内容をリセット
-
-                        //pushに変えてみた。headerのbefore mountedで監視してるから、セッション切れ後もワンチャンいける。
-                        this.$router.push("/login") //ログイン画面にジャンプ
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    });
             },
             fileSelected(event) {
                 this.fileInfo = event.target.files[0] //選択されたファイルの情報を変数に格納
@@ -159,7 +166,8 @@
                 //     })
 
 
-                this.getUserInfo()
+                //this.getUserInfo()
+                this.errorMessage.userUpdate = null
 
                 let postData = new FormData()
                 if (this.fileInfo) {
@@ -172,19 +180,26 @@
                 postData.append('email', this.user.email)
 
 
-                //バリデーションを通過しないと更新させなくしたい
                 axios.post("/api/account/update", postData)
                     .then(response => {
-                        this.message = response.data //更新されたかどうかの結果を格納したメッセージ
 
-                        if (this.message == 'updated') {
+                        this.errorMessage.userUpdate = response.data //更新されたかどうかの結果を格納したメッセージ
+
+                        //イランと思う
+                        if (this.errorMessage.userUpdate == 'updated') {
                             this.$bvModal.hide('modal-scoped')
                         } //変化があれば閉じる
 
                         this.getUserInfo() //ユーザー情報更新
                     })
                     .catch(error => {
-                        console.log(error)
+                        console.log(error.response.data.message)
+                        if (error.response.data.message.match(/Duplicate/)) {
+                            //strにhogeを含む場合の処理
+                            console.log('メールアドレス重複')
+                            this.errorMessage.userUpdate = 'duplicate'
+                        }
+                        //console.log(error.response.data.errors.email[0])
                     })
             },
             getUserInfo() {
@@ -199,7 +214,7 @@
                         //let icon = currentUser.icon
 
                         if (currentUser.icon) {
-                            this.blobUrl = '/storage/user_icon/' + currentUser.icon
+                            this.blobUrl = '/storage/user_icon/' + currentUser.icon + '?' +  Math.random().toString(32).substring(2)
                         } //最新版のユーザーアイコンを取得
 
                         this.user.name = this.user.name
@@ -244,61 +259,74 @@
                 return result
             },
 
+            //パスワードバリデーションチェック
+            checkPasswords(value) {
+                if (value == 'currentPassowrd') {
+                    this.errorMessage.currentPassword = Validate.password(this.user.currentPassword).message
 
-            //こいつらは1つのメソッドにまとめられる。
-            //どの引数でどのフォームかを判定してifでメッセージの格納先を分ければ良い
-            checkCurrentPassword() {
-                this.errorMessage.currentPassword = Validate.checkhoge(this.user.currentPassword)
-            },
-            checkNewPassword() {
-                this.errorMessage.newPassword = Validate.checkhoge(this.user.newPassword)
-            },           
-            checknewPasswordConfirm(){
-                this.errorMessage.newPasswordConfirm = Validate.checkhoge(this.user.newPasswordConfirm)
-            }, 
+                } else if (value == 'newPassword') {
+                    this.errorMessage.newPassword = Validate.password(this.user.newPassword).message
 
-            //まとめた版のメソッド
-            checkhogehoge(value){
-                if(value == currentPassowrd){
-                    this.errorMessage.currentPassword = Validate.checkhoge(this.user.currentPassword)
-                }else if(value ==newPassword){
-                    this.errorMessage.newPassword = Validate.checkhoge(this.user.newPassword)
-                }else if(value == newPasswordConfirm){
-                     this.errorMessage.newPasswordConfirm = Validate.checkhoge(this.user.newPasswordConfirm)
+                } else if (value == 'newPasswordConfirm') {
+                    this.errorMessage.newPasswordConfirm = Validate.password(this.user.newPasswordConfirm).message
+
                 }
 
-            },
-
-
-
-            passwordUpdate() {
-                if (this.user.newPassword == this.user.newPasswordConfirm) {
-                    console.log('パスワード一致')
+                if (Validate.password(this.user.currentPassword).result && Validate.password(this.user.newPassword)
+                    .result && Validate.password(this.user.newPasswordConfirm).result) {
+                    console.log('全部入力されている')
+                    return true
                 } else {
-                    console.log('パスワード不一致')
+                    console.log('入力されていない項目がある')
+                    return false
                 }
-                axios.get("/api/account/checkOldPassword", {
-                        params: {
-                            oldPassword: this.user.oldPassword,
-                            userId: this.user.id,
-                        }
-                    })
-                    .then(response => {
-                        console.log(response.data)
-                    })
             },
+            passwordUpdate() {
+                this.errorMessage.passwordUpdate = null
 
-            //まとめるチャレンジ
-            validation(input) {
-                // let hoge = input
+                let currentPassowrd = this.checkPasswords('currentPassowrd')
+                let newPassword = this.checkPasswords('newPassword')
+                let newPasswordConfirm = this.checkPasswords('newPasswordConfirm')
 
-                // this.errorMessage.hoge = Validate.hoge(this.userNewValue).message
+                if ((currentPassowrd && newPassword && newPasswordConfirm && (this.user.newPassword == this.user
+                        .newPasswordConfirm))) {
+                    console.log('全部trueかつ新しい2つのパスワードも一致')
 
-                // //モジュールから真偽を取得
-                // var result = Validate.input(this.userNewValue).result
-                // return result
-            }
+                    axios.post("/api/account/checkOldPassword", {
+                            userId: this.user.id,
+                            currentPassword: this.user.currentPassword,
+                            password: this.user.newPassword
+                        })
+                        .then(response => {
+                            console.log('フロントは問題なし。apiに投げるぜ')
+                            this.errorMessage.passwordUpdate = response.data
 
+                            if (this.errorMessage.passwordUpdate == 'success') {
+                                this.user.currentPassword = null
+                                this.user.newPassword = null
+                                this.user.newPasswordConfirm = null
+                            }
+                        })
+                } else if (this.user.newPassword != this.user.newPasswordConfirm) {
+                    console.log('新しいパスワード不一致')
+                }
+
+                // if (this.user.newPassword == this.user.newPasswordConfirm) {
+                //     console.log('パスワード一致')
+                //     axios.get("/api/account/checkOldPassword", {
+                //             params: {
+                //                 oldPassword: this.user.oldPassword,
+                //                 userId: this.user.id,
+                //             }
+                //         })
+                //         .then(response => {
+                //             console.log(response.data)
+                //         })
+                // } else {
+                //     console.log('パスワード不一致')
+                // }
+
+            },
         },
     }
 
@@ -334,6 +362,8 @@
         border-radius: 50%;
         /*角丸*/
         object-fit: cover;
+
+        margin-bottom: .7em;
     }
 
     .inactive {}

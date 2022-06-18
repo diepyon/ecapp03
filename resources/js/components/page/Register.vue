@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div v-if="isLoggedIn">
         <h1>{{title}}</h1>
         <div id="form">
             <div class="form">
@@ -7,22 +7,20 @@
                     <div class="form-group">
                         <label for="">Email</label>
                         <code>{{errorMessage.email}}</code>
-                        <input v-model="form.email" @change="checkEmail" @blur="checkEmail" type="email" class="form-control">
-                        <p>{{form.email}}</p>
+                        <input v-model="form.email" @change="checkEmail" @blur="checkEmail" type="email"
+                            class="form-control">
                     </div>
 
                     <div class="form-group">
                         <label for="">password</label>
-                        <code>{{errorMessage.password}}</code>
-                        <input v-model="form.password" @change="checkPassword" @blur="checkPassword" type="password" class="form-control">
-                        <p>{{form.password}}</p>      
+                        <code v-if="errorMessage.password">{{errorMessage.password}}</code>
+                        <input v-model="form.password" @change="checkPassword" @blur="checkPassword" type="password"
+                            class="form-control">
                     </div>
                 </div>
             </div>
-
-            <div class="form-submit">
-                <button type="button" class="btn btn-primary" @click="register">登録</button>
-            </div>
+            <b-alert show variant="danger" v-if="errorMessage.submit">{{errorMessage.submit}}</b-alert>
+            <button type="button" class="btn btn-primary" @click="register">登録</button>
         </div>
     </div>
 </template>
@@ -49,8 +47,8 @@
 
     //バリデーションのモジュールを外部ファイルから読み込
     import * as Validate from '../../modules/validation.js'
-    
-    
+
+
     export default {
         components: {
             Header,
@@ -61,18 +59,30 @@
             return {
                 title: 'Register',
                 //あらかじめ変数を定義してあげないとフロントが混乱する
-                form:{
+                form: {
                     email: '',
-                    password:'',
+                    password: '',
                 },
 
                 errorMessage: {
                     'email': null,
                     'password': null,
+                    'submit': null
                 },
+                isLoggedIn:null,
             }
         },
-        mounted() { //必ず通過するフック
+        mounted() {
+            axios.get("api/loginCheck")
+                .then(response => {
+                    this.isLoggedIn = 'yes' //trueだと判定までの読み込み中にフォームが表示されてしまう
+                    console.log('ログイン済み')
+                    this.$router.push('/account')
+                })
+                .catch(error => {
+                    console.log('未ログイン')
+                    this.isLoggedIn = 'no'
+                })            
         },
         methods: {
             checkEmail() {
@@ -85,36 +95,37 @@
             },
             checkPassword() {
                 //モジュールからエラーメッセージを取得
-                this.errorMessage.password = Validate.password(this.form).message
+                this.errorMessage.password = Validate.password(this.form.password).message
 
                 //モジュールから真偽を取得
-                var result = Validate.password(this.form).result
-                return result
+                return Validate.password(this.form.password).result
             },
 
-            register() { //投稿とボタンが押されたときに発動するメソッド
+            register() { 
+                 this.errorMessage.submit = null
+                //投稿とボタンが押されたときに発動するメソッド
                 //投稿直前にも入力に不備がないかチェック
                 var emailResult = this.checkEmail()
+                
                 var passwordResult = this.checkPassword()
+                console.log(passwordResult)
 
-                if (emailResult && passwordResult) {//check項目が全てtrueなら      
+                if (emailResult && passwordResult) { //check項目が全てtrueなら      
                     //バリデーション関数のreturnがどちらもtrueなら下記実行
                     axios.post('/api/register', this.form) //apiのルートを指定。第2引数には渡したい変数を入れる
                         .then(response => {
-                            //ここに成功した時に行いたい処理を記載
-                            alert('登録できました。ダッシュボードに移管させたい！');
+                            alert('登録できました。ログイン状態にしてダッシュボードに移管させたい！');
                         })
-                        .catch(function (error) {
-                            // handle error(axiosの処理にエラーが発生した場合に処理させたいことを記述)
-                            if(error.response.data.errors.email[0] == 'The email has already been taken.'){
+                        .catch(error => {
+                            if (error.response.data.errors.email[0] == 'The email has already been taken.') {
                                 console.log(error.response.data.errors.email[0])
-                                alert('このメールアドレスはすでに登録されています。')
-                            }else{
+                                this.errorMessage.submit = 'このメールアドレスはすでに登録されています。'
+                            } else {
                                 alert('あかんかったわ、コンソール見て');
                             }
                         })
                 } else {
-                    alert('入力に不備があります。')
+                   this.errorMessage.submit = '入力内容に不備があります。'
                 }
             }
         },

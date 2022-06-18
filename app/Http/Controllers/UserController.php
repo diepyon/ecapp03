@@ -6,6 +6,11 @@ use App\Models\User;   //name,email,passwordだけfillableなので注意
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
+use Image;
+
+//ffmpeg関連
+use FFMpeg;
+use ProtoneMedia\LaravelFFMpeg\Filesystem\Media;
 
 class UserController extends Controller
 {
@@ -15,24 +20,35 @@ class UserController extends Controller
         return $author;//全部返してもいい？メールアドレス見られちゃう？
     }
     public function update(User $user,Request $request)
-    {   
-        //メールアドレス 被り対策ができてない
-        
+    {           
         $userRecord =  User::where('id', $request->id)->first();
         $beforeUpdatedAt = $userRecord->updated_at;//更新前のupdated_at
 
+        
+       
+        
         //アイコンを最低限のサイズに縮小したい
-        if($request->extention || $userRecord->icon == null){
-            //ファイルがあるなら（拡張子があるなら）画像を投稿
-            //ファイル名ランダムじゃなくてもユーザーIDで良い説            
-            $filename = substr(bin2hex(random_bytes(8)), 0, 8);//ランダムなファイル名を定義
-            $userRecord->update(['icon' => $filename.'.'.$request->extention,]);
-            $request->file('files')[0]->storeAs('public/user_icon', $filename.'.'.$request->extention);//ランダムなファイル名.拡張子をファイル名に指定                 
-        }elseif($request->extention){
-            //ファイルありかつ既にアイコン設定済みなら上書き
-            $filename = $userRecord->icon;
-            $userRecord->update(['icon' => $filename.'.'.$request->extention,]);
-            $request->file('files')[0]->storeAs('public/user_icon', $filename.'.'.$request->extention);//ランダムなファイル名.拡張子をファイル名に指定                 
+        if($request->extention && $userRecord->icon == null){
+            //ファイルが（拡張子が）あり、アイコンが未設定なら画像を新規投稿     
+            //サイズを縮小したい
+            Image::make($request->file('files')[0])->resize(300, 300, function ($constraint) {
+                $constraint->aspectRatio();
+            })->save(storage_path(('app/public/user_icon/'. $userRecord->id.'.jpg'), 100));               
+            
+            //まだレコードのユーザー名を編集していない
+            $userRecord->update(['icon' => $userRecord->id.'.jpg',]);
+
+            //画像だけ更新されてもupdated_atは更新されないとかも？？？
+            $userRecord->touch();//updated_atを更新
+
+            $request->file('files')[0]->storeAs('public/user_icon', $userRecord->id.'.'.$request->extention);
+        }elseif($request->extention){ //ファイルありかつ既にアイコン設定済みなら上書き
+            //サイズを縮小したい
+            Image::make($request->file('files')[0])->resize(300, 300, function ($constraint) {
+                $constraint->aspectRatio();
+            })->save(storage_path(('app/public/user_icon/'. $userRecord->id.'.jpg'), 100));
+            
+            $userRecord->touch();//updated_atを更新
         }
 
         $result = $userRecord->fill($request->only([
@@ -49,13 +65,16 @@ class UserController extends Controller
         
     } 
     public function checkOldPassword(User $user,Request $request){
-        $nowPassword =  User::where('id', $request->userId)->first()->password;
+        $userRecord =  User::where('id', $request->userId)->first();
+        $currentPassword =  $userRecord->password;
 
-        if (Hash::check($request->oldPassword, $nowPassword)) {
-            return '古いパスワードは合ってる';
+        //return  Hash::make(($request->password);
+        
+        if (Hash::check($request->currentPassword, $currentPassword)) {
+            $userRecord->update(['password' =>  Hash::make($request->password)]);
+            return 'success';
         } else {
-            return '古いパスワードが間違ってる';
+            return 'oldPasswordError';
         }
-
     }   
 }

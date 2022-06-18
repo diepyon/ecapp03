@@ -49,4 +49,4 @@ Route::post('/logout', [LoginController::class, 'logout']);
 
 Route::post('/account/update', [UserController::class, 'update']);
 
-Route::get('/account/checkOldPassword', [UserController::class, 'checkOldPassword']);
+Route::post('/account/checkOldPassword', [UserController::class, 'checkOldPassword']);
