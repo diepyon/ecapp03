@@ -103,7 +103,7 @@
         },
         methods: {
             checkImgExist(id) {//サムネイル画像がエラーになるときは代替え画像に置き換え
-                var img = document.getElementById(id);
+                const img = document.getElementById(id);
                 img.setAttribute('src', '/storage/default_img/notfound.jpg');
             },
             async showArchive() {

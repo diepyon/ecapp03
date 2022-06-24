@@ -698,7 +698,7 @@ __webpack_require__.r(__webpack_exports__);
       isLoggedIn: false,
       activeStatus: 'inactive',
       fileInfo: null,
-      blobUrl: '/storage/user_icon/default_icon.jpg',
+      blobUrl: 'storage/default_img/default_icon.jpg',
       errorMessage: {
         'name': null,
         'email': null,
