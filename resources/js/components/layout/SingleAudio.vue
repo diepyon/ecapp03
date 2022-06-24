@@ -56,11 +56,12 @@
                 options: {
                     height: 90
                 },
-                file: "/storage/stock_sample/" + this.stock.filename + ".mp3",
+                file: "/storage/stock_sample/" + this.stock.filename + ".mp3",//ng
             }
         },
         mounted() {
-            console.log(this.stock.info)            
+            console.log(this.stock.info)  
+            console.log(this.file)          
 
         },
         methods: {

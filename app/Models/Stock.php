@@ -239,7 +239,8 @@ class Stock extends Model
         //ページに埋め込むmp3（サンプル音声付、再現性のあるサンプルにしたいからあえて元データを使って合成)
         $ffMpeg = FFMpeg::fromDisk('local')->open(['private/watermark/sample.mp3', $file])->export(); 
         $ffMpeg->addFilter('[0][1]', 'amix=inputs=2:duration=shortest', '[a]'); 
-        $ffMpeg->addFormatOutputMapping(new \FFMpeg\Format\Video\WebM, Media::make('local', 'public/stock_sample/'.$filename.'.mp3'), ['[a]']);
+        //$ffMpeg->addFormatOutputMapping(new \FFMpeg\Format\Video\WebM, Media::make('local', 'public/stock_sample/'.$filename.'.mp3'), ['[a]']);
+        $ffMpeg->addFormatOutputMapping(new \FFMpeg\Format\Audio\Mp3, Media::make('local', 'public/stock_sample/'.$filename.'.mp3'), ['[a]']);
         $ffMpeg->save();
 
         //ダウンロード用にmp3サンプルをコピー

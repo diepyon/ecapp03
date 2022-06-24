@@ -2,20 +2,20 @@
     <div v-if="isLoggedIn=='no'">
         <h1>{{title}}</h1>
         <b-form>
-            <b-form-group id="input-group-1" label="メールアドレス" description="">
+            <b-form-group label="メールアドレス" description="">
                 <code>{{errorMessage.email}}</code>
-                <b-form-input @change="checkEmail" @blur="checkEmail" id="input-1" v-model="form.email" type="email"
-                    placeholder="Enter email" required>
+                <b-form-input v-on:keydown.enter="onSubmit" @change="checkEmail" @blur="checkEmail" v-model="form.email" type="email"
+                    placeholder="メールアドレス" required>
                 </b-form-input>
             </b-form-group>
-            <b-form-group id="input-group-2" label="パスワード" description="">
+            <b-form-group label="パスワード" description="">
                 <code>{{errorMessage.password}}</code>
-                <b-form-input @change="checkPassword" @blur="checkPassword" id="input-2" v-model="form.password"
-                    type="password" placeholder="password" required>
+                <b-form-input v-on:keydown.enter="onSubmit" @change="checkPassword" @blur="checkPassword" v-model="form.password" type="password"
+                    placeholder="パスワード" required>
                 </b-form-input>
             </b-form-group>
             <b-alert show variant="danger" v-if="message">{{message}}</b-alert>
-            <b-button type="button" variant="primary" @click="onSubmit">ログイン</b-button>
+            <b-button variant="primary" @click="onSubmit">ログイン</b-button>
         </b-form>
     </div>
 </template>
@@ -87,8 +87,8 @@
                 this.errorMessage.password = Validate.password(this.form.password).message
 
                 //モジュールから真偽を取得
-                 return Validate.password(this.form.password).result
-               
+                return Validate.password(this.form.password).result
+
             },
             onSubmit() {
                 this.message = null

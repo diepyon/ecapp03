@@ -1,13 +1,16 @@
 <template>
     <div>
         <h1>{{title}}</h1>
-        <b-row>
-            <b-col cols="6" sm="3" class="b-col" v-for="stock in stocks" :key="stock.id">
+        <div class="stocks">
+            <div class="" v-for="stock in stocks" :key="stock.id">
                 <div class="stock_thumbnail">
                     <router-link :to="`stocks/` + stock.id">
-                        <img v-if="stock.genre=='image'" :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
-                        <img v-else-if="stock.genre=='video'" :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
-                        <img v-else-if="stock.genre=='audio'" :src="'/storage/stock_thumbnail/audiothumbnail.png'">
+                        <img @error="checkImgExist(stock.id)" id="stock.id" class="thumbnail" v-if="stock.genre=='image'"
+                            :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
+                        <img  @error="checkImgExist(stock.id)" :id="stock.id" class="thumbnail" v-else-if="stock.genre=='video'"
+                            :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
+                        <img  :id="stock.id" class="thumbnail" v-else-if="stock.genre=='audio'"
+                             :src="'/storage/stock_thumbnail/audiothumbnail.png'">
                     </router-link>
                     <div class="genre_icon">
                         <span v-show="stock.genre=='image'">
@@ -18,8 +21,9 @@
                             <font-awesome-icon :icon="['fas', 'music']" /></span>
                     </div>
                 </div>
-            </b-col>
-        </b-row>
+            </div>
+        </div>
+
         <div class="text-center">
             現在のページ：{{current_page}}<br>
             トータルページ数:{{length}}<br>
@@ -32,7 +36,7 @@
                     <li class="page-item"><button class="page-link" @click="changePage(previous)">
                             ‹</button></li>
 
-                    <li role="separator" class="page-item disabled bv-d-xs-down-none" v-if="current_page > 2"><span
+                    <li role="separator" class="page-item disabled bv-d-xs-down-none" v-if="current_page > 3"><span
                             class="page-link">…</span>
                     </li>
 
@@ -48,14 +52,15 @@
                     <li class="page-item"><button class="page-link" v-if="current_page +1 <= length"
                             @click="changePage(current_page + 1)">{{current_page +1}}</button></li>
 
-                    <li class="page-item"><button class="page-link" v-if="current_page +2 < length"
+                    <li class="page-item"><button class="page-link" v-if="current_page +1 < length"
                             @click="changePage(current_page + 2)">{{current_page +2}}</button></li>
 
-                    <li role="separator" class="page-item disabled bv-d-xs-down-none" v-if="current_page +1 < length">
+                    <li role="separator" class="page-item disabled bv-d-xs-down-none" v-if="current_page < length - 2">
                         <span class="page-link">…</span>
                     </li>
 
-                    <li class="page-item"><button class="page-link" @click="changePage(next)">
+                    <li class="page-item" v-if="current_page +2 > 0"><button class="page-link"
+                            @click="changePage(next)">
                             ›</button></li>
 
                     <li class="page-item"><button class="page-link" @click="changePage(length)">
@@ -63,24 +68,27 @@
                 </ul>
             </nav>
         </div>
+        <Pagination />
     </div>
 </template>
 
 <script>
     import Header from "../layout/Header";
     import Footer from "../layout/Footer";
+    import Pagination from "../layout/Pagination";
 
     export default {
+
         components: {
             Header,
             Footer,
+            Pagination,
         },
         data() {
             return {
                 title: 'Archive',
                 stocks: null,
                 current_page: null,
-                lists: [],
                 length: null,
                 parPage: null,
                 totalStocksPer: null,
@@ -89,23 +97,28 @@
                 next: null,
             }
         },
-        mounted() {         
+        mounted() {
             this.current_page = Number(this.$route.query.page) || 1
             this.showArchive()
-
         },
         methods: {
+            checkImgExist(id) {//サムネイル画像がエラーになるときは代替え画像に置き換え
+                var img = document.getElementById(id);
+                img.setAttribute('src', '/storage/default_img/notfound.jpg');
+            },
             async showArchive() {
                 const result = await axios.get(`/api/stocks?page=${this.current_page}`);
+                //↑この値を小コンポーネントに渡したいが、タイミングの問題ないのかnullになる
+                //mountedに別の変数名でawaitなしで仕込めばいい？
+
+
                 const stocks = result.data;
                 this.stocks = stocks.data;
                 this.parPage = stocks.meta.per_page //1ページ当たりの表示件数
                 this.totalStocksPer = stocks.meta.total //全部でアイテムが何個あるか
-                this.length = stocks.meta.last_page //総ページ数を取得
-
+                this.length = stocks.meta.last_page //総ページ数を取得             
                 this.makePagenation()
             },
-
             makePagenation() {
                 this.pages = []
                 for (let i = 1; i < this.length + 1; i++) {
@@ -133,6 +146,7 @@
             changePage(number) {
                 this.current_page = number
                 this.showArchive()
+
                 window.history.pushState({
                         number
                     },
@@ -148,14 +162,11 @@
             },
         }
     }
+
 </script>
 <style scoped>
     .b-col img {
         max-width: 100%;
-    }
-
-    .stock_thumbnail {
-        position: relative;
     }
 
     .genre_icon {
@@ -172,6 +183,10 @@
         margin: 8px;
     }
 
+    .stock_thumbnail {
+        position: relative;
+    }
+
     /*サムネイルの左下に出るジャンル判別アイコン*/
     .stock_thumbnail:hover img {
         filter: brightness(50%);
@@ -179,6 +194,47 @@
         -moz-transition: 0.1s ease-in-out;
         -o-transition: 0.1s ease-in-out;
         transition: 0.1s ease-in-out;
+    }
+
+    .stocks {
+        display: flex;
+        flex-wrap: wrap;
+        /* 親要素を無視して画面いっぱいに表示 */
+        margin-right: calc(50% - 50vw);
+        margin-left: calc(50% - 50vw);
+    }
+
+
+
+    /*レスポンシブデザイン*/
+    @media screen and (min-width:769px) {
+
+        /*** この中にPCのスタイル（769px以上） ***/
+        .thumbnail {
+            flex-grow: 1;
+            object-fit: cover;
+            max-height: 200px;
+            max-width: 400px;
+            margin: 0.2rem;
+            border-radius: 4px;
+        }
+    }
+
+    @media screen and (max-width:768px) {
+        /*** この中にタブレットのスタイル（768px以下） ***/
+    }
+
+    @media screen and (max-width:599px) {
+
+        /*** この中にスマホのスタイル（599px以下） ***/
+        .thumbnail {
+            flex-grow: 1;
+            object-fit: cover;
+            max-height: 100px;
+            max-width: 200px;
+            margin: 0.2rem;
+            border-radius: 4px;
+        }
     }
 
 </style>

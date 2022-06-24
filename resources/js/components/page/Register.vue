@@ -7,14 +7,14 @@
                     <div class="form-group">
                         <label for="">Email</label>
                         <code>{{errorMessage.email}}</code>
-                        <input v-model="form.email" @change="checkEmail" @blur="checkEmail" type="email"
+                        <input v-model="form.email" v-on:keydown.enter="register" @change="checkEmail" @blur="checkEmail" type="email"
                             class="form-control">
                     </div>
 
                     <div class="form-group">
                         <label for="">password</label>
                         <code v-if="errorMessage.password">{{errorMessage.password}}</code>
-                        <input v-model="form.password" @change="checkPassword" @blur="checkPassword" type="password"
+                        <input v-model="form.password" v-on:keydown.enter="register" @change="checkPassword" @blur="checkPassword" type="password"
                             class="form-control">
                     </div>
                 </div>

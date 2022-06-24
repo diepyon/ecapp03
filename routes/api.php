@@ -18,14 +18,20 @@ use App\Http\Controllers\Api\Auth\LoginController;//追記
 |
 */
 
-//Route::get('/stocks', [StockController::class, 'show']);//StockControllerのshowメソッドを発動
+
 
 Route::get('/stocks',  [StockController::class, 'index']);
 
+Route::get('/images', [StockController::class, 'images']);//StockControllerのshowImageメソッド発動
+
+//アイテム検索
+Route::get('/search', [StockController::class, 'search']);
+
+//videoアーカイブ
+//音源アーカイブ
 
 
-Route::get('/image', [StockController::class, 'showImage']);//StockControllerのshowImageメソッド発動
-//Route::get('/duration', [StockController::class, 'duration']);//選択されたビデオファイルの時間をlaravel-ffmpegで取得したい
+
 Route::get('/stocks/{stock_id}', [StockController::class, 'single']);//urlのstock_idの部分に入力された数字をsingleメソッドに渡す
 
 Route::get('/stock/author/{author_id}', [StockController::class, 'stocksByAuthorId']);
@@ -35,6 +41,8 @@ Route::get('/hoge/{author_id}', [UserController::class, 'index']);//idから投�
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+//sanctomのmidlewareで挟んだほうがいい
 Route::post('/stocks/create', [StockController::class, 'create']);
 
 //会員登録

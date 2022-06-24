@@ -17,9 +17,24 @@ class StockController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(){
-        $stocks =StockResource::collection(Stock::orderBy('created_at', 'desc')->paginate(10));
+    public function index(){//ジャンル関係なく全部（最終的には不要になる）
+        $stocks =StockResource::collection(Stock::orderBy('created_at', 'desc')->paginate(30));//paginateの引数を変数にしたい
         return $stocks;        
+    }
+   
+    public function images(){//画像だけのアーカイブ
+        $stocks =StockResource::collection(Stock::where('genre','image')->orderBy('created_at', 'desc')->paginate(10));//paginateの引数を変数にしたい
+        return $stocks;        
+    }
+
+    public function search(Request $request){
+        if(isset($request->key)){
+            $pat = '%' . addcslashes($request->key, '%_\\') . '%';
+            $stocks =StockResource::collection(Stock::where('genre',$request->genre)->where('name','LIKE',$pat)->orderBy('created_at', 'desc')->paginate(10));//paginateの引数を変数にしたい        
+        }else{//検索キーワードがなければ該当ジャンルをすべて表示
+            $stocks =StockResource::collection(Stock::where('genre',$request->genre)->orderBy('created_at', 'desc')->paginate(10));//paginateの引数を変数にしたい
+        }
+        return $stocks; 
     }
     
     /**
@@ -35,7 +50,7 @@ class StockController extends Controller
         $stock->name = $request->form['name'];
         $stock->genre = $request->form['genre'];//ジャンルを登録（html側では改ざん不可）
         $stock->fee =  $request->form['fee'];
-        $stock->detail =  $request->form['detail'];
+        $stock->detail =  $request->form['detail'];        
         $stock->author_id = $request->userId;//投稿者のID
         $stock->path =$filename.'.'.$extention;//ファイル名.拡張子をデータベースに登録
         $stock->filename =$filename;//ファイル名（拡張子なし）をデータベースに登録
@@ -76,11 +91,7 @@ class StockController extends Controller
         return new StockResource($stock);//StockResourceにデータを渡してjsonに変換してもらおう
     }
 
-    public function showImage()
-    {
-        $stock = Stock::where('genre', 'image')->get();//stocksテーブルからジャンルがimageのレコードをすべて取得
-        return new StockResource($stock);//StockResourceにデータを渡してjsonに変換してもらおう
-    }    
+ 
     public function single(Stock $stockModel,$stock_id)
     {   //url上の数値を取得
         $stock = Stock::find($stock_id);//受け取った数値と一致するIDのレコードを取得

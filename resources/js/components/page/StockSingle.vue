@@ -1,9 +1,10 @@
 <template>
-    <div v-if="stock">
+    <div>
         <h1>ID.{{ id }}詳細個別ページです</h1>
-        <SingleImage v-if="stock.genre=='image'" v-bind:stock="stock" />
-        <SingleVideo v-if="stock.genre=='video'" v-bind:stock="stock" />
-        <SingleAudio v-if="stock.genre=='audio'" v-bind:stock="stock" />
+
+        <SingleImage v-if="stock && stock.genre == 'image'" v-bind:stock="stock" />
+        <SingleVideo v-else-if="stock && stock.genre == 'video'" v-bind:stock="stock" />
+        <SingleAudio v-else-if="stock && stock.genre == 'audio'" v-bind:stock="stock" />
 
         <span class="" v-if="stock">
             <p>名前：{{stock.name}}</p>
@@ -12,24 +13,7 @@
             <p>詳細：{{stock.detail}}</p>
             <p>投稿日:{{date}}</p>
         </span>
-
         <div>created by {{authorName}}</div>
-
-        <h2>↓後でキレイにする</h2>
-
-        <!-- <div class="" style="width:100%; display: flex;justify-content: center;align-items: center;">
-            <div style="magin-top:0;">
-                <b-button v-if="playing" style="margin-top:0;" @click="stop">
-                    <font-awesome-icon :icon="['fa', 'stop']" />
-                </b-button>
-                <b-button v-else style="margin-top:0" @click="play">
-                    <font-awesome-icon :icon="['fa', 'play']" />
-                </b-button>
-            </div>
-            <div style="width:100%; margin:0 0 0 .5em ;">
-                <wavesurfer :src="file" :options="options" id="wavesurfer" ref="surf"></wavesurfer>
-            </div>
-        </div> -->
     </div>
 </template>
 
@@ -40,7 +24,6 @@
     import SingleVideo from '../layout/SingleVideo'
     import SingleAudio from '../layout/SingleAudio'
     import * as fns from 'date-fns'
-    import WaveSurferVue from "wavesurfer.js-vue";
 
 
     export default {
@@ -50,7 +33,6 @@
         components: {
             Header,
             Footer,
-            WaveSurferVue,
             SingleImage,
             SingleVideo,
             SingleAudio
@@ -60,69 +42,13 @@
             return {
                 stock: null,
                 date: null,
-                playing: false,
-                resetFlag: true,
-                options: {
-                    height: 90
-                },
-                file: "/storage/stock_sample/c9fea342.mp3",
-                filename: null,
-                saisei: false,
                 author_id: null,
                 authorName: null,
+                hoge:null,
             }
         },
         methods: {
-            // play() {
-            //     this.$refs.surf.waveSurfer.play()
-            //     this.playing = this.$refs.surf.waveSurfer.isPlaying()
 
-            //     this.hage = this.$refs.surf.waveSurfer.on('finish', function () {
-            //         console.log('終わったから先頭に戻ってほしい')
-            //         //this.$refs.surf.waveSurfer.stop()
-            //         stop()
-            //         return 'finish'
-            //     })
-            //     console.log(this.hage)
-            //     //asynsc awaitを使ってfinishになったタイミングで変数を取得する
-            //     //それをウォッチで監視して、任意の処理を走らせる
-            // },
-            // finish() {
-            //     console.log('終わった')
-            //     this.resetFlag = false
-            //     this.$nextTick(() => (this.resetFlag = true))
-            // },
-            // play: async function () {
-            //     this.$refs.surf.waveSurfer.play() //普通に再生
-            //     this.playing = this.$refs.surf.waveSurfer.isPlaying()
-
-            //     let result = await this.finish()
-            //     console.log('playメソッドの最後')
-            //     //window.addEventListener(this.$refs.surf.waveSurfer.on('oneded'),this.finish(console.log('aaa')))
-            // },
-
-            // finish: async function(){
-            //     this.$refs.surf.waveSurfer.on('finish', function () {
-            //         console.log('finishメソッド発火')
-            //         });
-            // },
-
-            hoge() {
-                console.log('aaaa')
-                //console.log('aaa')
-                //this.resetFlag = false
-                //this.$nextTick(() => (this.resetFlag = true))
-            },
-            play() {
-                this.$refs.surf.waveSurfer.play() //普通に再生
-                this.playing = this.$refs.surf.waveSurfer.isPlaying()
-            },
-
-            stop() {
-                console.log('stop')
-                this.$refs.surf.waveSurfer.stop()
-                this.playing = this.$refs.surf.waveSurfer.isPlaying()    
-            }
         },
         mounted() {
             axios.get('/api/stocks/' + this.id)
@@ -137,29 +63,7 @@
                         })
                     //console.log(this.stock.author_id) //投稿者IDはUsercontroller経由しなくても取れる
                 })
-
-
         },
-        watch: {
-            'playing'(newVal, oldVal) {
-                // 残念ながら最後まで再生し終わった時には変数は変化してくれない
-                console.log(newVal, '->', oldVal)
-                if (newVal === true) {
-                    console.log('再生中だぜ')
-                } else if (newVal === false) {
-                    console.log('再生が終わったぜ')
-                }
-            },
-            'saisei'(newVal, oldVal) {
-                console.log('変化あり')
-                console.log(oldVal, '->', newVal)
-            },
-        },
-        computed: {
-            player() {
-                return this.$refs.surf.waveSurfer
-            }
-        }
     }
 
 </script>

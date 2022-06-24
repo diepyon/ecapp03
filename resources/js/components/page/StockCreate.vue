@@ -168,13 +168,14 @@
                 blobUrl: null,
                 previewArea: false,
                 isLoggedIn: false,
+                currentUserid:null,
             }
         },
         mounted() {
             axios.get("/api/loginCheck")
                 .then(response => {
                     this.isLoggedIn = true
-                    console.log(response)
+                    this.currentUserid = response.data.id
 
                     //ログインに成功したら元々行きたかったページを記憶したローカルストレージ削除
                 })
@@ -376,8 +377,8 @@
                     postData.append('form[genre]', this.genre)
                     postData.append('form[fee]', this.feeSelected)
                     postData.append('form[detail]', this.detail)
-                    postData.append('userId', localStorage.id)//localstorage書き換えられたらあかんかも？
-                    //headerからカレンとユーザーのIDを取得する？
+                    postData.append('userId', this.currentUserid)//ここが取れてない。currentID取るべき
+
 
                     //バリデーション関数のreturnがどちらもtrueなら下記実行
                     axios.post('/api/stocks/create', postData) //api.phpのルートを指定。第2引数には渡したい変数を入れる（今回は配列postData=入力された内容）

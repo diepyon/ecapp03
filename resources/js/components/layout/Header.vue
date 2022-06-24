@@ -11,6 +11,7 @@
                         <b-nav-item :class="{ active: $route.path === '/stocks/create' }" to="/stocks/create">Post
                         </b-nav-item>
                         <b-nav-item :class="{ active: $route.path === '/stocks' }" to="/stocks">Archive</b-nav-item>
+                        <b-nav-item :class="{ active: $route.path === '/images' }" to="/images">画像</b-nav-item>
                         <b-nav-item :class="{ active: $route.path === '/login' }" to="/login">Login</b-nav-item>
                         <b-nav-item :class="{ active: $route.path === '/register' }" to="/register">Register
                         </b-nav-item>
@@ -83,19 +84,17 @@
                         })
                 }
             )
-
-
             let userInfo = {
                 name: localStorage.getItem("userName"),
                 //email: localStorage.getItem("userEmail"),
             }
             this.$store.commit("updateUser", userInfo);
 
-            console.log(localStorage.getItem("userName")) //localstorageの値をとる
+            //console.log(localStorage.getItem("userName")) //localstorageの値をとる
         },
 
         beforeUpdate() {
-            console.log('beforeupdate')
+            //console.log('beforeupdate')
 
             //ここに書けばリロードじゃなくも行けるのでは？
             //これでいけるならmounted直下の axios.get("/api/loginCheck")はいらないんじゃないかな

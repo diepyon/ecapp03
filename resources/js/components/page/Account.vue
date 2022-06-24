@@ -4,7 +4,7 @@
             <b-card no-body>
                 <b-tabs pills card vertical>
                     <b-tab title="ユーザー情報" active>
-                        <b-form id="form">
+                        <b-form>
                             <div class="parent" style="width:150px;">
                                 <img class="userIcon" :src="blobUrl" />
                                 <label style="display:initial;">
@@ -14,16 +14,18 @@
                                         accept=".jpg,.jpeg,.png,.gif" style="display:none">
                                 </label>
                             </div>
-                            <b-form-group id="" description="254文字まで">
+                            <b-form-group description="254文字まで">
                                 <code>{{errorMessage.name}}</code>
-                                <input v-model="user.name" @change="checkName" @blur="checkName" type="txt"
-                                    class="form-control" placeholder="表示名">
+                                <b-form-input v-model="user.name" @change="checkName" @blur="checkName"
+                                    class="form-control" placeholder="表示名" v-on:keydown.enter="userInfoUpdate">
+                                </b-form-input>
                             </b-form-group>
 
-                            <b-form-group id="" description="">
+                            <b-form-group description="">
                                 <code>{{errorMessage.email}}</code>
-                                <input v-model="user.email" @change="checkEmail" @blur="checkEmail" type="email"
-                                    class="form-control" placeholder="メールアドレス">
+                                <b-form-input v-model="user.email" @change="checkEmail" @blur="checkEmail" type="email"
+                                    class="form-control" placeholder="メールアドレス" v-on:keydown.enter="userInfoUpdate">
+                                </b-form-input>
                             </b-form-group>
 
                             <b-alert show variant="success" v-if="errorMessage.userUpdate=='updated'">更新しました。</b-alert>
@@ -31,40 +33,53 @@
                             </b-alert>
                             <b-alert show variant="warning" v-if="errorMessage.userUpdate=='duplicate'">
                                 そのメールアドレスは既にほかのアカウントで利用されています。</b-alert>
-                            <b-button @click="update();" type="button" variant="primary">更新</b-button>
+                            <b-button @click="userInfoUpdate();" variant="primary">更新</b-button>
                         </b-form>
                     </b-tab>
                     <b-tab title="セキュリティ">
                         <template>
-                            <div>
-                                <code v-if="errorMessage.currentPassword">{{errorMessage.currentPassword}}</code>
-                                <b-form-input type="password" v-model="user.currentPassword"
-                                    @change="checkPasswords('currentPassowrd')"
-                                    @blur="checkPasswords('currentPassowrd')" placeholder="現在のパスワード">
-                                </b-form-input>
-                                <div class="mt-2"></div>
-                            </div>
-                            <div>
-                                <code v-if="errorMessage.newPassword">{{errorMessage.newPassword}}</code>
-                                <b-form-input type="password" @change="checkPasswords('newPassword')"
-                                    @blur="checkPasswords('newPassword')" v-model="user.newPassword"
-                                    placeholder="新しいパスワード">
-                                </b-form-input>
-                                <div class="mt-2"></div>
-                            </div>
-                            <div>
-                                <code v-if="errorMessage.newPasswordConfirm">{{errorMessage.newPasswordConfirm}}</code>
-                                <b-form-input type="password" v-model="user.newPasswordConfirm"
-                                    @change="checkPasswords('newPasswordConfirm')"
-                                    @blur="checkPasswords('newPasswordConfirm')" placeholder="新しいパスワード再入力">
-                                </b-form-input>
-                                <div class="mt-2"></div>
-                            </div>
+                            <b-form>
+                                <div>
+                                    <b-form-group description="">
+                                        <b-form-input v-model="user.email" autocomplete="username" hidden>
+                                        </b-form-input>
+                                    </b-form-group>
+
+                                    <code v-if="errorMessage.currentPassword">{{errorMessage.currentPassword}}</code>
+                                    <b-form-input type="password" autocomplete="current-password"
+                                        v-on:keydown.enter="passwordUpdate" v-model="user.currentPassword"
+                                        @change="checkPasswords('currentPassowrd')"
+                                        @blur="checkPasswords('currentPassowrd')" placeholder="現在のパスワード">
+                                    </b-form-input>
+                                    <div class="mt-2"></div>
+                                </div>
+                                <div>
+                                    <code v-if="errorMessage.newPassword">{{errorMessage.newPassword}}</code>
+                                    <b-form-input type="password" autocomplete="new-password"
+                                        v-on:keydown.enter="passwordUpdate" @change="checkPasswords('newPassword')"
+                                        @blur="checkPasswords('newPassword')" v-model="user.newPassword"
+                                        placeholder="新しいパスワード">
+                                    </b-form-input>
+                                    <div class="mt-2"></div>
+                                </div>
+                                <div>
+                                    <code
+                                        v-if="errorMessage.newPasswordConfirm">{{errorMessage.newPasswordConfirm}}</code>
+                                    <b-form-input type="password" autocomplete="new-password"
+                                        v-model="user.newPasswordConfirm" v-on:keydown.enter="passwordUpdate"
+                                        @change="checkPasswords('newPasswordConfirm')"
+                                        @blur="checkPasswords('newPasswordConfirm')" placeholder="新しいパスワード再入力">
+                                    </b-form-input>
+                                    <div class="mt-2"></div>
+                                </div>
+                            </b-form>
                         </template>
                         <b-alert show variant="success" v-if="errorMessage.passwordUpdate=='success'">更新しました。</b-alert>
                         <b-alert show variant="warning" v-if="errorMessage.passwordUpdate=='oldPasswordError'">
                             現在のパスワードが間違っています。</b-alert>
-                        <b-button @click="passwordUpdate();" type="button" variant="primary">更新</b-button>
+                        <b-alert show variant="warning" v-if="errorMessage.passwordUpdate=='confirmPassworError'">
+                            新しいパスワードが一致しません。</b-alert>
+                        <b-button @click="passwordUpdate();" variant="primary">更新</b-button>
                     </b-tab>
                     <b-tab title="Tab 3">
                         <b-card-text>なにかしら</b-card-text>
@@ -145,14 +160,7 @@
                     this.blobUrl = ""
                 }
             },
-            update() {
-                // axios.get("/api/loginCheck")
-                //     .then(response => {
-                //         this.user.id = response.data.id
-                //     })
-
-
-                //this.getUserInfo()
+            userInfoUpdate() {
                 this.errorMessage.userUpdate = null
 
                 let postData = new FormData()
@@ -294,23 +302,9 @@
                         })
                 } else if (this.user.newPassword != this.user.newPasswordConfirm) {
                     console.log('新しいパスワード不一致')
+                    this.errorMessage.passwordUpdate = 'confirmPassworError'
+
                 }
-
-                // if (this.user.newPassword == this.user.newPasswordConfirm) {
-                //     console.log('パスワード一致')
-                //     axios.get("/api/account/checkOldPassword", {
-                //             params: {
-                //                 oldPassword: this.user.oldPassword,
-                //                 userId: this.user.id,
-                //             }
-                //         })
-                //         .then(response => {
-                //             console.log(response.data)
-                //         })
-                // } else {
-                //     console.log('パスワード不一致')
-                // }
-
             },
         },
     }

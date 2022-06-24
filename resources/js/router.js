@@ -4,7 +4,7 @@ import Home from './components/page/Home'
 import About from './components/page/About.vue'
 import StockCreate from './components/page/StockCreate.vue'
 import StockArchive from './components/page/StockArchive.vue'
-import StockArchiveImage from './components/page/StockArchiveImage.vue'
+import Images from './components/page/Images.vue'
 import StockSingle from './components/page/StockSingle.vue'
 import Login from './components/page/Login.vue'
 import NotFound from './components/page/NotFound.vue'
@@ -42,14 +42,9 @@ const router = new Router({
             component: StockArchive
         },
         {
-            path: '/stock?page=:pageid',
-            name: 'stockarchive',
-            component: StockArchive
-        },
-        {
-            path: '/image',
-            name: 'stockarchiveimage',
-            component: StockArchiveImage
+            path: '/images',
+            name: 'images',
+            component: Images
         },
         {
             path: '/stocks/:id(\\d+)',
