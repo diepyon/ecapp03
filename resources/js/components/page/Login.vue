@@ -124,12 +124,12 @@
                                 this.$router.push('/account')
                             }
                             localStorage.clear()
-
-
                         })
                         .catch((error => {
                             console.log(error)
                             this.message = 'ユーザー名またはパスワードが違います。'
+                            //もしくはこの情報で新規登録しますか？みたいな。
+                            //既に登録されていないメールアドレスが入力された場合。
                         }))
                 } else {
                     this.message = '入力内容に不備があります。'

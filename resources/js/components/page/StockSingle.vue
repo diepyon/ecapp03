@@ -1,19 +1,24 @@
 <template>
     <div>
-        <h1>ID.{{ id }}詳細個別ページです</h1>
+        <div v-if="stock">
+            <h1>ID.{{ id }}詳細個別ページです</h1>
 
-        <SingleImage v-if="stock && stock.genre == 'image'" v-bind:stock="stock" />
-        <SingleVideo v-else-if="stock && stock.genre == 'video'" v-bind:stock="stock" />
-        <SingleAudio v-else-if="stock && stock.genre == 'audio'" v-bind:stock="stock" />
+            <SingleImage v-if="stock && stock.genre == 'image'" v-bind:stock="stock" />
+            <SingleVideo v-else-if="stock && stock.genre == 'video'" v-bind:stock="stock" />
+            <SingleAudio v-else-if="stock && stock.genre == 'audio'" v-bind:stock="stock" />
 
-        <span class="" v-if="stock">
-            <p>名前：{{stock.name}}</p>
-            <p>金額：{{stock.fee}}</p>
-            <p>ジャンル：{{stock.genre}}</p>
-            <p>詳細：{{stock.detail}}</p>
-            <p>投稿日:{{date}}</p>
-        </span>
-        <div>created by {{authorName}}</div>
+            <span class="">
+                <p>名前：{{stock.name}}</p>
+                <p>金額：{{stock.fee}}</p>
+                <p>ジャンル：{{stock.genre}}</p>
+                <p>詳細：{{stock.detail}}</p>
+                <p>投稿日:{{date}}</p>
+            </span>
+            <div>created by {{authorName}}</div>
+        </div>
+        <div v-else>
+            <h1>見つかりませんでした。</h1>
+        </div>
     </div>
 </template>
 
@@ -44,7 +49,7 @@
                 date: null,
                 author_id: null,
                 authorName: null,
-                hoge:null,
+                hoge: null,
             }
         },
         methods: {

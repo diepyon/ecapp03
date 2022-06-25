@@ -177,7 +177,6 @@
                     this.isLoggedIn = true
                     this.currentUserid = response.data.id
 
-                    //ログインに成功したら元々行きたかったページを記憶したローカルストレージ削除
                 })
                 .catch(error => {
                     console.log(error)

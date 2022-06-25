@@ -79,7 +79,17 @@ __webpack_require__.r(__webpack_exports__);
       return getters.getUserName;
     }, function (newValue, oldValue) {
       console.log('user changed! %s => %s', oldValue, newValue);
-      _this.userName = newValue; //セッション切れ後初回ログインで通らないので2重処理
+      _this.userName = newValue;
+
+      if (_this.userName) {
+        console.log('ログインしたよ');
+
+        _this.makeToast('ログインしました。');
+      } else {
+        console.log('ログアウトしたよ');
+
+        _this.makeToast('ログアウトしました。');
+      } //セッション切れ後初回ログインで通らないので2重処理
       //これでうまくいったらノートに記載して
       // if (this.userName) {
       //     this.isLoggedIn = true
@@ -87,6 +97,7 @@ __webpack_require__.r(__webpack_exports__);
       //     this.isLoggedIn = false
       // }
       //vuexのユーザー名が変わったことを検知した上でサンクタムのログインチェック処理
+
 
       axios.get("/api/loginCheck").then(function (response) {
         _this.isLoggedIn = true;
@@ -126,6 +137,14 @@ __webpack_require__.r(__webpack_exports__);
   },
   computed: {},
   methods: {
+    makeToast: function makeToast(message) {
+      this.$bvToast.toast(message, {
+        title: 'ログイン通知',
+        toaster: 'b-toaster-bottom-left',
+        autoHideDelay: 5000,
+        appendToast: false
+      });
+    },
     logout: function logout() {
       var _this3 = this;
 
@@ -1290,7 +1309,8 @@ __webpack_require__.r(__webpack_exports__);
           localStorage.clear();
         })["catch"](function (error) {
           console.log(error);
-          _this2.message = 'ユーザー名またはパスワードが違います。';
+          _this2.message = 'ユーザー名またはパスワードが違います。'; //もしくはこの情報で新規登録しますか？みたいな。
+          //既に登録されていないメールアドレスが入力された場合。
         });
       } else {
         this.message = '入力内容に不備があります。';
@@ -1448,8 +1468,29 @@ __webpack_require__.r(__webpack_exports__);
 
       return _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__.password(this.form.password).result;
     },
-    register: function register() {
+    login: function login() {
       var _this2 = this;
+
+      axios.post('/api/login', this.form).then(function (response) {
+        var userInfo = {
+          id: response.data.user.id,
+          name: response.data.user.name,
+          email: response.data.user.email,
+          token: response.data.token
+        };
+
+        _this2.$store.commit("checkLogin", userInfo);
+
+        _this2.$store.commit("resetState"); //vuexに保存されているメッセージをリセット
+
+
+        _this2.$router.push('/account');
+
+        localStorage.clear();
+      });
+    },
+    register: function register() {
+      var _this3 = this;
 
       this.errorMessage.submit = null; //投稿とボタンが押されたときに発動するメソッド
       //投稿直前にも入力に不備がないかチェック
@@ -1463,11 +1504,13 @@ __webpack_require__.r(__webpack_exports__);
         //バリデーション関数のreturnがどちらもtrueなら下記実行
         axios.post('/api/register', this.form) //apiのルートを指定。第2引数には渡したい変数を入れる
         .then(function (response) {
-          alert('登録できました。ログイン状態にしてダッシュボードに移管させたい！');
+          //ログインしましたって出したい
+          //ログイン処理
+          _this3.login();
         })["catch"](function (error) {
           if (error.response.data.errors.email[0] == 'The email has already been taken.') {
             console.log(error.response.data.errors.email[0]);
-            _this2.errorMessage.submit = 'このメールアドレスはすでに登録されています。';
+            _this3.errorMessage.submit = 'このメールアドレスはすでに登録されています。';
           } else {
             alert('あかんかったわ、コンソール見て');
           }
@@ -1880,7 +1923,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
     axios.get("/api/loginCheck").then(function (response) {
       _this.isLoggedIn = true;
-      _this.currentUserid = response.data.id; //ログインに成功したら元々行きたかったページを記憶したローカルストレージ削除
+      _this.currentUserid = response.data.id;
     })["catch"](function (error) {
       console.log(error);
       _this.isLoggedIn = false;
@@ -2157,6 +2200,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 
 
 
@@ -2218,24 +2266,26 @@ __webpack_require__.r(__webpack_exports__);
 function email(form) {
   var reg = /^[A-Za-z0-9]{1}[A-Za-z0-9_.-]*@{1}[A-Za-z0-9_.-]{1,}.[A-Za-z0-9]{1,}$/; //メールアドレスの形式を定義
 
-  var n = '';
   var n = form.email.length; //emailの文字数を取得
 
+  var message = null;
+  var result = null;
+
   if (n == 0) {
-    var message = "入力してください。";
+    message = "入力してください。";
   } else if (reg.test(form.email) == false) {
     //メールアドレスの形式になっているかチェック
-    var message = "メールアドレスの形式で入力してください。";
+    message = "メールアドレスの形式で入力してください。";
   } else if (n > 256) {
-    var message = "255文字以内で入力してください。";
+    message = "255文字以内で入力してください。";
   } else {
-    var message = "";
+    message = "";
   }
 
   if (message == "") {
-    var result = true;
+    result = true;
   } else {
-    var result = false;
+    result = false;
   } //emailの入力に問題がなければtrueを返す
 
 
@@ -2266,22 +2316,24 @@ function password(value) {
 }
 
 function name(form) {
-  var n = '';
   var n = form.name.length; //passwordの文字数
 
+  var message = null;
+  var result = null;
+
   if (n == 0) {
-    var message = "入力してください。";
+    message = "入力してください。";
   } else if (n > 256) {
     //文字数を変数にしたい
-    var message = "255文字以内で入力してください。";
+    message = "255文字以内で入力してください。";
   } else {
-    var message = "";
+    message = "";
   }
 
   if (message == "") {
-    var result = true;
+    result = true;
   } else {
-    var result = false;
+    result = false;
   } //nameの入力に問題がなければtrueを返す
 
 
@@ -10904,37 +10956,39 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    [
-      _c("h1", [_vm._v("ID." + _vm._s(_vm.id) + "詳細個別ページです")]),
-      _vm._v(" "),
-      _vm.stock && _vm.stock.genre == "image"
-        ? _c("SingleImage", { attrs: { stock: _vm.stock } })
-        : _vm.stock && _vm.stock.genre == "video"
-        ? _c("SingleVideo", { attrs: { stock: _vm.stock } })
-        : _vm.stock && _vm.stock.genre == "audio"
-        ? _c("SingleAudio", { attrs: { stock: _vm.stock } })
-        : _vm._e(),
-      _vm._v(" "),
-      _vm.stock
-        ? _c("span", {}, [
-            _c("p", [_vm._v("名前：" + _vm._s(_vm.stock.name))]),
+  return _c("div", [
+    _vm.stock
+      ? _c(
+          "div",
+          [
+            _c("h1", [_vm._v("ID." + _vm._s(_vm.id) + "詳細個別ページです")]),
             _vm._v(" "),
-            _c("p", [_vm._v("金額：" + _vm._s(_vm.stock.fee))]),
+            _vm.stock && _vm.stock.genre == "image"
+              ? _c("SingleImage", { attrs: { stock: _vm.stock } })
+              : _vm.stock && _vm.stock.genre == "video"
+              ? _c("SingleVideo", { attrs: { stock: _vm.stock } })
+              : _vm.stock && _vm.stock.genre == "audio"
+              ? _c("SingleAudio", { attrs: { stock: _vm.stock } })
+              : _vm._e(),
             _vm._v(" "),
-            _c("p", [_vm._v("ジャンル：" + _vm._s(_vm.stock.genre))]),
+            _c("span", {}, [
+              _c("p", [_vm._v("名前：" + _vm._s(_vm.stock.name))]),
+              _vm._v(" "),
+              _c("p", [_vm._v("金額：" + _vm._s(_vm.stock.fee))]),
+              _vm._v(" "),
+              _c("p", [_vm._v("ジャンル：" + _vm._s(_vm.stock.genre))]),
+              _vm._v(" "),
+              _c("p", [_vm._v("詳細：" + _vm._s(_vm.stock.detail))]),
+              _vm._v(" "),
+              _c("p", [_vm._v("投稿日:" + _vm._s(_vm.date))])
+            ]),
             _vm._v(" "),
-            _c("p", [_vm._v("詳細：" + _vm._s(_vm.stock.detail))]),
-            _vm._v(" "),
-            _c("p", [_vm._v("投稿日:" + _vm._s(_vm.date))])
-          ])
-        : _vm._e(),
-      _vm._v(" "),
-      _c("div", [_vm._v("created by " + _vm._s(_vm.authorName))])
-    ],
-    1
-  )
+            _c("div", [_vm._v("created by " + _vm._s(_vm.authorName))])
+          ],
+          1
+        )
+      : _c("div", [_c("h1", [_vm._v("見つかりませんでした。")])])
+  ])
 }
 var staticRenderFns = []
 render._withStripped = true

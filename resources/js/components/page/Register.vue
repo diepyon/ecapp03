@@ -7,15 +7,15 @@
                     <div class="form-group">
                         <label for="">Email</label>
                         <code>{{errorMessage.email}}</code>
-                        <input v-model="form.email" v-on:keydown.enter="register" @change="checkEmail" @blur="checkEmail" type="email"
-                            class="form-control">
+                        <input v-model="form.email" v-on:keydown.enter="register" @change="checkEmail"
+                            @blur="checkEmail" type="email" class="form-control">
                     </div>
 
                     <div class="form-group">
                         <label for="">password</label>
                         <code v-if="errorMessage.password">{{errorMessage.password}}</code>
-                        <input v-model="form.password" v-on:keydown.enter="register" @change="checkPassword" @blur="checkPassword" type="password"
-                            class="form-control">
+                        <input v-model="form.password" v-on:keydown.enter="register" @change="checkPassword"
+                            @blur="checkPassword" type="password" class="form-control">
                     </div>
                 </div>
             </div>
@@ -69,7 +69,7 @@
                     'password': null,
                     'submit': null
                 },
-                isLoggedIn:null,
+                isLoggedIn: null,
             }
         },
         mounted() {
@@ -82,7 +82,7 @@
                 .catch(error => {
                     console.log('未ログイン')
                     this.isLoggedIn = 'no'
-                })            
+                })
         },
         methods: {
             checkEmail() {
@@ -100,13 +100,28 @@
                 //モジュールから真偽を取得
                 return Validate.password(this.form.password).result
             },
+            login(){
+                axios.post('/api/login', this.form)
+                    .then(response => {
+                        let userInfo = {
+                            id: response.data.user.id,
+                            name: response.data.user.name,
+                            email: response.data.user.email,
+                            token: response.data.token,
+                        }
+                        this.$store.commit("checkLogin", userInfo)
+                        this.$store.commit("resetState") //vuexに保存されているメッセージをリセット
+                        this.$router.push('/account')
+                        localStorage.clear()
+                    })
+            },
 
-            register() { 
-                 this.errorMessage.submit = null
+            register() {
+                this.errorMessage.submit = null
                 //投稿とボタンが押されたときに発動するメソッド
                 //投稿直前にも入力に不備がないかチェック
                 var emailResult = this.checkEmail()
-                
+
                 var passwordResult = this.checkPassword()
                 console.log(passwordResult)
 
@@ -114,7 +129,10 @@
                     //バリデーション関数のreturnがどちらもtrueなら下記実行
                     axios.post('/api/register', this.form) //apiのルートを指定。第2引数には渡したい変数を入れる
                         .then(response => {
-                            alert('登録できました。ログイン状態にしてダッシュボードに移管させたい！');
+                            //ログインしましたって出したい
+
+                            //ログイン処理
+                            this.login()
                         })
                         .catch(error => {
                             if (error.response.data.errors.email[0] == 'The email has already been taken.') {
@@ -125,7 +143,7 @@
                             }
                         })
                 } else {
-                   this.errorMessage.submit = '入力内容に不備があります。'
+                    this.errorMessage.submit = '入力内容に不備があります。'
                 }
             }
         },

@@ -30,7 +30,7 @@
                     </b-navbar-nav>
                 </b-collapse>
             </b-navbar>
-        </div>
+        </div>      
     </header>
 </template>
 <script>
@@ -60,6 +60,15 @@
                 (newValue, oldValue) => {
                     console.log('user changed! %s => %s', oldValue, newValue)
                     this.userName = newValue
+
+                    if(this.userName){
+                        console.log('ログインしたよ')
+                        this.makeToast('ログインしました。')
+                    }else{
+                        console.log('ログアウトしたよ')
+                        this.makeToast('ログアウトしました。')                        
+                    }
+
 
                     //セッション切れ後初回ログインで通らないので2重処理
                     //これでうまくいったらノートに記載して
@@ -116,6 +125,14 @@
 
         },
         methods: {
+            makeToast(message) {
+                this.$bvToast.toast(message, {
+                    title: 'ログイン通知',
+                    toaster:'b-toaster-bottom-left',
+                    autoHideDelay: 5000,
+                    appendToast: false
+                })
+            },            
             logout() {
                 axios
                     .post("api/logout")
