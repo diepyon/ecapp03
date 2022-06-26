@@ -23,19 +23,23 @@
                 </template>
             </b-input-group>
         </div>
-
-        <b-row>
-            <b-col cols="6" sm="3" class="b-col" v-for="stock in stocks" :key="stock.id">
+        <div class="stocks">
+            <div class="" v-for="stock in stocks" :key="stock.id">
                 <div class="stock_thumbnail">
                     <router-link :to="`stocks/` + stock.id">
-                        <img :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
+                        <img @error="checkImgExist(stock.id)" id="stock.id" class="thumbnail"
+                            v-if="stock.genre=='image'" :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
+                        <img @error="checkImgExist(stock.id)" :id="stock.id" class="thumbnail"
+                            v-else-if="stock.genre=='video'" :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
                     </router-link>
                     <div class="genre_icon">
-                        <font-awesome-icon :icon="['fas', 'image']" />
+                        <span>
+                            <font-awesome-icon :icon="['fas', 'image']" /></span>
                     </div>
                 </div>
-            </b-col>
-        </b-row>
+            </div>
+        </div>
+
         <div class="text-center">
             現在のページ：{{current_page}}<br>
             トータルページ数:{{length}}<br>
@@ -64,14 +68,15 @@
                     <li class="page-item"><button class="page-link" v-if="current_page +1 <= length"
                             @click="changePage(current_page + 1)">{{current_page +1}}</button></li>
 
-                    <li class="page-item"><button class="page-link" v-if="current_page +1 < length" 
+                    <li class="page-item"><button class="page-link" v-if="current_page +1 < length"
                             @click="changePage(current_page + 2)">{{current_page +2}}</button></li>
 
                     <li role="separator" class="page-item disabled bv-d-xs-down-none" v-if="current_page < length - 2">
                         <span class="page-link">…</span>
                     </li>
 
-                    <li class="page-item" v-if="current_page +2 > 0"><button class="page-link" @click="changePage(next)">
+                    <li class="page-item" v-if="current_page +2 > 0"><button class="page-link"
+                            @click="changePage(next)">
                             ›</button></li>
 
                     <li class="page-item"><button class="page-link" @click="changePage(length)">
@@ -113,21 +118,19 @@
             this.keyword = this.$route.query.key
 
             this.showArchive()
+
         },
         computed: {
 
         },
         methods: {
             async showArchive() {
+
                 let result = null
                 this.searchKeyword = this.keyword
-                if ((this.keyword)) {
-                    result = await axios.get(
-                        `/api/search?genre=image&key=${this.keyword}&page=${this.current_page}`)
-                } else {
-                    result = await axios.get(
-                        `/api/images?page=${this.current_page}`)
-                }
+
+                result = await axios.get(`/api/search?genre=image&key=${this.keyword}&page=${this.current_page}`)
+
                 const stocks = result.data;
                 this.stocks = stocks.data;
                 this.parPage = stocks.meta.per_page //1ページ当たりの表示件数
@@ -165,12 +168,20 @@
                     this.current_page = number //受け取ったページ番号をthis.currentpageに格納
 
                     this.showArchive()
+
+
+                    if (this.keyword) {
+                        var hoge = `${window.location.origin}/image?&key=${this.keyword}&page=${this.current_page}`
+                    } else {
+                        var hoge = `${window.location.origin}/image?&page=${this.current_page}`
+                    }
+
                     window.history.pushState({
                             number
                         },
                         `Page${number}`,
                         //search?genre=image&keyword=${this.keyword}&page=${this.current_page}`);
-                        `${window.location.origin}/images?&key=${this.keyword}&page=${this.current_page}`
+                        hoge
                     )
                 } else {
                     this.current_page = number
@@ -179,7 +190,7 @@
                             number
                         },
                         `Page${number}`,
-                        `${window.location.origin}/images?page=${this.current_page}`
+                        `${window.location.origin}/image?page=${this.current_page}`
                     )
                 }
                 this.moveToTop()
@@ -189,15 +200,15 @@
                     top: 0,
                 });
             },
+            checkImgExist(id) { //サムネイル画像がエラーになるときは代替え画像に置き換え
+                const img = document.getElementById(id);
+                img.setAttribute('src', '/storage/default_img/notfound.jpg');
+            },
         }
     };
 
 </script>
 <style scoped>
-    .b-col img {
-        max-width: 100%;
-    }
-
     .stock_thumbnail {
         position: relative;
         margin: 2.5px;
@@ -218,12 +229,56 @@
     }
 
     /*サムネイルの左下に出るジャンル判別アイコン*/
+    .stock_thumbnail {
+        position: relative;
+    }
+
+    .stocks {
+        display: flex;
+        flex-wrap: wrap;
+        /* 親要素を無視して画面いっぱいに表示 */
+        margin-right: calc(50% - 50vw);
+        margin-left: calc(50% - 50vw);
+    }
+
     .stock_thumbnail:hover img {
         filter: brightness(50%);
         -webkit-transition: 0.1s ease-in-out;
         -moz-transition: 0.1s ease-in-out;
         -o-transition: 0.1s ease-in-out;
         transition: 0.1s ease-in-out;
+    }
+
+    /*レスポンシブデザイン*/
+
+    @media screen and (min-width:769px) {
+
+        /*** この中にPCのスタイル（769px以上） ***/
+        .thumbnail {
+            flex-grow: 1;
+            object-fit: cover;
+            max-height: 200px;
+            max-width: 400px;
+            margin: 0.2rem;
+            border-radius: 4px;
+        }
+    }
+
+    @media screen and (max-width:768px) {
+        /*** この中にタブレットのスタイル（768px以下） ***/
+    }
+
+    @media screen and (max-width:599px) {
+
+        /*** この中にスマホのスタイル（599px以下） ***/
+        .thumbnail {
+            flex-grow: 1;
+            object-fit: cover;
+            max-height: 100px;
+            max-width: 200px;
+            margin: 0.2rem;
+            border-radius: 4px;
+        }
     }
 
     .search {

@@ -176,7 +176,6 @@
 
                 axios.post("/api/account/update", postData)
                     .then(response => {
-
                         this.errorMessage.userUpdate = response.data //更新されたかどうかの結果を格納したメッセージ
 
                         //イランと思う

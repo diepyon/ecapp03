@@ -11,7 +11,7 @@
                         <b-nav-item :class="{ active: $route.path === '/stocks/create' }" to="/stocks/create">Post
                         </b-nav-item>
                         <b-nav-item :class="{ active: $route.path === '/stocks' }" to="/stocks">Archive</b-nav-item>
-                        <b-nav-item :class="{ active: $route.path === '/images' }" to="/images">画像</b-nav-item>
+                        <b-nav-item :class="{ active: $route.path === '/image' }" to="/image">画像</b-nav-item>
                         <b-nav-item :class="{ active: $route.path === '/login' }" to="/login">Login</b-nav-item>
                         <b-nav-item :class="{ active: $route.path === '/register' }" to="/register">Register
                         </b-nav-item>
@@ -61,13 +61,13 @@
                     console.log('user changed! %s => %s', oldValue, newValue)
                     this.userName = newValue
 
-                    if(this.userName){
-                        console.log('ログインしたよ')
-                        this.makeToast('ログインしました。')
-                    }else{
-                        console.log('ログアウトしたよ')
-                        this.makeToast('ログアウトしました。')                        
-                    }
+                    // if(this.userName){
+                    //     console.log('ログインしたよ')
+                    //     this.makeToast('ログインしました。')
+                    // }else{
+                    //     console.log('ログアウトしたよ')
+                    //     this.makeToast('ログアウトしました。')                        
+                    // }
 
 
                     //セッション切れ後初回ログインで通らないので2重処理
@@ -87,6 +87,7 @@
                                 //email: localStorage.getItem("userEmail"),
                             }
                             this.$store.commit("updateUser", userInfo);
+                            
                         })
                         .catch(error => {
                             this.isLoggedIn = false

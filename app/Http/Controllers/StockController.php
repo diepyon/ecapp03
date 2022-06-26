@@ -22,13 +22,8 @@ class StockController extends Controller
         return $stocks;        
     }
    
-    public function images(){//画像だけのアーカイブ
-        $stocks =StockResource::collection(Stock::where('genre','image')->orderBy('created_at', 'desc')->paginate(10));//paginateの引数を変数にしたい
-        return $stocks;        
-    }
-
     public function search(Request $request){
-        if(isset($request->key)){
+        if($request->key != 'undefined'){
             $pat = '%' . addcslashes($request->key, '%_\\') . '%';
             $stocks =StockResource::collection(Stock::where('genre',$request->genre)->where('name','LIKE',$pat)->orderBy('created_at', 'desc')->paginate(10));//paginateの引数を変数にしたい        
         }else{//検索キーワードがなければ該当ジャンルをすべて表示

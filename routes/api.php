@@ -22,7 +22,7 @@ use App\Http\Controllers\Api\Auth\LoginController;//追記
 
 Route::get('/stocks',  [StockController::class, 'index']);
 
-Route::get('/images', [StockController::class, 'images']);//StockControllerのshowImageメソッド発動
+Route::get('/image', [StockController::class, 'images']);//StockControllerのshowImageメソッド発動
 
 //アイテム検索
 Route::get('/search', [StockController::class, 'search']);

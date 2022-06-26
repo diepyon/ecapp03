@@ -42,10 +42,10 @@ const router = new Router({
             component: StockArchive
         },
         {
-            path: '/images',
+            path: '/image',
             name: 'images',
             component: Images
-        },
+        },//これは必要。URLの受け皿にもなる。
         {
             path: '/stocks/:id(\\d+)',
             name: 'stocksingle',
