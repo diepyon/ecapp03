@@ -253,8 +253,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     };
   },
   mounted: function mounted() {
-    this.current_page = Number(this.$route.query.page) || 1;
-    this.showArchive(); // this.showArchive(this.genre,this.keyword) //わざわざ引数で指定する必要ないかも
+    this.current_page = Number(this.$route.query.page) || 1; //this.genre = this.$route.query.genre
+
+    this.showArchive();
   },
   methods: {
     showArchive: function showArchive() {
@@ -266,33 +267,48 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                //ジャンル以外でも絞り込み検索が必要なら複数のpropsを受け取ればいい
-                //キーワードなし検索はややこしいから別途API用意したほうがきれいかも
                 result = null; //最終的にはifではなく、引数をもとにジャンルやキーワードを使ったAPIを呼び出して検索したい
 
-                if (!_this.keyword) {
-                  _context.next = 9;
+                if (!(_this.keyword && _this.genre)) {
+                  _context.next = 8;
                   break;
                 }
 
-                console.log('キーワードは');
-                console.log(_this.keyword);
-                _context.next = 6;
+                console.log('キーワードだけ');
+                _context.next = 5;
                 return axios.get("/api/search?genre=".concat(_this.genre, "&key=").concat(_this.keyword, "&page=").concat(_this.current_page));
 
-              case 6:
+              case 5:
                 result = _context.sent;
-                _context.next = 12;
+                _context.next = 18;
                 break;
 
-              case 9:
-                _context.next = 11;
-                return axios.get("/api/stocks?page=".concat(_this.current_page));
+              case 8:
+                if (!(_this.keyword == '' && _this.genre)) {
+                  _context.next = 15;
+                  break;
+                }
 
-              case 11:
-                result = _context.sent;
+                console.log('ジャンルだけ');
+                _context.next = 12;
+                return axios.get("/api/search?genre=".concat(_this.genre, "&page=").concat(_this.current_page));
 
               case 12:
+                result = _context.sent;
+                _context.next = 18;
+                break;
+
+              case 15:
+                _context.next = 17;
+                return axios.get("/api/stocks?page=".concat(_this.current_page));
+
+              case 17:
+                result = _context.sent;
+
+              case 18:
+                console.log(_this.genre);
+                console.log(_this.keyword);
+                console.log(result.data);
                 stocks = result.data;
                 _this.stocks = stocks.data;
                 _this.parPage = stocks.meta.per_page; //1ページ当たりの表示件数
@@ -309,7 +325,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
                 _this.$emit('stocksFromChild', _this.stocks);
 
-              case 22:
+              case 31:
               case "end":
                 return _context.stop();
             }
@@ -348,7 +364,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
       if (this.keyword && this.genre) {
         url = "".concat(window.location.origin, "/").concat(this.genre, "?&key=").concat(this.keyword, "&page=").concat(this.current_page);
-      } else if (this.keyword && this.genre == null) {
+      } else if (!this.keyword && this.genre) {
         url = "".concat(window.location.origin, "/").concat(this.genre, "?&page=").concat(this.current_page);
       } else {
         url = "".concat(window.location.origin, "/stocks?&page=").concat(this.current_page);
@@ -1711,6 +1727,7 @@ __webpack_require__.r(__webpack_exports__);
   },
   mounted: function mounted() {
     this.genre = this.$route.query.genre;
+    this.keyword = this.$route.query.key;
   },
   methods: {
     getStocksFromChild: function getStocksFromChild(value) {

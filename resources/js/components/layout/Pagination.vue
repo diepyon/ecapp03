@@ -74,90 +74,97 @@
         },
         mounted() {
             this.current_page = Number(this.$route.query.page) || 1
+            //this.genre = this.$route.query.genre
+
             this.showArchive()
-            // this.showArchive(this.genre,this.keyword) //わざわざ引数で指定する必要ないかも
+
         },
         methods: {
             async showArchive() {
-                //ジャンル以外でも絞り込み検索が必要なら複数のpropsを受け取ればいい
-                //キーワードなし検索はややこしいから別途API用意したほうがきれいかも
                 let result = null
 
                 //最終的にはifではなく、引数をもとにジャンルやキーワードを使ったAPIを呼び出して検索したい
 
-                if (this.keyword) {
-                    console.log('キーワードは')
-                    console.log(this.keyword)
-                    result = await axios.get(
-                        `/api/search?genre=${this.genre}&key=${this.keyword}&page=${this.current_page}`)
-                } else {
+                if (this.keyword && this.genre) {
+                    console.log('キーワードだけ')
+                    result = await axios.get(`/api/search?genre=${this.genre}&key=${this.keyword}&page=${this.current_page}`)
+                } else if (this.keyword=='' && this.genre) {
+                    console.log('ジャンルだけ')
+                    result =await axios.get( `/api/search?genre=${this.genre}&page=${this.current_page}`)
+                }else {
                     result = await axios.get(`/api/stocks?page=${this.current_page}`);
                 }
-                const stocks = result.data;
-                this.stocks = stocks.data;
-                this.parPage = stocks.meta.per_page //1ページ当たりの表示件数
-                this.totalStocksPer = stocks.meta.total //全部でアイテムが何個あるか
-                this.length = stocks.meta.last_page //総ページ数を取得             
-                this.makePagenation()
 
-                console.log('ページネーション')
-                console.log(this.stocks)
+            console.log(this.genre)
+            console.log(this.keyword)
+            
+            console.log(result.data)
 
-                console.log('親コンポーネントに変数を渡すぜ')
-                this.$emit('stocksFromChild', this.stocks)
-            },
-            makePagenation() {
-                this.pages = []
-                for (let i = 1; i < this.length + 1; i++) {
-                    //ページ番号とリンク先をオブジェクトで追加
-                    this.pages.push({
-                        no: i,
-                    })
-                }
-                //1個前のページ
-                if (this.current_page !== 1) {
-                    this.previous = this.current_page - 1
-                } else {
-                    this.previous = 1
-                }
-                //次のページ
-                if (this.current_page !== this.length) {
-                    this.next = this.current_page + 1
-                } else {
-                    this.next = this.length
-                }
-            },
+            const stocks = result.data;
+            this.stocks = stocks.data;
+            this.parPage = stocks.meta.per_page //1ページ当たりの表示件数
+            this.totalStocksPer = stocks.meta.total //全部でアイテムが何個あるか
+            this.length = stocks.meta.last_page //総ページ数を取得             
+            this.makePagenation()
 
-            changePage(number) {
-                this.current_page = number
-                this.showArchive()
+            console.log('ページネーション')
+            console.log(this.stocks)
 
-                let url = null
-
-                if (this.keyword && this.genre) {
-                    url = `${window.location.origin}/${this.genre}?&key=${this.keyword}&page=${this.current_page}`
-                } else if(this.keyword && this.genre==null) {
-                    url = `${window.location.origin}/${this.genre}?&page=${this.current_page}`
-                }else{
-                     url = `${window.location.origin}/stocks?&page=${this.current_page}`
-                }
-
-                window.history.pushState({
-                        number
-                    },
-                    `Page${number}`,
-                    url
-
-                )
-                this.moveToTop()
-            },
-            moveToTop() {
-                window.scrollTo({
-                    top: 0,
-                });
-            },
-
+            console.log('親コンポーネントに変数を渡すぜ')
+            this.$emit('stocksFromChild', this.stocks)
         },
+        makePagenation() {
+            this.pages = []
+            for (let i = 1; i < this.length + 1; i++) {
+                //ページ番号とリンク先をオブジェクトで追加
+                this.pages.push({
+                    no: i,
+                })
+            }
+            //1個前のページ
+            if (this.current_page !== 1) {
+                this.previous = this.current_page - 1
+            } else {
+                this.previous = 1
+            }
+            //次のページ
+            if (this.current_page !== this.length) {
+                this.next = this.current_page + 1
+            } else {
+                this.next = this.length
+            }
+        },
+
+        changePage(number) {
+            this.current_page = number
+            this.showArchive()
+
+            let url = null
+
+            if (this.keyword && this.genre) {
+                url = `${window.location.origin}/${this.genre}?&key=${this.keyword}&page=${this.current_page}`
+            } else if (!this.keyword  && this.genre) {
+                url = `${window.location.origin}/${this.genre}?&page=${this.current_page}`
+            } else {
+                url = `${window.location.origin}/stocks?&page=${this.current_page}`
+            }
+
+            window.history.pushState({
+                    number
+                },
+                `Page${number}`,
+                url
+
+            )
+            this.moveToTop()
+        },
+        moveToTop() {
+            window.scrollTo({
+                top: 0,
+            });
+        },
+
+    },
     }
 
 </script>

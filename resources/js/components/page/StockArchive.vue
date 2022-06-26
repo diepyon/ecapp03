@@ -47,12 +47,12 @@
         },
         mounted() {
              this.genre = this.$route.query.genre
+             this.keyword = this.$route.query.key
         },
         methods: {
             getStocksFromChild(value) {
                 //ページネーションコンポーネントから一覧すべきレコードを取得
                 this.stocks = value
-
             },
             checkImgExist(id) { //サムネイル画像がエラーになるときは代替え画像に置き換え
                 const img = document.getElementById(id);
