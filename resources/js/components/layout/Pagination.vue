@@ -134,10 +134,12 @@
 
                 let url = null
 
-                if (this.keyword) {
+                if (this.keyword && this.genre) {
                     url = `${window.location.origin}/${this.genre}?&key=${this.keyword}&page=${this.current_page}`
-                } else {
+                } else if(this.keyword && this.genre==null) {
                     url = `${window.location.origin}/${this.genre}?&page=${this.current_page}`
+                }else{
+                     url = `${window.location.origin}/stocks?&page=${this.current_page}`
                 }
 
                 window.history.pushState({

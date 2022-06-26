@@ -346,10 +346,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       this.showArchive();
       var url = null;
 
-      if (this.keyword) {
+      if (this.keyword && this.genre) {
         url = "".concat(window.location.origin, "/").concat(this.genre, "?&key=").concat(this.keyword, "&page=").concat(this.current_page);
-      } else {
+      } else if (this.keyword && this.genre == null) {
         url = "".concat(window.location.origin, "/").concat(this.genre, "?&page=").concat(this.current_page);
+      } else {
+        url = "".concat(window.location.origin, "/stocks?&page=").concat(this.current_page);
       }
 
       window.history.pushState({
