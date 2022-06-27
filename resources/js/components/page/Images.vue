@@ -2,7 +2,7 @@
     <div>
         <h1>{{title}}</h1>
         <h2 v-if="searchKeyword">「{{searchKeyword}}」の検索結果</h2>
-        洗濯済みの選択肢をドロップダウンに表示したければ、javascriptで書かないとあかんかも
+        洗濯済みの選択肢をドロップダウンに表示したければ、javascriptで書かないとあかんかも<br>
         <div>
             <b-input-group class="search">
                 <template #prepend>
@@ -13,11 +13,11 @@
                     </b-dropdown>
                 </template>
 
-                <b-form-input v-model="keyword" v-on:keydown.enter="showArchive() ;changePage(1)">
+                <b-form-input v-model="keyword"  @keydown.enter="$refs.child.showArchive();searchKeyword = keyword">
                 </b-form-input>
 
                 <template #append>
-                    <b-button @click="showArchive();changePage(1)" type="" id="btn-search" variant="primary">
+                    <b-button @click="$refs.child.showArchive();searchKeyword = keyword" type="" id="btn-search" variant="primary">
                         <font-awesome-icon :icon="['fa', 'search']" />
                     </b-button>
                 </template>
@@ -27,74 +27,29 @@
             <div class="" v-for="stock in stocks" :key="stock.id">
                 <div class="stock_thumbnail">
                     <router-link :to="`stocks/` + stock.id">
-                        <img @error="checkImgExist(stock.id)" id="stock.id" class="thumbnail"
-                            v-if="stock.genre=='image'" :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
-                        <img @error="checkImgExist(stock.id)" :id="stock.id" class="thumbnail"
-                            v-else-if="stock.genre=='video'" :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
+                        <img @error="checkImgExist(stock.id)" :id="stock.id" class="thumbnail" :src="'/storage/stock_thumbnail/'+stock.filename+'.png'">
                     </router-link>
                     <div class="genre_icon">
-                        <span>
-                            <font-awesome-icon :icon="['fas', 'image']" /></span>
+                        <span><font-awesome-icon :icon="['fas', 'image']" /></span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="text-center">
-            現在のページ：{{current_page}}<br>
-            トータルページ数:{{length}}<br>
-            トータル記事数:{{totalStocksPer}}<br>
-
-            <nav aria-label="Page navigation example">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item"><button class="page-link" @click="changePage(1)">
-                            «</button></li>
-                    <li class="page-item"><button class="page-link" @click="changePage(previous)">
-                            ‹</button></li>
-
-                    <li role="separator" class="page-item disabled bv-d-xs-down-none" v-if="current_page > 3"><span
-                            class="page-link">…</span>
-                    </li>
-
-                    <li class="page-item"><button class="page-link" v-if="current_page -2 > 0"
-                            @click="changePage(current_page - 2)">{{current_page -2}}</button></li>
-
-                    <li class="page-item"><button class="page-link" v-if="current_page -1 > 0"
-                            @click="changePage(current_page - 1)">{{current_page -1}}</button></li>
-
-                    <li class="page-item active"><button class="page-link"
-                            @click="changePage(current_page)">{{current_page}}</button></li>
-
-                    <li class="page-item"><button class="page-link" v-if="current_page +1 <= length"
-                            @click="changePage(current_page + 1)">{{current_page +1}}</button></li>
-
-                    <li class="page-item"><button class="page-link" v-if="current_page +1 < length"
-                            @click="changePage(current_page + 2)">{{current_page +2}}</button></li>
-
-                    <li role="separator" class="page-item disabled bv-d-xs-down-none" v-if="current_page < length - 2">
-                        <span class="page-link">…</span>
-                    </li>
-
-                    <li class="page-item" v-if="current_page +2 > 0"><button class="page-link"
-                            @click="changePage(next)">
-                            ›</button></li>
-
-                    <li class="page-item"><button class="page-link" @click="changePage(length)">
-                            »</button></li>
-                </ul>
-            </nav>
-        </div>
+        <Pagination @stocksFromChild="getStocksFromChild" :genre="'image'" :keyword="this.keyword"  ref="child" />
 
     </div>
 </template>
 <script>
     import Header from "../layout/Header";
     import Footer from "../layout/Footer";
+    import Pagination from "../layout/Pagination";
 
     export default {
         components: {
             Header,
             Footer,
+            Pagination,
         },
         title: 'Image Archive',
         data() {
@@ -117,88 +72,16 @@
             this.current_page = Number(this.$route.query.page) || 1
             this.keyword = this.$route.query.key
 
-            this.showArchive()
+
 
         },
         computed: {
 
         },
         methods: {
-            async showArchive() {
-
-                let result = null
-                this.searchKeyword = this.keyword
-
-                result = await axios.get(`/api/search?genre=image&key=${this.keyword}&page=${this.current_page}`)
-
-                const stocks = result.data;
-                this.stocks = stocks.data;
-                this.parPage = stocks.meta.per_page //1ページ当たりの表示件数
-                this.totalStocksPer = stocks.meta.total //全部でアイテムが何個あるか
-                this.length = stocks.meta.last_page //総ページ数を取得
-                this.makePagenation()
-            },
-
-            makePagenation() {
-                this.pages = []
-                for (let i = 1; i < this.length + 1; i++) {
-                    //ページ番号とリンク先をオブジェクトで追加
-                    this.pages.push({
-                        no: i,
-                    })
-                }
-
-                //1個前のページ
-                if (this.current_page !== 1) {
-                    this.previous = this.current_page - 1
-                } else {
-                    this.previous = 1
-                }
-
-                //次のページ
-                if (this.current_page !== this.length) {
-                    this.next = this.current_page + 1
-                } else {
-                    this.next = this.length
-                }
-            },
-
-            changePage(number) {
-                if (this.keyword) {
-                    this.current_page = number //受け取ったページ番号をthis.currentpageに格納
-
-                    this.showArchive()
-
-
-                    if (this.keyword) {
-                        var hoge = `${window.location.origin}/image?&key=${this.keyword}&page=${this.current_page}`
-                    } else {
-                        var hoge = `${window.location.origin}/image?&page=${this.current_page}`
-                    }
-
-                    window.history.pushState({
-                            number
-                        },
-                        `Page${number}`,
-                        //search?genre=image&keyword=${this.keyword}&page=${this.current_page}`);
-                        hoge
-                    )
-                } else {
-                    this.current_page = number
-                    this.showArchive()
-                    window.history.pushState({
-                            number
-                        },
-                        `Page${number}`,
-                        `${window.location.origin}/image?page=${this.current_page}`
-                    )
-                }
-                this.moveToTop()
-            },
-            moveToTop() {
-                window.scrollTo({
-                    top: 0,
-                });
+            getStocksFromChild(value) {
+                //ページネーションコンポーネントから一覧すべきレコードを取得
+                this.stocks = value
             },
             checkImgExist(id) { //サムネイル画像がエラーになるときは代替え画像に置き換え
                 const img = document.getElementById(id);
@@ -216,7 +99,6 @@
 
     .genre_icon {
         color: #adb5bd99;
-        ;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -266,6 +148,14 @@
 
     @media screen and (max-width:768px) {
         /*** この中にタブレットのスタイル（768px以下） ***/
+        .thumbnail {
+            flex-grow: 1;
+            object-fit: cover;
+            max-height: 150px;
+            max-width: 300px;
+            margin: 0.2rem;
+            border-radius: 4px;
+        }
     }
 
     @media screen and (max-width:599px) {

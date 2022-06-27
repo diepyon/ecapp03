@@ -315,7 +315,6 @@
                 } else {
                     this.blobUrl = ""
                 }
-
                 this.genreSelect()
             },
 
@@ -347,7 +346,7 @@
                     this.genre = 'video'
                     this.genreString = "映像"
 
-                    //macのmovファイル？プレビューできないかもしれないイことを説明
+                //macのmovファイル？プレビューできないかもしれないイことを説明
                 } else if (result && this.fileInfo && this.fileInfo.type.match(
                         'video')) { //問題ないファイル存在が（選ばれていて）なおかつ動画なら
                     this.genre = 'video'
@@ -377,7 +376,6 @@
                     postData.append('form[fee]', this.feeSelected)
                     postData.append('form[detail]', this.detail)
                     postData.append('userId', this.currentUserid)//ここが取れてない。currentID取るべき
-
 
                     //バリデーション関数のreturnがどちらもtrueなら下記実行
                     axios.post('/api/stocks/create', postData) //api.phpのルートを指定。第2引数には渡したい変数を入れる（今回は配列postData=入力された内容）

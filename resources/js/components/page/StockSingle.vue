@@ -1,5 +1,6 @@
 <template>
     <div>
+         <!-- <div v-if="stock&& stock.stasut=='publish'"></div> -->
         <div v-if="stock">
             <h1>ID.{{ id }}詳細個別ページです</h1>
 
@@ -17,7 +18,7 @@
             <div>created by {{authorName}}</div>
         </div>
         <div v-else>
-            <h1>見つかりませんでした。</h1>
+            <h1>statusがpublich以外なら隠せばいい</h1>
         </div>
     </div>
 </template>
@@ -62,6 +63,7 @@
                     this.date = fns.format(new Date(this.stock.created_at), 'yyyy/MM/dd')
 
                     //入れ子にしてもいいのか、めんどくさいけどasyncawait使うべき？
+                    //→メソッド化したらええやん
                     axios.get('/api/hoge/' + this.stock.author_id)
                         .then(response => {
                             this.authorName = response.data.name //投稿者名

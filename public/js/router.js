@@ -144,7 +144,7 @@ __webpack_require__.r(__webpack_exports__);
     logout: function logout() {
       var _this3 = this;
 
-      axios.post("api/logout").then(function (response) {
+      axios.post("/api/logout").then(function (response) {
         localStorage.clear();
 
         _this3.$store.commit("logout"); //vuexの内容をリセット
@@ -233,9 +233,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
-//
-//
-//
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Pagination',
   props: ["genre", "keyword"],
@@ -255,6 +252,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   mounted: function mounted() {
     this.current_page = Number(this.$route.query.page) || 1; //this.genre = this.$route.query.genre
 
+    console.log(this.genre);
     this.showArchive();
   },
   methods: {
@@ -280,11 +278,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 5:
                 result = _context.sent;
-                _context.next = 18;
+                _context.next = 19;
                 break;
 
               case 8:
-                if (!(_this.keyword == '' && _this.genre)) {
+                if (!(!_this.keyword && _this.genre)) {
                   _context.next = 15;
                   break;
                 }
@@ -295,17 +293,18 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 12:
                 result = _context.sent;
-                _context.next = 18;
+                _context.next = 19;
                 break;
 
               case 15:
-                _context.next = 17;
+                console.log('その他');
+                _context.next = 18;
                 return axios.get("/api/stocks?page=".concat(_this.current_page));
 
-              case 17:
+              case 18:
                 result = _context.sent;
 
-              case 18:
+              case 19:
                 console.log(_this.genre);
                 console.log(_this.keyword);
                 console.log(result.data);
@@ -325,7 +324,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
                 _this.$emit('stocksFromChild', _this.stocks);
 
-              case 31:
+              case 32:
               case "end":
                 return _context.stop();
             }
@@ -1088,111 +1087,59 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
-/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _layout_Header__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../layout/Header */ "./resources/js/components/layout/Header.vue");
-/* harmony import */ var _layout_Footer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../layout/Footer */ "./resources/js/components/layout/Footer.vue");
+/* harmony import */ var _layout_Header__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../layout/Header */ "./resources/js/components/layout/Header.vue");
+/* harmony import */ var _layout_Footer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../layout/Footer */ "./resources/js/components/layout/Footer.vue");
+/* harmony import */ var _layout_Pagination__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../layout/Pagination */ "./resources/js/components/layout/Pagination.vue");
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
-
-function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
-
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {
-    Header: _layout_Header__WEBPACK_IMPORTED_MODULE_1__.default,
-    Footer: _layout_Footer__WEBPACK_IMPORTED_MODULE_2__.default
+    Header: _layout_Header__WEBPACK_IMPORTED_MODULE_0__.default,
+    Footer: _layout_Footer__WEBPACK_IMPORTED_MODULE_1__.default,
+    Pagination: _layout_Pagination__WEBPACK_IMPORTED_MODULE_2__.default
   },
   title: 'Image Archive',
   data: function data() {
@@ -1214,98 +1161,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   mounted: function mounted() {
     this.current_page = Number(this.$route.query.page) || 1;
     this.keyword = this.$route.query.key;
-    this.showArchive();
   },
   computed: {},
   methods: {
-    showArchive: function showArchive() {
-      var _this = this;
-
-      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
-        var result, stocks;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                result = null;
-                _this.searchKeyword = _this.keyword;
-                _context.next = 4;
-                return axios.get("/api/search?genre=image&key=".concat(_this.keyword, "&page=").concat(_this.current_page));
-
-              case 4:
-                result = _context.sent;
-                stocks = result.data;
-                _this.stocks = stocks.data;
-                _this.parPage = stocks.meta.per_page; //1ページ当たりの表示件数
-
-                _this.totalStocksPer = stocks.meta.total; //全部でアイテムが何個あるか
-
-                _this.length = stocks.meta.last_page; //総ページ数を取得
-
-                _this.makePagenation();
-
-              case 11:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee);
-      }))();
-    },
-    makePagenation: function makePagenation() {
-      this.pages = [];
-
-      for (var i = 1; i < this.length + 1; i++) {
-        //ページ番号とリンク先をオブジェクトで追加
-        this.pages.push({
-          no: i
-        });
-      } //1個前のページ
-
-
-      if (this.current_page !== 1) {
-        this.previous = this.current_page - 1;
-      } else {
-        this.previous = 1;
-      } //次のページ
-
-
-      if (this.current_page !== this.length) {
-        this.next = this.current_page + 1;
-      } else {
-        this.next = this.length;
-      }
-    },
-    changePage: function changePage(number) {
-      if (this.keyword) {
-        this.current_page = number; //受け取ったページ番号をthis.currentpageに格納
-
-        this.showArchive();
-
-        if (this.keyword) {
-          var hoge = "".concat(window.location.origin, "/image?&key=").concat(this.keyword, "&page=").concat(this.current_page);
-        } else {
-          var hoge = "".concat(window.location.origin, "/image?&page=").concat(this.current_page);
-        }
-
-        window.history.pushState({
-          number: number
-        }, "Page".concat(number), //search?genre=image&keyword=${this.keyword}&page=${this.current_page}`);
-        hoge);
-      } else {
-        this.current_page = number;
-        this.showArchive();
-        window.history.pushState({
-          number: number
-        }, "Page".concat(number), "".concat(window.location.origin, "/image?page=").concat(this.current_page));
-      }
-
-      this.moveToTop();
-    },
-    moveToTop: function moveToTop() {
-      window.scrollTo({
-        top: 0
-      });
+    getStocksFromChild: function getStocksFromChild(value) {
+      //ページネーションコンポーネントから一覧すべきレコードを取得
+      this.stocks = value;
     },
     checkImgExist: function checkImgExist(id) {
       //サムネイル画像がエラーになるときは代替え画像に置き換え
@@ -2221,6 +2082,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 
 
@@ -2255,6 +2117,7 @@ __webpack_require__.r(__webpack_exports__);
     axios.get('/api/stocks/' + this.id).then(function (response) {
       _this.stock = response.data.data;
       _this.date = date_fns__WEBPACK_IMPORTED_MODULE_5__.default(new Date(_this.stock.created_at), 'yyyy/MM/dd'); //入れ子にしてもいいのか、めんどくさいけどasyncawait使うべき？
+      //→メソッド化したらええやん
 
       axios.get('/api/hoge/' + _this.stock.author_id).then(function (response) {
         _this.authorName = response.data.name; //投稿者名
@@ -2476,7 +2339,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.stock_thumbnail[data-v-fa8d95c6] {\n    position: relative;\n    margin: 2.5px;\n}\n.genre_icon[data-v-fa8d95c6] {\n    color: #adb5bd99;\n    ;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    font-size: 1.5rem;\n    cursor: pointer;\n    position: absolute;\n    bottom: 0%;\n    left: 0%;\n    margin: 8px;\n}\n\n/*サムネイルの左下に出るジャンル判別アイコン*/\n.stock_thumbnail[data-v-fa8d95c6] {\n    position: relative;\n}\n.stocks[data-v-fa8d95c6] {\n    display: flex;\n    flex-wrap: wrap;\n    /* 親要素を無視して画面いっぱいに表示 */\n    margin-right: calc(50% - 50vw);\n    margin-left: calc(50% - 50vw);\n}\n.stock_thumbnail:hover img[data-v-fa8d95c6] {\n    filter: brightness(50%);\n    transition: 0.1s ease-in-out;\n}\n\n/*レスポンシブデザイン*/\n@media screen and (min-width:769px) {\n\n    /*** この中にPCのスタイル（769px以上） ***/\n.thumbnail[data-v-fa8d95c6] {\n        flex-grow: 1;\n        -o-object-fit: cover;\n           object-fit: cover;\n        max-height: 200px;\n        max-width: 400px;\n        margin: 0.2rem;\n        border-radius: 4px;\n}\n}\n@media screen and (max-width:768px) {\n    /*** この中にタブレットのスタイル（768px以下） ***/\n}\n@media screen and (max-width:599px) {\n\n    /*** この中にスマホのスタイル（599px以下） ***/\n.thumbnail[data-v-fa8d95c6] {\n        flex-grow: 1;\n        -o-object-fit: cover;\n           object-fit: cover;\n        max-height: 100px;\n        max-width: 200px;\n        margin: 0.2rem;\n        border-radius: 4px;\n}\n}\n.search[data-v-fa8d95c6] {\n    padding: .5em;\n}\n\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.stock_thumbnail[data-v-fa8d95c6] {\n    position: relative;\n    margin: 2.5px;\n}\n.genre_icon[data-v-fa8d95c6] {\n    color: #adb5bd99;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    font-size: 1.5rem;\n    cursor: pointer;\n    position: absolute;\n    bottom: 0%;\n    left: 0%;\n    margin: 8px;\n}\n\n/*サムネイルの左下に出るジャンル判別アイコン*/\n.stock_thumbnail[data-v-fa8d95c6] {\n    position: relative;\n}\n.stocks[data-v-fa8d95c6] {\n    display: flex;\n    flex-wrap: wrap;\n    /* 親要素を無視して画面いっぱいに表示 */\n    margin-right: calc(50% - 50vw);\n    margin-left: calc(50% - 50vw);\n}\n.stock_thumbnail:hover img[data-v-fa8d95c6] {\n    filter: brightness(50%);\n    transition: 0.1s ease-in-out;\n}\n\n/*レスポンシブデザイン*/\n@media screen and (min-width:769px) {\n\n    /*** この中にPCのスタイル（769px以上） ***/\n.thumbnail[data-v-fa8d95c6] {\n        flex-grow: 1;\n        -o-object-fit: cover;\n           object-fit: cover;\n        max-height: 200px;\n        max-width: 400px;\n        margin: 0.2rem;\n        border-radius: 4px;\n}\n}\n@media screen and (max-width:768px) {\n    /*** この中にタブレットのスタイル（768px以下） ***/\n.thumbnail[data-v-fa8d95c6] {\n        flex-grow: 1;\n        -o-object-fit: cover;\n           object-fit: cover;\n        max-height: 150px;\n        max-width: 300px;\n        margin: 0.2rem;\n        border-radius: 4px;\n}\n}\n@media screen and (max-width:599px) {\n\n    /*** この中にスマホのスタイル（599px以下） ***/\n.thumbnail[data-v-fa8d95c6] {\n        flex-grow: 1;\n        -o-object-fit: cover;\n           object-fit: cover;\n        max-height: 100px;\n        max-width: 200px;\n        margin: 0.2rem;\n        border-radius: 4px;\n}\n}\n.search[data-v-fa8d95c6] {\n    padding: .5em;\n}\n\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -2524,7 +2387,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.b-col img[data-v-8d9c309e] {\n    max-width: 100%;\n}\n.genre_icon[data-v-8d9c309e] {\n    color: #adb5bd99;\n    ;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    font-size: 1.5rem;\n    cursor: pointer;\n    position: absolute;\n    bottom: 0%;\n    left: 0%;\n    margin: 8px;\n}\n.stock_thumbnail[data-v-8d9c309e] {\n    position: relative;\n}\n\n/*サムネイルの左下に出るジャンル判別アイコン*/\n.stock_thumbnail:hover img[data-v-8d9c309e] {\n    filter: brightness(50%);\n    transition: 0.1s ease-in-out;\n}\n.stocks[data-v-8d9c309e] {\n    display: flex;\n    flex-wrap: wrap;\n    /* 親要素を無視して画面いっぱいに表示 */\n    margin-right: calc(50% - 50vw);\n    margin-left: calc(50% - 50vw);\n}\n\n\n\n/*レスポンシブデザイン*/\n@media screen and (min-width:769px) {\n\n    /*** この中にPCのスタイル（769px以上） ***/\n.thumbnail[data-v-8d9c309e] {\n        flex-grow: 1;\n        -o-object-fit: cover;\n           object-fit: cover;\n        max-height: 200px;\n        max-width: 400px;\n        margin: 0.2rem;\n        border-radius: 4px;\n}\n}\n@media screen and (max-width:768px) {\n    /*** この中にタブレットのスタイル（768px以下） ***/\n}\n@media screen and (max-width:599px) {\n\n    /*** この中にスマホのスタイル（599px以下） ***/\n.thumbnail[data-v-8d9c309e] {\n        flex-grow: 1;\n        -o-object-fit: cover;\n           object-fit: cover;\n        max-height: 100px;\n        max-width: 200px;\n        margin: 0.2rem;\n        border-radius: 4px;\n}\n}\n\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.b-col img[data-v-8d9c309e] {\n    max-width: 100%;\n}\n.genre_icon[data-v-8d9c309e] {\n    color: #adb5bd99;\n    ;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    font-size: 1.5rem;\n    cursor: pointer;\n    position: absolute;\n    bottom: 0%;\n    left: 0%;\n    margin: 8px;\n}\n.stock_thumbnail[data-v-8d9c309e] {\n    position: relative;\n}\n\n/*サムネイルの左下に出るジャンル判別アイコン*/\n.stock_thumbnail:hover img[data-v-8d9c309e] {\n    filter: brightness(50%);\n    transition: 0.1s ease-in-out;\n}\n.stocks[data-v-8d9c309e] {\n    display: flex;\n    flex-wrap: wrap;\n    /* 親要素を無視して画面いっぱいに表示 */\n    margin-right: calc(50% - 50vw);\n    margin-left: calc(50% - 50vw);\n}\n\n\n\n/*レスポンシブデザイン*/\n@media screen and (min-width:769px) {\n\n    /*** この中にPCのスタイル（769px以上） ***/\n.thumbnail[data-v-8d9c309e] {\n        flex-grow: 1;\n        -o-object-fit: cover;\n           object-fit: cover;\n        max-height: 200px;\n        max-width: 400px;\n        margin: 0.2rem;\n        border-radius: 4px;\n}\n}\n@media screen and (max-width:768px) {\n    /*** この中にタブレットのスタイル（768px以下） ***/\n.thumbnail[data-v-8d9c309e] {\n        flex-grow: 1;\n        -o-object-fit: cover;\n           object-fit: cover;\n        max-height: 150px;\n        max-width: 300px;\n        margin: 0.2rem;\n        border-radius: 4px;\n}\n}\n@media screen and (max-width:599px) {\n\n    /*** この中にスマホのスタイル（599px以下） ***/\n.thumbnail[data-v-8d9c309e] {\n        flex-grow: 1;\n        -o-object-fit: cover;\n           object-fit: cover;\n        max-height: 100px;\n        max-width: 200px;\n        margin: 0.2rem;\n        border-radius: 4px;\n}\n}\n\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -8580,8 +8443,6 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", [
-    _c("hr"),
-    _vm._v("\n    ページネーションだよ\n\n    "),
     _c("div", { staticClass: "text-center" }, [
       _vm._v("\n        現在のページ：" + _vm._s(_vm.current_page)),
       _c("br"),
@@ -9862,352 +9723,167 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", [
-    _c("h1", [_vm._v(_vm._s(_vm.title))]),
-    _vm._v(" "),
-    _vm.searchKeyword
-      ? _c("h2", [_vm._v("「" + _vm._s(_vm.searchKeyword) + "」の検索結果")])
-      : _vm._e(),
-    _vm._v(
-      "\n    洗濯済みの選択肢をドロップダウンに表示したければ、javascriptで書かないとあかんかも\n    "
-    ),
-    _c(
-      "div",
-      [
-        _c(
-          "b-input-group",
-          {
-            staticClass: "search",
-            scopedSlots: _vm._u([
-              {
-                key: "prepend",
-                fn: function() {
-                  return [
-                    _c(
-                      "b-dropdown",
-                      { attrs: { id: "dropdown-1", text: "すべての画像" } },
-                      [
-                        _c(
-                          "b-dropdown-item",
-                          [
-                            _c("font-awesome-icon", {
-                              attrs: { icon: ["fas", "image"] }
-                            }),
-                            _vm._v("イラスト")
-                          ],
-                          1
-                        ),
-                        _vm._v(" "),
-                        _c("b-dropdown-item", [_vm._v("写真")])
-                      ],
-                      1
-                    )
-                  ]
-                },
-                proxy: true
-              },
-              {
-                key: "append",
-                fn: function() {
-                  return [
-                    _c(
-                      "b-button",
-                      {
-                        attrs: {
-                          type: "",
-                          id: "btn-search",
-                          variant: "primary"
-                        },
-                        on: {
-                          click: function($event) {
-                            _vm.showArchive()
-                            _vm.changePage(1)
-                          }
-                        }
-                      },
-                      [
-                        _c("font-awesome-icon", {
-                          attrs: { icon: ["fa", "search"] }
-                        })
-                      ],
-                      1
-                    )
-                  ]
-                },
-                proxy: true
-              }
-            ])
-          },
-          [
-            _vm._v(" "),
-            _c("b-form-input", {
-              on: {
-                keydown: function($event) {
-                  if (
-                    !$event.type.indexOf("key") &&
-                    _vm._k($event.keyCode, "enter", 13, $event.key, "Enter")
-                  ) {
-                    return null
-                  }
-                  _vm.showArchive()
-                  _vm.changePage(1)
-                }
-              },
-              model: {
-                value: _vm.keyword,
-                callback: function($$v) {
-                  _vm.keyword = $$v
-                },
-                expression: "keyword"
-              }
-            })
-          ],
-          1
-        )
-      ],
-      1
-    ),
-    _vm._v(" "),
-    _c(
-      "div",
-      { staticClass: "stocks" },
-      _vm._l(_vm.stocks, function(stock) {
-        return _c("div", { key: stock.id }, [
+  return _c(
+    "div",
+    [
+      _c("h1", [_vm._v(_vm._s(_vm.title))]),
+      _vm._v(" "),
+      _vm.searchKeyword
+        ? _c("h2", [_vm._v("「" + _vm._s(_vm.searchKeyword) + "」の検索結果")])
+        : _vm._e(),
+      _vm._v(
+        "\n    洗濯済みの選択肢をドロップダウンに表示したければ、javascriptで書かないとあかんかも"
+      ),
+      _c("br"),
+      _vm._v(" "),
+      _c(
+        "div",
+        [
           _c(
-            "div",
-            { staticClass: "stock_thumbnail" },
-            [
-              _c("router-link", { attrs: { to: "stocks/" + stock.id } }, [
-                stock.genre == "image"
-                  ? _c("img", {
-                      staticClass: "thumbnail",
-                      attrs: {
-                        id: "stock.id",
-                        src:
-                          "/storage/stock_thumbnail/" + stock.filename + ".png"
-                      },
-                      on: {
-                        error: function($event) {
-                          return _vm.checkImgExist(stock.id)
-                        }
-                      }
-                    })
-                  : stock.genre == "video"
-                  ? _c("img", {
-                      staticClass: "thumbnail",
-                      attrs: {
-                        id: stock.id,
-                        src:
-                          "/storage/stock_thumbnail/" + stock.filename + ".png"
-                      },
-                      on: {
-                        error: function($event) {
-                          return _vm.checkImgExist(stock.id)
-                        }
-                      }
-                    })
-                  : _vm._e()
-              ]),
-              _vm._v(" "),
-              _c("div", { staticClass: "genre_icon" }, [
-                _c(
-                  "span",
-                  [
-                    _c("font-awesome-icon", {
-                      attrs: { icon: ["fas", "image"] }
-                    })
-                  ],
-                  1
-                )
+            "b-input-group",
+            {
+              staticClass: "search",
+              scopedSlots: _vm._u([
+                {
+                  key: "prepend",
+                  fn: function() {
+                    return [
+                      _c(
+                        "b-dropdown",
+                        { attrs: { id: "dropdown-1", text: "すべての画像" } },
+                        [
+                          _c(
+                            "b-dropdown-item",
+                            [
+                              _c("font-awesome-icon", {
+                                attrs: { icon: ["fas", "image"] }
+                              }),
+                              _vm._v("イラスト")
+                            ],
+                            1
+                          ),
+                          _vm._v(" "),
+                          _c("b-dropdown-item", [_vm._v("写真")])
+                        ],
+                        1
+                      )
+                    ]
+                  },
+                  proxy: true
+                },
+                {
+                  key: "append",
+                  fn: function() {
+                    return [
+                      _c(
+                        "b-button",
+                        {
+                          attrs: {
+                            type: "",
+                            id: "btn-search",
+                            variant: "primary"
+                          },
+                          on: {
+                            click: function($event) {
+                              _vm.$refs.child.showArchive()
+                              _vm.searchKeyword = _vm.keyword
+                            }
+                          }
+                        },
+                        [
+                          _c("font-awesome-icon", {
+                            attrs: { icon: ["fa", "search"] }
+                          })
+                        ],
+                        1
+                      )
+                    ]
+                  },
+                  proxy: true
+                }
               ])
+            },
+            [
+              _vm._v(" "),
+              _c("b-form-input", {
+                on: {
+                  keydown: function($event) {
+                    if (
+                      !$event.type.indexOf("key") &&
+                      _vm._k($event.keyCode, "enter", 13, $event.key, "Enter")
+                    ) {
+                      return null
+                    }
+                    _vm.$refs.child.showArchive()
+                    _vm.searchKeyword = _vm.keyword
+                  }
+                },
+                model: {
+                  value: _vm.keyword,
+                  callback: function($$v) {
+                    _vm.keyword = $$v
+                  },
+                  expression: "keyword"
+                }
+              })
             ],
             1
           )
-        ])
-      }),
-      0
-    ),
-    _vm._v(" "),
-    _c("div", { staticClass: "text-center" }, [
-      _vm._v("\n        現在のページ：" + _vm._s(_vm.current_page)),
-      _c("br"),
-      _vm._v("\n        トータルページ数:" + _vm._s(_vm.length)),
-      _c("br"),
-      _vm._v("\n        トータル記事数:" + _vm._s(_vm.totalStocksPer)),
-      _c("br"),
+        ],
+        1
+      ),
       _vm._v(" "),
-      _c("nav", { attrs: { "aria-label": "Page navigation example" } }, [
-        _c("ul", { staticClass: "pagination justify-content-center" }, [
-          _c("li", { staticClass: "page-item" }, [
+      _c(
+        "div",
+        { staticClass: "stocks" },
+        _vm._l(_vm.stocks, function(stock) {
+          return _c("div", { key: stock.id }, [
             _c(
-              "button",
-              {
-                staticClass: "page-link",
-                on: {
-                  click: function($event) {
-                    return _vm.changePage(1)
-                  }
-                }
-              },
-              [_vm._v("\n                        «")]
-            )
-          ]),
-          _vm._v(" "),
-          _c("li", { staticClass: "page-item" }, [
-            _c(
-              "button",
-              {
-                staticClass: "page-link",
-                on: {
-                  click: function($event) {
-                    return _vm.changePage(_vm.previous)
-                  }
-                }
-              },
-              [_vm._v("\n                        ‹")]
-            )
-          ]),
-          _vm._v(" "),
-          _vm.current_page > 3
-            ? _c(
-                "li",
-                {
-                  staticClass: "page-item disabled bv-d-xs-down-none",
-                  attrs: { role: "separator" }
-                },
-                [_c("span", { staticClass: "page-link" }, [_vm._v("…")])]
-              )
-            : _vm._e(),
-          _vm._v(" "),
-          _c("li", { staticClass: "page-item" }, [
-            _vm.current_page - 2 > 0
-              ? _c(
-                  "button",
-                  {
-                    staticClass: "page-link",
+              "div",
+              { staticClass: "stock_thumbnail" },
+              [
+                _c("router-link", { attrs: { to: "stocks/" + stock.id } }, [
+                  _c("img", {
+                    staticClass: "thumbnail",
+                    attrs: {
+                      id: stock.id,
+                      src: "/storage/stock_thumbnail/" + stock.filename + ".png"
+                    },
                     on: {
-                      click: function($event) {
-                        return _vm.changePage(_vm.current_page - 2)
+                      error: function($event) {
+                        return _vm.checkImgExist(stock.id)
                       }
                     }
-                  },
-                  [_vm._v(_vm._s(_vm.current_page - 2))]
-                )
-              : _vm._e()
-          ]),
-          _vm._v(" "),
-          _c("li", { staticClass: "page-item" }, [
-            _vm.current_page - 1 > 0
-              ? _c(
-                  "button",
-                  {
-                    staticClass: "page-link",
-                    on: {
-                      click: function($event) {
-                        return _vm.changePage(_vm.current_page - 1)
-                      }
-                    }
-                  },
-                  [_vm._v(_vm._s(_vm.current_page - 1))]
-                )
-              : _vm._e()
-          ]),
-          _vm._v(" "),
-          _c("li", { staticClass: "page-item active" }, [
-            _c(
-              "button",
-              {
-                staticClass: "page-link",
-                on: {
-                  click: function($event) {
-                    return _vm.changePage(_vm.current_page)
-                  }
-                }
-              },
-              [_vm._v(_vm._s(_vm.current_page))]
-            )
-          ]),
-          _vm._v(" "),
-          _c("li", { staticClass: "page-item" }, [
-            _vm.current_page + 1 <= _vm.length
-              ? _c(
-                  "button",
-                  {
-                    staticClass: "page-link",
-                    on: {
-                      click: function($event) {
-                        return _vm.changePage(_vm.current_page + 1)
-                      }
-                    }
-                  },
-                  [_vm._v(_vm._s(_vm.current_page + 1))]
-                )
-              : _vm._e()
-          ]),
-          _vm._v(" "),
-          _c("li", { staticClass: "page-item" }, [
-            _vm.current_page + 1 < _vm.length
-              ? _c(
-                  "button",
-                  {
-                    staticClass: "page-link",
-                    on: {
-                      click: function($event) {
-                        return _vm.changePage(_vm.current_page + 2)
-                      }
-                    }
-                  },
-                  [_vm._v(_vm._s(_vm.current_page + 2))]
-                )
-              : _vm._e()
-          ]),
-          _vm._v(" "),
-          _vm.current_page < _vm.length - 2
-            ? _c(
-                "li",
-                {
-                  staticClass: "page-item disabled bv-d-xs-down-none",
-                  attrs: { role: "separator" }
-                },
-                [_c("span", { staticClass: "page-link" }, [_vm._v("…")])]
-              )
-            : _vm._e(),
-          _vm._v(" "),
-          _vm.current_page + 2 > 0
-            ? _c("li", { staticClass: "page-item" }, [
-                _c(
-                  "button",
-                  {
-                    staticClass: "page-link",
-                    on: {
-                      click: function($event) {
-                        return _vm.changePage(_vm.next)
-                      }
-                    }
-                  },
-                  [_vm._v("\n                        ›")]
-                )
-              ])
-            : _vm._e(),
-          _vm._v(" "),
-          _c("li", { staticClass: "page-item" }, [
-            _c(
-              "button",
-              {
-                staticClass: "page-link",
-                on: {
-                  click: function($event) {
-                    return _vm.changePage(_vm.length)
-                  }
-                }
-              },
-              [_vm._v("\n                        »")]
+                  })
+                ]),
+                _vm._v(" "),
+                _c("div", { staticClass: "genre_icon" }, [
+                  _c(
+                    "span",
+                    [
+                      _c("font-awesome-icon", {
+                        attrs: { icon: ["fas", "image"] }
+                      })
+                    ],
+                    1
+                  )
+                ])
+              ],
+              1
             )
           ])
-        ])
-      ])
-    ])
-  ])
+        }),
+        0
+      ),
+      _vm._v(" "),
+      _c("Pagination", {
+        ref: "child",
+        attrs: { genre: "image", keyword: this.keyword },
+        on: { stocksFromChild: _vm.getStocksFromChild }
+      })
+    ],
+    1
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
@@ -11014,7 +10690,7 @@ var render = function() {
           ],
           1
         )
-      : _c("div", [_c("h1", [_vm._v("見つかりませんでした。")])])
+      : _c("div", [_c("h1", [_vm._v("statusがpublich以外なら隠せばいい")])])
   ])
 }
 var staticRenderFns = []

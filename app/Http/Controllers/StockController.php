@@ -41,15 +41,16 @@ class StockController extends Controller
     {       
         $filename = substr(bin2hex(random_bytes(8)), 0, 8);//ランダムなファイル名を定義
         $extention = $request->form['extention']; //ファイルの拡張子を取得
-        $request->file('files')[0]->storeAs('private/stocks', $filename.'.'.$extention);//ランダムなファイル名.拡張子をファイル名に指定
-        $stock->name = $request->form['name'];
-        $stock->genre = $request->form['genre'];//ジャンルを登録（html側では改ざん不可）
-        $stock->fee =  $request->form['fee'];
-        $stock->detail =  $request->form['detail'];        
-        $stock->author_id = $request->userId;//投稿者のID
-        $stock->path =$filename.'.'.$extention;//ファイル名.拡張子をデータベースに登録
-        $stock->filename =$filename;//ファイル名（拡張子なし）をデータベースに登録
-        $stock->save();
+        
+        $stock->fill(array_merge($request->form,
+            //request以外から生成してレコードに保存する必須のカラムの内容
+             ['path' => $filename.'.'.$extention],
+             ['filename' => $filename],
+             ['author_id' => $request->userId],
+        ))->save(); 
+        
+        //ランダムなファイル名.拡張子をファイル名に指定して保存
+        $request->file('files')[0]->storeAs('private/stocks', $filename.'.'.$extention);
 
         //投稿時に走らせるとやっぱり重い。認証システム入れたら承認時に変換する方式にしたい
         if($request->form['genre']=='image'){

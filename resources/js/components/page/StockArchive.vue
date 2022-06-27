@@ -23,7 +23,7 @@
                 </div>
             </div>
         </div>
-        <Pagination @stocksFromChild="getStocksFromChild" :genre="''" :keyword="''"/>
+        <Pagination @stocksFromChild="getStocksFromChild" :genre="''" :keyword="''" />
     </div>
 </template>
 
@@ -46,8 +46,8 @@
             }
         },
         mounted() {
-             this.genre = this.$route.query.genre
-             this.keyword = this.$route.query.key
+            this.genre = this.$route.query.genre
+            this.keyword = this.$route.query.key
         },
         methods: {
             getStocksFromChild(value) {
@@ -120,6 +120,14 @@
 
     @media screen and (max-width:768px) {
         /*** この中にタブレットのスタイル（768px以下） ***/
+        .thumbnail {
+            flex-grow: 1;
+            object-fit: cover;
+            max-height: 150px;
+            max-width: 300px;
+            margin: 0.2rem;
+            border-radius: 4px;
+        }
     }
 
     @media screen and (max-width:599px) {

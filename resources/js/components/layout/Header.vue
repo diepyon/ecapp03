@@ -135,8 +135,7 @@
                 })
             },            
             logout() {
-                axios
-                    .post("api/logout")
+                axios.post("/api/logout")
                     .then(response => {
                         localStorage.clear()
                         this.$store.commit("logout") //vuexの内容をリセット

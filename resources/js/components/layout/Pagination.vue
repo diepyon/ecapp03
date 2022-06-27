@@ -1,9 +1,6 @@
 <template>
 
     <div>
-        <hr>
-        ページネーションだよ
-
         <div class="text-center">
             現在のページ：{{current_page}}<br>
             トータルページ数:{{length}}<br>
@@ -75,6 +72,7 @@
         mounted() {
             this.current_page = Number(this.$route.query.page) || 1
             //this.genre = this.$route.query.genre
+            console.log(this.genre)
 
             this.showArchive()
 
@@ -88,10 +86,11 @@
                 if (this.keyword && this.genre) {
                     console.log('キーワードだけ')
                     result = await axios.get(`/api/search?genre=${this.genre}&key=${this.keyword}&page=${this.current_page}`)
-                } else if (this.keyword=='' && this.genre) {
+                } else if (!this.keyword && this.genre) {
                     console.log('ジャンルだけ')
                     result =await axios.get( `/api/search?genre=${this.genre}&page=${this.current_page}`)
                 }else {
+                    console.log('その他')
                     result = await axios.get(`/api/stocks?page=${this.current_page}`);
                 }
 
