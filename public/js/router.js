@@ -68,6 +68,7 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     var _this = this;
 
+    //ユーザー名取れないなどログインしていないときだけ走らせれば省エネでは？
     axios.get("/api/loginCheck").then(function (response) {
       _this.isLoggedIn = true; //this.userName = localStorage.getItem('userName')
       //email: localStorage.getItem("userEmail"),
@@ -79,21 +80,21 @@ __webpack_require__.r(__webpack_exports__);
       return getters.getUserName;
     }, function (newValue, oldValue) {
       console.log('user changed! %s => %s', oldValue, newValue);
-      _this.userName = newValue; // if(this.userName){
-      //     console.log('ログインしたよ')
-      //     this.makeToast('ログインしました。')
-      // }else{
-      //     console.log('ログアウトしたよ')
-      //     this.makeToast('ログアウトしました。')                        
-      // }
-      //セッション切れ後初回ログインで通らないので2重処理
-      //これでうまくいったらノートに記載して
-      // if (this.userName) {
-      //     this.isLoggedIn = true
-      // } else {
-      //     this.isLoggedIn = false
-      // }
-      //vuexのユーザー名が変わったことを検知した上でサンクタムのログインチェック処理
+      _this.userName = newValue; //セッション切れログアウトからのログイン時には通知が出ない
+      //oldvalueとnewvalueの動きを確認してリファクタリングが必要
+
+      var referrer = _this.$router.referrer; //セッション切れの時のこの部分が知りたい
+
+      console.log(referrer);
+
+      if (_this.userName && referrer.name == 'login') {
+        //ユーザー名が取得できた&ログインページから飛んできたか、元々のユーザー名がnullなら
+        _this.makeToast('ログインしました。');
+      } else if (_this.userName == null) {
+        //ユーザー名がnullになったら
+        _this.makeToast('ログアウトしました。');
+      } //vuexのユーザー名が変わったことを検知した上でサンクタムのログインチェック処理
+
 
       axios.get("/api/loginCheck").then(function (response) {
         _this.isLoggedIn = true;
@@ -135,7 +136,7 @@ __webpack_require__.r(__webpack_exports__);
   methods: {
     makeToast: function makeToast(message) {
       this.$bvToast.toast(message, {
-        title: 'ログイン通知',
+        title: '通知',
         toaster: 'b-toaster-bottom-left',
         autoHideDelay: 5000,
         appendToast: false
@@ -235,7 +236,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Pagination',
-  props: ["genre", "keyword"],
+  props: ["genre", "keyword", "subgenre"],
   //複数書くときの書き方これであってるよな？
   data: function data() {
     return {
@@ -250,9 +251,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     };
   },
   mounted: function mounted() {
-    this.current_page = Number(this.$route.query.page) || 1; //this.genre = this.$route.query.genre
+    this.current_page = Number(this.$route.query.page) || 1; //this.genre = this.$route.query.genre || null
+    //今のところ動くが要注意
 
-    console.log(this.genre);
+    this.keyword = this.$route.query.key;
     this.showArchive();
   },
   methods: {
@@ -265,49 +267,34 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                result = null; //最終的にはifではなく、引数をもとにジャンルやキーワードを使ったAPIを呼び出して検索したい
-
-                if (!(_this.keyword && _this.genre)) {
-                  _context.next = 8;
-                  break;
-                }
-
-                console.log('キーワードだけ');
+                console.log('サブジャンルは');
+                console.log(_this.subgenre);
+                result = null;
                 _context.next = 5;
-                return axios.get("/api/search?genre=".concat(_this.genre, "&key=").concat(_this.keyword, "&page=").concat(_this.current_page));
+                return axios.get('/api/search', {
+                  params: {
+                    genre: _this.genre,
+                    subgenre: _this.subgenre,
+                    key: _this.keyword,
+                    page: _this.current_page
+                  }
+                });
 
               case 5:
                 result = _context.sent;
-                _context.next = 19;
-                break;
-
-              case 8:
-                if (!(!_this.keyword && _this.genre)) {
-                  _context.next = 15;
-                  break;
-                }
-
-                console.log('ジャンルだけ');
-                _context.next = 12;
-                return axios.get("/api/search?genre=".concat(_this.genre, "&page=").concat(_this.current_page));
-
-              case 12:
-                result = _context.sent;
-                _context.next = 19;
-                break;
-
-              case 15:
-                console.log('その他');
-                _context.next = 18;
-                return axios.get("/api/stocks?page=".concat(_this.current_page));
-
-              case 18:
-                result = _context.sent;
-
-              case 19:
-                console.log(_this.genre);
-                console.log(_this.keyword);
-                console.log(result.data);
+                // if (this.keyword && this.genre) {
+                //     console.log('キーワードとジャンル')
+                //     result = await axios.get(`/api/search?genre=${this.genre}&key=${this.keyword}&page=${this.current_page}`)
+                // } else if (!this.keyword && this.genre) {
+                //     console.log('ジャンルだけ')
+                //     result =await axios.get( `/api/search?genre=${this.genre}&page=${this.current_page}`)
+                // }else {
+                //     console.log('その他')
+                //     result = await axios.get(`/api/stocks?page=${this.current_page}`);
+                // }
+                //console.log(this.genre)
+                //console.log(this.keyword)
+                //console.log(result.data)
                 stocks = result.data;
                 _this.stocks = stocks.data;
                 _this.parPage = stocks.meta.per_page; //1ページ当たりの表示件数
@@ -316,21 +303,25 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
                 _this.length = stocks.meta.last_page; //総ページ数を取得             
 
-                _this.makePagenation();
+                _this.makePagenation(); //console.log('ページネーション')
 
-                console.log('ページネーション');
-                console.log(_this.stocks);
-                console.log('親コンポーネントに変数を渡すぜ');
+
+                console.log(_this.stocks); //console.log('親コンポーネントに変数を渡すぜ')
 
                 _this.$emit('stocksFromChild', _this.stocks);
 
-              case 32:
+              case 14:
               case "end":
                 return _context.stop();
             }
           }
         }, _callee);
       }))();
+    },
+    search: function search() {
+      //わざわざメソッド分けるほどのことか？親で側でchangepage(1)を呼べばいい説
+      this.showArchive();
+      this.changePage(1);
     },
     makePagenation: function makePagenation() {
       this.pages = [];
@@ -359,14 +350,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     changePage: function changePage(number) {
       this.current_page = number;
       this.showArchive();
-      var url = null;
+      var url = null; //サブジャンル系のクエリパラーメーター付きのURLもここに必要
 
       if (this.keyword && this.genre) {
-        url = "".concat(window.location.origin, "/").concat(this.genre, "?&key=").concat(this.keyword, "&page=").concat(this.current_page);
+        url = "".concat(window.location.origin, "/").concat(this.genre, "?key=").concat(this.keyword, "&page=").concat(this.current_page);
       } else if (!this.keyword && this.genre) {
-        url = "".concat(window.location.origin, "/").concat(this.genre, "?&page=").concat(this.current_page);
+        url = "".concat(window.location.origin, "/").concat(this.genre, "?page=").concat(this.current_page);
       } else {
-        url = "".concat(window.location.origin, "/stocks?&page=").concat(this.current_page);
+        url = "".concat(window.location.origin, "/stocks?page=").concat(this.current_page);
       }
 
       window.history.pushState({
@@ -831,11 +822,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
-//
-//
-//
-//
 
  //バリデーションのモジュールを外部ファイルから読み込み
 
@@ -965,7 +951,9 @@ __webpack_require__.r(__webpack_exports__);
         _this2.$store.commit("checkLogin", userInfo);
       })["catch"](function (error) {
         //console.log(error)
-        _this2.isLoggedIn = false; //this.$store.commit("message", 'ログインしてください。')
+        _this2.isLoggedIn = false;
+
+        _this2.$store.commit("message", 'ログインしてください。');
 
         _this2.$router.push("/login"); //ログイン画面にジャンプ
 
@@ -1132,6 +1120,13 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 
 
 
@@ -1155,15 +1150,28 @@ __webpack_require__.r(__webpack_exports__);
       previous: null,
       next: null,
       keyword: null,
-      searchKeyword: null
+      searchKeyword: null,
+      subGenreOptions: [],
+      subGenreSelected: {
+        value: null,
+        text: 'すべての画像'
+      }
     };
   },
   mounted: function mounted() {
     this.current_page = Number(this.$route.query.page) || 1;
     this.keyword = this.$route.query.key;
+    this.getSubgenre();
   },
   computed: {},
   methods: {
+    selectSubgenre: function selectSubgenre(subGenreOption) {
+      this.subGenreSelected = subGenreOption; //this.genre = subGenreOption.value
+
+      console.log('選ばれたサブジャンルは');
+      console.log(this.subGenreSelected);
+      console.log('子コンポーネントに投げるサブジャンルは' + this.subGenreSelected.value);
+    },
     getStocksFromChild: function getStocksFromChild(value) {
       //ページネーションコンポーネントから一覧すべきレコードを取得
       this.stocks = value;
@@ -1172,6 +1180,19 @@ __webpack_require__.r(__webpack_exports__);
       //サムネイル画像がエラーになるときは代替え画像に置き換え
       var img = document.getElementById(id);
       img.setAttribute('src', '/storage/default_img/notfound.jpg');
+    },
+    getSubgenre: function getSubgenre() {
+      var _this = this;
+
+      axios.get("/api/stocks/getSubgenre?genre=image").then(function (response) {
+        var subgenres = response.data;
+        subgenres.filter(function (subgenre) {
+          _this.subGenreOptions.push({
+            value: subgenre.subgenre,
+            text: subgenre.subgenreText
+          });
+        });
+      }); //サブジャンルの選択肢をデータベースから取得
     }
   }
 });
@@ -1375,9 +1396,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _layout_Header__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../layout/Header */ "./resources/js/components/layout/Header.vue");
 /* harmony import */ var _layout_Footer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../layout/Footer */ "./resources/js/components/layout/Footer.vue");
 /* harmony import */ var _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../modules/validation.js */ "./resources/js/modules/validation.js");
-//
-//
-//
 //
 //
 //
@@ -1742,6 +1760,14 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
@@ -1767,6 +1793,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       genre: '',
       genreString: '',
       //金額選択の配列
+      subGenreSelected: null,
+      subGenreOption: [],
       feeSelected: 1500,
       feeOptions: [{
         text: '￥1,500',
@@ -1778,7 +1806,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         text: '￥10,000',
         value: 10000
       }, {
-        text: '20000',
+        text: '￥20000',
         value: 20000
       }],
       //配列にしたい
@@ -1787,7 +1815,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       errorMessage: {
         'name': null,
         'detail': null,
-        'file': null
+        'file': null,
+        'subGenre': null
       },
       blobUrl: null,
       previewArea: false,
@@ -1818,6 +1847,19 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     });
   },
   methods: {
+    getSubgenre: function getSubgenre() {
+      var _this2 = this;
+
+      axios.get("/api/stocks/getSubgenre?genre=" + this.genre).then(function (response) {
+        var subgenres = response.data;
+        subgenres.filter(function (subgenre) {
+          _this2.subGenreOption.push({
+            value: subgenre.subgenre,
+            text: subgenre.subgenreText
+          });
+        });
+      }); //サブジャンルの選択肢をデータベースから取得
+    },
     videoInfo: function videoInfo() {
       console.log(video);
       this.checkFile(video.duration); //プレビュー用のvideoタグから長さを取得
@@ -1835,6 +1877,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
       this.genre = null;
       this.genreString = null;
+      this.subGenreOption = [];
+      this.subGenreSelected = null; //サブジャンルも消す(消せてるはず)
     },
     //バリテーション
     checkName: function checkName() {
@@ -1859,6 +1903,17 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
 
       return result;
+    },
+    checkSubGenre: function checkSubGenre() {
+      console.log(this.subGenreSelected);
+
+      if (this.subGenreSelected == null || this.subGenreSelected == undefined) {
+        this.errorMessage.subGenre = "選択してください";
+        return false;
+      } else {
+        this.errorMessage.subGenre = "";
+        return true;
+      }
     },
     checkDetail: function checkDetail() {
       var n = '';
@@ -1965,6 +2020,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       }
 
       this.genreSelect();
+      this.getSubgenre();
     },
     genreSelect: function genreSelect() {
       var result = this.checkFile(); //ファイルに問題がないかチェック
@@ -1972,7 +2028,16 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       if (result && this.fileInfo && this.fileInfo.type.match('image')) {
         //問題がないファイルが存在（選ばれていて）なおかつ画像なら
         this.genre = 'image';
-        this.genreString = "画像";
+        this.genreString = "画像"; //これらいらん
+        // this.subGenreOption = [{
+        //         value: 'illust',
+        //         text: 'イラスト'
+        //     },
+        //     {
+        //         value: 'photo',
+        //         text: '写真'
+        //     }
+        // ]
       } else if (result && this.fileInfo && this.fileInfo.type.match('quicktime')) {
         //問題ないファイル存在が（選ばれていて）なおかつ動画なら
         this.genre = 'video';
@@ -1991,15 +2056,16 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       }
     },
     stockCreate: function stockCreate() {
-      var _this2 = this;
+      var _this3 = this;
 
       //投稿とボタンが押されたときに発動するメソッド
       //投稿直前にも入力に不備がないかチェック
       var nameResult = this.checkName();
       var detailResult = this.checkDetail();
       var fileResult = this.checkFile();
+      var subGenreReulst = this.checkSubGenre();
 
-      if (nameResult && detailResult && fileResult) {
+      if (nameResult && detailResult && fileResult && subGenreReulst) {
         //check項目が全てtrueなら
         var postData = new FormData();
         postData.append('files[0]', this.fileInfo); //files配列の先頭はthis.fileInfo
@@ -2008,6 +2074,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
         postData.append('form[name]', this.name);
         postData.append('form[genre]', this.genre);
+        postData.append('form[subGenre]', this.subGenreSelected);
         postData.append('form[fee]', this.feeSelected);
         postData.append('form[detail]', this.detail);
         postData.append('userId', this.currentUserid); //ここが取れてない。currentID取るべき
@@ -2017,16 +2084,16 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         .then(function (response) {
           alert('投稿できました'); //投稿に成功したらv-modelを使って書くフォームをクリア
 
-          _this2.name = "";
-          _this2.fileName = "";
-          _this2.fileInfo = null;
-          _this2.$refs.file.value = null; //input fileクリア
+          _this3.name = "";
+          _this3.fileName = "";
+          _this3.fileInfo = null;
+          _this3.$refs.file.value = null; //input fileクリア
 
-          _this2.genre = "";
-          _this2.feeSelected = 1500;
-          _this2.detail = "";
-          _this2.genreString = "";
-          _this2.previewArea = false;
+          _this3.genre = "";
+          _this3.feeSelected = 1500;
+          _this3.detail = "";
+          _this3.genreString = "";
+          _this3.previewArea = false;
         })["catch"](function (error) {
           alert('あかんかったわ、コンソール見て');
           console.log(error);
@@ -9393,213 +9460,192 @@ var render = function() {
                       { attrs: { title: "セキュリティ" } },
                       [
                         [
-                          _c("b-form", [
-                            _c(
-                              "div",
-                              [
-                                _c(
-                                  "b-form-group",
-                                  { attrs: { description: "" } },
-                                  [
-                                    _c("b-form-input", {
-                                      attrs: {
-                                        autocomplete: "username",
-                                        hidden: ""
+                          _c(
+                            "b-form",
+                            [
+                              _c(
+                                "b-form-group",
+                                [
+                                  _c("b-form-input", {
+                                    attrs: {
+                                      autocomplete: "username",
+                                      hidden: ""
+                                    },
+                                    model: {
+                                      value: _vm.user.email,
+                                      callback: function($$v) {
+                                        _vm.$set(_vm.user, "email", $$v)
                                       },
-                                      model: {
-                                        value: _vm.user.email,
-                                        callback: function($$v) {
-                                          _vm.$set(_vm.user, "email", $$v)
-                                        },
-                                        expression: "user.email"
-                                      }
-                                    })
-                                  ],
-                                  1
-                                ),
-                                _vm._v(" "),
-                                _vm.errorMessage.currentPassword
-                                  ? _c("code", [
-                                      _vm._v(
-                                        _vm._s(_vm.errorMessage.currentPassword)
-                                      )
-                                    ])
-                                  : _vm._e(),
-                                _vm._v(" "),
-                                _c("b-form-input", {
-                                  attrs: {
-                                    type: "password",
-                                    autocomplete: "current-password",
-                                    placeholder: "現在のパスワード"
-                                  },
-                                  on: {
-                                    keydown: function($event) {
-                                      if (
-                                        !$event.type.indexOf("key") &&
-                                        _vm._k(
-                                          $event.keyCode,
-                                          "enter",
-                                          13,
-                                          $event.key,
-                                          "Enter"
-                                        )
-                                      ) {
-                                        return null
-                                      }
-                                      return _vm.passwordUpdate.apply(
-                                        null,
-                                        arguments
-                                      )
-                                    },
-                                    change: function($event) {
-                                      return _vm.checkPasswords(
-                                        "currentPassowrd"
-                                      )
-                                    },
-                                    blur: function($event) {
-                                      return _vm.checkPasswords(
-                                        "currentPassowrd"
-                                      )
+                                      expression: "user.email"
                                     }
-                                  },
-                                  model: {
-                                    value: _vm.user.currentPassword,
-                                    callback: function($$v) {
-                                      _vm.$set(_vm.user, "currentPassword", $$v)
-                                    },
-                                    expression: "user.currentPassword"
-                                  }
-                                }),
-                                _vm._v(" "),
-                                _c("div", { staticClass: "mt-2" })
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "div",
-                              [
-                                _vm.errorMessage.newPassword
-                                  ? _c("code", [
-                                      _vm._v(
-                                        _vm._s(_vm.errorMessage.newPassword)
+                                  })
+                                ],
+                                1
+                              ),
+                              _vm._v(" "),
+                              _vm.errorMessage.currentPassword
+                                ? _c("code", [
+                                    _vm._v(
+                                      _vm._s(_vm.errorMessage.currentPassword)
+                                    )
+                                  ])
+                                : _vm._e(),
+                              _vm._v(" "),
+                              _c("b-form-input", {
+                                attrs: {
+                                  type: "password",
+                                  autocomplete: "current-password",
+                                  placeholder: "現在のパスワード"
+                                },
+                                on: {
+                                  keydown: function($event) {
+                                    if (
+                                      !$event.type.indexOf("key") &&
+                                      _vm._k(
+                                        $event.keyCode,
+                                        "enter",
+                                        13,
+                                        $event.key,
+                                        "Enter"
                                       )
-                                    ])
-                                  : _vm._e(),
-                                _vm._v(" "),
-                                _c("b-form-input", {
-                                  attrs: {
-                                    type: "password",
-                                    autocomplete: "new-password",
-                                    placeholder: "新しいパスワード"
-                                  },
-                                  on: {
-                                    keydown: function($event) {
-                                      if (
-                                        !$event.type.indexOf("key") &&
-                                        _vm._k(
-                                          $event.keyCode,
-                                          "enter",
-                                          13,
-                                          $event.key,
-                                          "Enter"
-                                        )
-                                      ) {
-                                        return null
-                                      }
-                                      return _vm.passwordUpdate.apply(
-                                        null,
-                                        arguments
-                                      )
-                                    },
-                                    change: function($event) {
-                                      return _vm.checkPasswords("newPassword")
-                                    },
-                                    blur: function($event) {
-                                      return _vm.checkPasswords("newPassword")
+                                    ) {
+                                      return null
                                     }
+                                    return _vm.passwordUpdate.apply(
+                                      null,
+                                      arguments
+                                    )
                                   },
-                                  model: {
-                                    value: _vm.user.newPassword,
-                                    callback: function($$v) {
-                                      _vm.$set(_vm.user, "newPassword", $$v)
-                                    },
-                                    expression: "user.newPassword"
+                                  change: function($event) {
+                                    return _vm.checkPasswords("currentPassowrd")
+                                  },
+                                  blur: function($event) {
+                                    return _vm.checkPasswords("currentPassowrd")
                                   }
-                                }),
-                                _vm._v(" "),
-                                _c("div", { staticClass: "mt-2" })
-                              ],
-                              1
-                            ),
-                            _vm._v(" "),
-                            _c(
-                              "div",
-                              [
-                                _vm.errorMessage.newPasswordConfirm
-                                  ? _c("code", [
-                                      _vm._v(
-                                        _vm._s(
-                                          _vm.errorMessage.newPasswordConfirm
-                                        )
-                                      )
-                                    ])
-                                  : _vm._e(),
-                                _vm._v(" "),
-                                _c("b-form-input", {
-                                  attrs: {
-                                    type: "password",
-                                    autocomplete: "new-password",
-                                    placeholder: "新しいパスワード再入力"
+                                },
+                                model: {
+                                  value: _vm.user.currentPassword,
+                                  callback: function($$v) {
+                                    _vm.$set(_vm.user, "currentPassword", $$v)
                                   },
-                                  on: {
-                                    keydown: function($event) {
-                                      if (
-                                        !$event.type.indexOf("key") &&
-                                        _vm._k(
-                                          $event.keyCode,
-                                          "enter",
-                                          13,
-                                          $event.key,
-                                          "Enter"
-                                        )
-                                      ) {
-                                        return null
-                                      }
-                                      return _vm.passwordUpdate.apply(
-                                        null,
-                                        arguments
+                                  expression: "user.currentPassword"
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "mt-2" }),
+                              _vm._v(" "),
+                              _vm.errorMessage.newPassword
+                                ? _c("code", [
+                                    _vm._v(_vm._s(_vm.errorMessage.newPassword))
+                                  ])
+                                : _vm._e(),
+                              _vm._v(" "),
+                              _c("b-form-input", {
+                                attrs: {
+                                  type: "password",
+                                  autocomplete: "new-password",
+                                  placeholder: "新しいパスワード"
+                                },
+                                on: {
+                                  keydown: function($event) {
+                                    if (
+                                      !$event.type.indexOf("key") &&
+                                      _vm._k(
+                                        $event.keyCode,
+                                        "enter",
+                                        13,
+                                        $event.key,
+                                        "Enter"
                                       )
-                                    },
-                                    change: function($event) {
-                                      return _vm.checkPasswords(
-                                        "newPasswordConfirm"
-                                      )
-                                    },
-                                    blur: function($event) {
-                                      return _vm.checkPasswords(
-                                        "newPasswordConfirm"
-                                      )
+                                    ) {
+                                      return null
                                     }
+                                    return _vm.passwordUpdate.apply(
+                                      null,
+                                      arguments
+                                    )
                                   },
-                                  model: {
-                                    value: _vm.user.newPasswordConfirm,
-                                    callback: function($$v) {
-                                      _vm.$set(
-                                        _vm.user,
-                                        "newPasswordConfirm",
-                                        $$v
-                                      )
-                                    },
-                                    expression: "user.newPasswordConfirm"
+                                  change: function($event) {
+                                    return _vm.checkPasswords("newPassword")
+                                  },
+                                  blur: function($event) {
+                                    return _vm.checkPasswords("newPassword")
                                   }
-                                }),
-                                _vm._v(" "),
-                                _c("div", { staticClass: "mt-2" })
-                              ],
-                              1
-                            )
-                          ])
+                                },
+                                model: {
+                                  value: _vm.user.newPassword,
+                                  callback: function($$v) {
+                                    _vm.$set(_vm.user, "newPassword", $$v)
+                                  },
+                                  expression: "user.newPassword"
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "mt-2" }),
+                              _vm._v(" "),
+                              _vm.errorMessage.newPasswordConfirm
+                                ? _c("code", [
+                                    _vm._v(
+                                      _vm._s(
+                                        _vm.errorMessage.newPasswordConfirm
+                                      )
+                                    )
+                                  ])
+                                : _vm._e(),
+                              _vm._v(" "),
+                              _c("b-form-input", {
+                                attrs: {
+                                  type: "password",
+                                  autocomplete: "new-password",
+                                  placeholder: "新しいパスワード再入力"
+                                },
+                                on: {
+                                  keydown: function($event) {
+                                    if (
+                                      !$event.type.indexOf("key") &&
+                                      _vm._k(
+                                        $event.keyCode,
+                                        "enter",
+                                        13,
+                                        $event.key,
+                                        "Enter"
+                                      )
+                                    ) {
+                                      return null
+                                    }
+                                    return _vm.passwordUpdate.apply(
+                                      null,
+                                      arguments
+                                    )
+                                  },
+                                  change: function($event) {
+                                    return _vm.checkPasswords(
+                                      "newPasswordConfirm"
+                                    )
+                                  },
+                                  blur: function($event) {
+                                    return _vm.checkPasswords(
+                                      "newPasswordConfirm"
+                                    )
+                                  }
+                                },
+                                model: {
+                                  value: _vm.user.newPasswordConfirm,
+                                  callback: function($$v) {
+                                    _vm.$set(
+                                      _vm.user,
+                                      "newPasswordConfirm",
+                                      $$v
+                                    )
+                                  },
+                                  expression: "user.newPasswordConfirm"
+                                }
+                              }),
+                              _vm._v(" "),
+                              _c("div", { staticClass: "mt-2" })
+                            ],
+                            1
+                          )
                         ],
                         _vm._v(" "),
                         _vm.errorMessage.passwordUpdate == "success"
@@ -9731,10 +9777,6 @@ var render = function() {
       _vm.searchKeyword
         ? _c("h2", [_vm._v("「" + _vm._s(_vm.searchKeyword) + "」の検索結果")])
         : _vm._e(),
-      _vm._v(
-        "\n    洗濯済みの選択肢をドロップダウンに表示したければ、javascriptで書かないとあかんかも"
-      ),
-      _c("br"),
       _vm._v(" "),
       _c(
         "div",
@@ -9750,22 +9792,45 @@ var render = function() {
                     return [
                       _c(
                         "b-dropdown",
-                        { attrs: { id: "dropdown-1", text: "すべての画像" } },
+                        { attrs: { text: _vm.subGenreSelected.text } },
                         [
                           _c(
                             "b-dropdown-item",
-                            [
-                              _c("font-awesome-icon", {
-                                attrs: { icon: ["fas", "image"] }
-                              }),
-                              _vm._v("イラスト")
-                            ],
-                            1
+                            {
+                              on: {
+                                click: function($event) {
+                                  return _vm.selectSubgenre({
+                                    value: null,
+                                    text: "すべての画像"
+                                  })
+                                }
+                              }
+                            },
+                            [_vm._v("すべての画像")]
                           ),
                           _vm._v(" "),
-                          _c("b-dropdown-item", [_vm._v("写真")])
+                          _vm._l(_vm.subGenreOptions, function(subGenreOption) {
+                            return _c(
+                              "b-dropdown-item",
+                              {
+                                key: subGenreOption.id,
+                                on: {
+                                  click: function($event) {
+                                    return _vm.selectSubgenre(subGenreOption)
+                                  }
+                                }
+                              },
+                              [
+                                _vm._v(
+                                  "\n                    " +
+                                    _vm._s(subGenreOption.text) +
+                                    "\n                    "
+                                )
+                              ]
+                            )
+                          })
                         ],
-                        1
+                        2
                       )
                     ]
                   },
@@ -9785,7 +9850,7 @@ var render = function() {
                           },
                           on: {
                             click: function($event) {
-                              _vm.$refs.child.showArchive()
+                              _vm.$refs.child.search()
                               _vm.searchKeyword = _vm.keyword
                             }
                           }
@@ -9814,8 +9879,9 @@ var render = function() {
                     ) {
                       return null
                     }
-                    _vm.$refs.child.showArchive()
+                    _vm.$refs.child.search()
                     _vm.searchKeyword = _vm.keyword
+                    _vm.current_page = 1
                   }
                 },
                 model: {
@@ -9878,7 +9944,11 @@ var render = function() {
       _vm._v(" "),
       _c("Pagination", {
         ref: "child",
-        attrs: { genre: "image", keyword: this.keyword },
+        attrs: {
+          genre: "image",
+          keyword: this.keyword,
+          subgenre: _vm.subGenreSelected.value
+        },
         on: { stocksFromChild: _vm.getStocksFromChild }
       })
     ],
@@ -10070,33 +10140,24 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm.isLoggedIn
-    ? _c("div", [
-        _c("h1", [_vm._v(_vm._s(_vm.title))]),
-        _vm._v(" "),
-        _c(
-          "div",
-          { attrs: { id: "form" } },
-          [
-            _c("div", { staticClass: "form" }, [
-              _c("div", {}, [
-                _c("div", { staticClass: "form-group" }, [
-                  _c("label", { attrs: { for: "" } }, [_vm._v("Email")]),
-                  _vm._v(" "),
+  return _vm.isLoggedIn == "no"
+    ? _c(
+        "div",
+        [
+          _c("h1", [_vm._v(_vm._s(_vm.title))]),
+          _vm._v(" "),
+          _c(
+            "b-form",
+            [
+              _c(
+                "b-form-group",
+                { attrs: { label: "メールアドレス", description: "" } },
+                [
                   _c("code", [_vm._v(_vm._s(_vm.errorMessage.email))]),
                   _vm._v(" "),
-                  _c("input", {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
-                        value: _vm.form.email,
-                        expression: "form.email"
-                      }
-                    ],
+                  _c("b-form-input", {
                     staticClass: "form-control",
                     attrs: { type: "email" },
-                    domProps: { value: _vm.form.email },
                     on: {
                       keydown: function($event) {
                         if (
@@ -10114,36 +10175,33 @@ var render = function() {
                         return _vm.register.apply(null, arguments)
                       },
                       change: _vm.checkEmail,
-                      blur: _vm.checkEmail,
-                      input: function($event) {
-                        if ($event.target.composing) {
-                          return
-                        }
-                        _vm.$set(_vm.form, "email", $event.target.value)
-                      }
+                      blur: _vm.checkEmail
+                    },
+                    model: {
+                      value: _vm.form.email,
+                      callback: function($$v) {
+                        _vm.$set(_vm.form, "email", $$v)
+                      },
+                      expression: "form.email"
                     }
                   })
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "form-group" }, [
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _c(
+                "b-form-group",
+                { attrs: { label: "パスワード", description: "" } },
+                [
                   _c("label", { attrs: { for: "" } }, [_vm._v("password")]),
                   _vm._v(" "),
                   _vm.errorMessage.password
                     ? _c("code", [_vm._v(_vm._s(_vm.errorMessage.password))])
                     : _vm._e(),
                   _vm._v(" "),
-                  _c("input", {
-                    directives: [
-                      {
-                        name: "model",
-                        rawName: "v-model",
-                        value: _vm.form.password,
-                        expression: "form.password"
-                      }
-                    ],
+                  _c("b-form-input", {
                     staticClass: "form-control",
                     attrs: { type: "password" },
-                    domProps: { value: _vm.form.password },
                     on: {
                       keydown: function($event) {
                         if (
@@ -10161,38 +10219,41 @@ var render = function() {
                         return _vm.register.apply(null, arguments)
                       },
                       change: _vm.checkPassword,
-                      blur: _vm.checkPassword,
-                      input: function($event) {
-                        if ($event.target.composing) {
-                          return
-                        }
-                        _vm.$set(_vm.form, "password", $event.target.value)
-                      }
+                      blur: _vm.checkPassword
+                    },
+                    model: {
+                      value: _vm.form.password,
+                      callback: function($$v) {
+                        _vm.$set(_vm.form, "password", $$v)
+                      },
+                      expression: "form.password"
                     }
                   })
-                ])
-              ])
-            ]),
-            _vm._v(" "),
-            _vm.errorMessage.submit
-              ? _c("b-alert", { attrs: { show: "", variant: "danger" } }, [
-                  _vm._v(_vm._s(_vm.errorMessage.submit))
-                ])
-              : _vm._e(),
-            _vm._v(" "),
-            _c(
-              "button",
-              {
-                staticClass: "btn btn-primary",
-                attrs: { type: "button" },
-                on: { click: _vm.register }
-              },
-              [_vm._v("登録")]
-            )
-          ],
-          1
-        )
-      ])
+                ],
+                1
+              ),
+              _vm._v(" "),
+              _vm.errorMessage.submit
+                ? _c("b-alert", { attrs: { show: "", variant: "danger" } }, [
+                    _vm._v(_vm._s(_vm.errorMessage.submit))
+                  ])
+                : _vm._e(),
+              _vm._v(" "),
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-primary",
+                  attrs: { type: "button" },
+                  on: { click: _vm.register }
+                },
+                [_vm._v("登録")]
+              )
+            ],
+            1
+          )
+        ],
+        1
+      )
     : _vm._e()
 }
 var staticRenderFns = []
@@ -10380,94 +10441,46 @@ var render = function() {
     ? _c("div", [
         _c("h1", [_vm._v(_vm._s(_vm.title))]),
         _vm._v(" "),
-        _c("div", { attrs: { id: "form" } }, [
-          _c("div", { staticClass: "form" }, [
-            _c("div", {}, [
-              _c("div", { staticClass: "form-group" }, [
-                _c("label", { attrs: { for: "" } }, [_vm._v("作品名")]),
-                _vm._v(" "),
-                _c("code", [_vm._v(_vm._s(_vm.errorMessage.name))]),
-                _vm._v(" "),
-                _c("input", {
-                  directives: [
-                    {
-                      name: "model",
-                      rawName: "v-model",
-                      value: _vm.name,
-                      expression: "name"
-                    }
-                  ],
-                  staticClass: "form-control",
-                  attrs: { type: "txt" },
-                  domProps: { value: _vm.name },
-                  on: {
-                    change: _vm.checkName,
-                    blur: _vm.checkName,
-                    input: function($event) {
-                      if ($event.target.composing) {
-                        return
-                      }
-                      _vm.name = $event.target.value
-                    }
-                  }
-                }),
-                _vm._v(" "),
-                _c("p", [_vm._v(_vm._s(_vm.name))])
-              ])
-            ])
-          ]),
-          _vm._v(" "),
-          _c("code", [_vm._v(_vm._s(_vm.errorMessage.file))]),
-          _vm._v(" "),
-          _c(
-            "div",
-            {
-              directives: [
-                {
-                  name: "show",
-                  rawName: "v-show",
-                  value: _vm.previewArea == false,
-                  expression: "previewArea==false"
-                }
-              ],
-              staticClass: "drop_area",
-              class: { enter: _vm.isEnter },
-              on: {
-                dragenter: _vm.dragEnter,
-                dragleave: _vm.dragLeave,
-                dragover: function($event) {
-                  $event.preventDefault()
-                },
-                drop: function($event) {
-                  $event.preventDefault()
-                  return _vm.dropFile.apply(null, arguments)
-                }
-              }
-            },
-            [
-              _c("div", [_vm._v("販売する作品をドラッグ＆ドロップ")]),
-              _vm._v(" "),
-              _c("div", [_vm._v("png,jpg,mp4,mov,wav,mp3")]),
-              _vm._v(" "),
-              _c("label", [
-                _c("span", { staticClass: "btn btn-primary" }, [
-                  _vm._v("\n                    選択\n                    "),
+        _c(
+          "div",
+          { attrs: { id: "form" } },
+          [
+            _c("div", { staticClass: "form" }, [
+              _c("div", {}, [
+                _c("div", { staticClass: "form-group" }, [
+                  _c("label", { attrs: { for: "" } }, [_vm._v("作品名")]),
+                  _vm._v(" "),
+                  _c("code", [_vm._v(_vm._s(_vm.errorMessage.name))]),
+                  _vm._v(" "),
                   _c("input", {
-                    ref: "file",
-                    staticClass: "form-control-file ",
-                    staticStyle: { display: "none" },
-                    attrs: {
-                      type: "file",
-                      accept: ".jpg,.jpeg,.png,.gif,.mp3,.wav,.m4a,.mp4,.mov"
-                    },
-                    on: { change: _vm.fileSelected }
+                    directives: [
+                      {
+                        name: "model",
+                        rawName: "v-model",
+                        value: _vm.name,
+                        expression: "name"
+                      }
+                    ],
+                    staticClass: "form-control",
+                    attrs: { type: "txt" },
+                    domProps: { value: _vm.name },
+                    on: {
+                      change: _vm.checkName,
+                      blur: _vm.checkName,
+                      input: function($event) {
+                        if ($event.target.composing) {
+                          return
+                        }
+                        _vm.name = $event.target.value
+                      }
+                    }
                   })
                 ])
               ])
-            ]
-          ),
-          _vm._v(" "),
-          _c("div", { staticClass: "form-group" }, [
+            ]),
+            _vm._v(" "),
+            _c("code", [_vm._v(_vm._s(_vm.errorMessage.file))]),
+            _vm._v(" "),
             _c(
               "div",
               {
@@ -10475,164 +10488,254 @@ var render = function() {
                   {
                     name: "show",
                     rawName: "v-show",
-                    value: _vm.previewArea,
-                    expression: "previewArea"
+                    value: _vm.previewArea == false,
+                    expression: "previewArea==false"
                   }
                 ],
-                staticClass: "preview"
+                staticClass: "drop_area",
+                class: { enter: _vm.isEnter },
+                on: {
+                  dragenter: _vm.dragEnter,
+                  dragleave: _vm.dragLeave,
+                  dragover: function($event) {
+                    $event.preventDefault()
+                  },
+                  drop: function($event) {
+                    $event.preventDefault()
+                    return _vm.dropFile.apply(null, arguments)
+                  }
+                }
               },
               [
-                _c(
-                  "div",
-                  { staticClass: "delete-mark", on: { click: _vm.deleteFile } },
-                  [_vm._v("×")]
-                ),
+                _c("div", [_vm._v("販売する作品をドラッグ＆ドロップ")]),
                 _vm._v(" "),
-                _vm.genre == "image"
-                  ? _c("img", { attrs: { src: _vm.blobUrl } })
-                  : _vm._e(),
+                _c("div", [_vm._v("png,jpg,mp4,mov,wav,mp3")]),
                 _vm._v(" "),
-                _vm.genre == "video"
-                  ? _c("video", {
+                _c("label", [
+                  _c("span", { staticClass: "btn btn-primary" }, [
+                    _vm._v("\n                    選択\n                    "),
+                    _c("input", {
+                      ref: "file",
+                      staticClass: "form-control-file ",
+                      staticStyle: { display: "none" },
                       attrs: {
-                        controls: "",
-                        id: "video",
-                        loop: "",
-                        autoplay: "",
-                        muted: "",
-                        src: _vm.blobUrl
+                        type: "file",
+                        accept: ".jpg,.jpeg,.png,.gif,.mp3,.wav,.m4a,.mp4,.mov"
                       },
-                      domProps: { muted: true },
-                      on: { loadedmetadata: _vm.videoInfo }
+                      on: { change: _vm.fileSelected }
                     })
-                  : _vm._e(),
-                _vm._v(" "),
-                _vm.genre == "audio"
-                  ? _c("audio", {
-                      attrs: { id: "audio", controls: "", src: _vm.blobUrl },
-                      on: { loadedmetadata: _vm.audioInfo }
-                    })
-                  : _vm._e()
+                  ])
+                ])
               ]
             ),
-            _vm._v("\n            " + _vm._s(_vm.fileName) + "\n        ")
-          ]),
-          _vm._v(" "),
-          _c(
-            "div",
-            { staticClass: "form-group", attrs: { id: "genreSelectForm" } },
-            [
-              _c("label", { attrs: { for: "" } }, [_vm._v("ジャンル")]),
-              _vm._v(" "),
-              _c("input", {
-                attrs: {
-                  type: "txt",
-                  placeholder: "自動選択されます",
-                  readonly: ""
-                },
-                domProps: { value: _vm.genreString }
-              })
-            ]
-          ),
-          _vm._v(" "),
-          _c("div", { staticClass: "form-group" }, [
-            _c("label", { attrs: { for: "" } }, [_vm._v("販売価格")]),
             _vm._v(" "),
-            _c(
-              "select",
-              {
+            _c("div", { staticClass: "form-group" }, [
+              _c(
+                "div",
+                {
+                  directives: [
+                    {
+                      name: "show",
+                      rawName: "v-show",
+                      value: _vm.previewArea,
+                      expression: "previewArea"
+                    }
+                  ],
+                  staticClass: "preview"
+                },
+                [
+                  _c(
+                    "div",
+                    {
+                      staticClass: "delete-mark",
+                      on: { click: _vm.deleteFile }
+                    },
+                    [_vm._v("×")]
+                  ),
+                  _vm._v(" "),
+                  _vm.genre == "image"
+                    ? _c("img", { attrs: { src: _vm.blobUrl } })
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.genre == "video"
+                    ? _c("video", {
+                        attrs: {
+                          controls: "",
+                          id: "video",
+                          loop: "",
+                          autoplay: "",
+                          muted: "",
+                          src: _vm.blobUrl
+                        },
+                        domProps: { muted: true },
+                        on: { loadedmetadata: _vm.videoInfo }
+                      })
+                    : _vm._e(),
+                  _vm._v(" "),
+                  _vm.genre == "audio"
+                    ? _c("audio", {
+                        attrs: { id: "audio", controls: "", src: _vm.blobUrl },
+                        on: { loadedmetadata: _vm.audioInfo }
+                      })
+                    : _vm._e()
+                ]
+              )
+            ]),
+            _vm._v(" "),
+            _c("div", { staticClass: "form-group" }, [
+              _c("label", { attrs: { for: "" } }, [_vm._v("販売価格")]),
+              _vm._v(" "),
+              _c(
+                "select",
+                {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.feeSelected,
+                      expression: "feeSelected"
+                    }
+                  ],
+                  on: {
+                    change: function($event) {
+                      var $$selectedVal = Array.prototype.filter
+                        .call($event.target.options, function(o) {
+                          return o.selected
+                        })
+                        .map(function(o) {
+                          var val = "_value" in o ? o._value : o.value
+                          return val
+                        })
+                      _vm.feeSelected = $event.target.multiple
+                        ? $$selectedVal
+                        : $$selectedVal[0]
+                    }
+                  }
+                },
+                _vm._l(_vm.feeOptions, function(feeOption) {
+                  return _c(
+                    "option",
+                    {
+                      key: feeOption.value,
+                      domProps: { value: feeOption.value }
+                    },
+                    [
+                      _vm._v(
+                        "\n                    " +
+                          _vm._s(feeOption.text) +
+                          "\n                "
+                      )
+                    ]
+                  )
+                }),
+                0
+              )
+            ]),
+            _vm._v(" "),
+            _vm.genre
+              ? [
+                  _c(
+                    "div",
+                    [
+                      _c("code", [_vm._v(_vm._s(_vm.errorMessage.subGenre))]),
+                      _vm._v(" "),
+                      _c("b-form-select", {
+                        staticClass: "mb-3",
+                        attrs: { options: _vm.subGenreOption },
+                        on: {
+                          change: _vm.checkSubGenre,
+                          blur: _vm.checkSubGenre
+                        },
+                        scopedSlots: _vm._u(
+                          [
+                            {
+                              key: "first",
+                              fn: function() {
+                                return [
+                                  _vm._v(
+                                    "v-bind:options=\"[genre ? 'active']\"\n                        "
+                                  ),
+                                  _c(
+                                    "b-form-select-option",
+                                    { attrs: { value: null, disabled: "" } },
+                                    [
+                                      _vm._v(
+                                        "-- Please select a subgenre --\n                        "
+                                      )
+                                    ]
+                                  )
+                                ]
+                              },
+                              proxy: true
+                            }
+                          ],
+                          null,
+                          false,
+                          2921917767
+                        ),
+                        model: {
+                          value: _vm.subGenreSelected,
+                          callback: function($$v) {
+                            _vm.subGenreSelected = $$v
+                          },
+                          expression: "subGenreSelected"
+                        }
+                      }),
+                      _vm._v(" "),
+                      _c("div", { staticClass: "mt-3" }, [
+                        _vm._v("subGenreSelected: "),
+                        _c("strong", [_vm._v(_vm._s(_vm.subGenreSelected))])
+                      ])
+                    ],
+                    1
+                  )
+                ]
+              : _vm._e(),
+            _vm._v(" "),
+            _c("div", { staticClass: "form-group" }, [
+              _c("label", { attrs: { for: "" } }, [_vm._v("商品説明")]),
+              _vm._v(" "),
+              _c("code", [_vm._v(_vm._s(_vm.errorMessage.detail))]),
+              _vm._v(" "),
+              _c("textarea", {
                 directives: [
                   {
                     name: "model",
                     rawName: "v-model",
-                    value: _vm.feeSelected,
-                    expression: "feeSelected"
+                    value: _vm.detail,
+                    expression: "detail"
                   }
                 ],
+                staticClass: "form-control",
+                attrs: { id: "", rows: "5" },
+                domProps: { value: _vm.detail },
                 on: {
-                  change: function($event) {
-                    var $$selectedVal = Array.prototype.filter
-                      .call($event.target.options, function(o) {
-                        return o.selected
-                      })
-                      .map(function(o) {
-                        var val = "_value" in o ? o._value : o.value
-                        return val
-                      })
-                    _vm.feeSelected = $event.target.multiple
-                      ? $$selectedVal
-                      : $$selectedVal[0]
+                  change: _vm.checkDetail,
+                  blur: _vm.checkDetail,
+                  input: function($event) {
+                    if ($event.target.composing) {
+                      return
+                    }
+                    _vm.detail = $event.target.value
                   }
                 }
-              },
-              _vm._l(_vm.feeOptions, function(feeOption) {
-                return _c(
-                  "option",
-                  {
-                    key: feeOption.value,
-                    domProps: { value: feeOption.value }
-                  },
-                  [
-                    _vm._v(
-                      "\n                    " +
-                        _vm._s(feeOption.text) +
-                        "\n                "
-                    )
-                  ]
-                )
-              }),
-              0
-            ),
+              })
+            ]),
             _vm._v(" "),
-            _c("span", [_vm._v("Selected: " + _vm._s(_vm.feeSelected))])
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: "form-group" }, [
-            _c("label", { attrs: { for: "" } }, [_vm._v("商品説明")]),
-            _vm._v(" "),
-            _c("code", [_vm._v(_vm._s(_vm.errorMessage.detail))]),
-            _vm._v(" "),
-            _c("textarea", {
-              directives: [
+            _c("div", { staticClass: "form-submit" }, [
+              _c(
+                "button",
                 {
-                  name: "model",
-                  rawName: "v-model",
-                  value: _vm.detail,
-                  expression: "detail"
-                }
-              ],
-              staticClass: "form-control",
-              attrs: { id: "", rows: "5" },
-              domProps: { value: _vm.detail },
-              on: {
-                change: _vm.checkDetail,
-                blur: _vm.checkDetail,
-                input: function($event) {
-                  if ($event.target.composing) {
-                    return
-                  }
-                  _vm.detail = $event.target.value
-                }
-              }
-            }),
-            _vm._v(" "),
-            _c("p", { staticStyle: { "white-space": "pre-line" } }, [
-              _vm._v(_vm._s(_vm.detail))
+                  staticClass: "btn btn-primary",
+                  attrs: { type: "button" },
+                  on: { click: _vm.stockCreate }
+                },
+                [_vm._v("投稿")]
+              )
             ])
-          ]),
-          _vm._v(" "),
-          _c("div", { staticClass: "form-submit" }, [
-            _c(
-              "button",
-              {
-                staticClass: "btn btn-primary",
-                attrs: { type: "button" },
-                on: { click: _vm.stockCreate }
-              },
-              [_vm._v("投稿する")]
-            )
-          ])
-        ])
+          ],
+          2
+        )
       ])
     : _vm._e()
 }
@@ -32753,6 +32856,10 @@ var router = new vue_router__WEBPACK_IMPORTED_MODULE_11__.default({
     name: 'account',
     component: _components_page_Account_vue__WEBPACK_IMPORTED_MODULE_9__.default
   }]
+});
+router.beforeEach(function (to, from, next) {
+  router['referrer'] = from;
+  next();
 });
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (router);
 })();

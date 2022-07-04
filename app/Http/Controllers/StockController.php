@@ -23,11 +23,22 @@ class StockController extends Controller
     }
    
     public function search(Request $request){
-        if($request->key != 'undefined'){
-            $pat = '%' . addcslashes($request->key, '%_\\') . '%';
-            $stocks =StockResource::collection(Stock::where('genre',$request->genre)->where('name','LIKE',$pat)->orderBy('created_at', 'desc')->paginate(10));//paginateの引数を変数にしたい        
-        }else{//検索キーワードがなければ該当ジャンルをすべて表示
-            $stocks =StockResource::collection(Stock::where('genre',$request->genre)->orderBy('created_at', 'desc')->paginate(10));//paginateの引数を変数にしたい
+        $pat = '%' . addcslashes($request->key, '%_\\') . '%';
+        
+        if($request->subgenre && $request->key != 'undefined'){
+            //サブジャンルまで指定がありキーワードもあるなら
+            $stocks = StockResource::collection(Stock::where('subGenre',$request->subgenre)->where('name','LIKE',$pat)->orderBy('created_at', 'desc')->paginate(10));//paginateの引数を変数にしたい        
+        }elseif($request->subgenre && $request->key == 'undefined'){
+            //サブジャンルの指定はあるがキーワードがないなら
+            $stocks = StockResource::collection(Stock::where('subGenre',$request->subgenre)->orderBy('created_at', 'desc')->paginate(10));//paginateの引数を変数にしたい
+        }elseif($request->subgenre != 'undefined' && $request->subgenre == 'undefined' && $request->key != 'undefined'){
+            //サブジャンルの指定はないがキーワードの指定はある(親ジャンルの指定だけがある)
+            $stocks = StockResource::collection(Stock::where('genre',$request->genre)->where('name','LIKE',$pat)->orderBy('created_at', 'desc')->paginate(10));//paginateの引数を変数にしたい        
+        }elseif($request->genre != 'undefined' && $request->key != 'undefined'){
+            //サブジャンルの指定はないが親ジャンルとキーワードの指定はある
+            $stocks = StockResource::collection(Stock::where('genre',$request->genre)->where('name','LIKE',$pat)->orderBy('created_at', 'desc')->paginate(10));//paginateの引数を変数にしたい        
+        }else{//何も指定がない    
+            $stocks = StockResource::collection(Stock::orderBy('created_at', 'desc')->paginate(10));//paginateの引数を変数にしたい
         }
         return $stocks; 
     }
@@ -147,8 +158,5 @@ class StockController extends Controller
         $author = Stock::find($author_id);
         return new StockCollection($stock->stocks);
     }
-    public function hoge()
-    {
-        return 'success';
-    }    
+  
 }

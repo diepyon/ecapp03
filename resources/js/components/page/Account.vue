@@ -39,39 +39,34 @@
                     <b-tab title="セキュリティ">
                         <template>
                             <b-form>
-                                <div>
-                                    <b-form-group description="">
-                                        <b-form-input v-model="user.email" autocomplete="username" hidden>
-                                        </b-form-input>
-                                    </b-form-group>
+                                <b-form-group>
+                                    <b-form-input v-model="user.email" autocomplete="username" hidden>
+                                    </b-form-input>
+                                </b-form-group>
 
-                                    <code v-if="errorMessage.currentPassword">{{errorMessage.currentPassword}}</code>
-                                    <b-form-input type="password" autocomplete="current-password"
-                                        v-on:keydown.enter="passwordUpdate" v-model="user.currentPassword"
-                                        @change="checkPasswords('currentPassowrd')"
-                                        @blur="checkPasswords('currentPassowrd')" placeholder="現在のパスワード">
-                                    </b-form-input>
-                                    <div class="mt-2"></div>
-                                </div>
-                                <div>
-                                    <code v-if="errorMessage.newPassword">{{errorMessage.newPassword}}</code>
-                                    <b-form-input type="password" autocomplete="new-password"
-                                        v-on:keydown.enter="passwordUpdate" @change="checkPasswords('newPassword')"
-                                        @blur="checkPasswords('newPassword')" v-model="user.newPassword"
-                                        placeholder="新しいパスワード">
-                                    </b-form-input>
-                                    <div class="mt-2"></div>
-                                </div>
-                                <div>
-                                    <code
-                                        v-if="errorMessage.newPasswordConfirm">{{errorMessage.newPasswordConfirm}}</code>
-                                    <b-form-input type="password" autocomplete="new-password"
-                                        v-model="user.newPasswordConfirm" v-on:keydown.enter="passwordUpdate"
-                                        @change="checkPasswords('newPasswordConfirm')"
-                                        @blur="checkPasswords('newPasswordConfirm')" placeholder="新しいパスワード再入力">
-                                    </b-form-input>
-                                    <div class="mt-2"></div>
-                                </div>
+                                <code v-if="errorMessage.currentPassword">{{errorMessage.currentPassword}}</code>
+                                <b-form-input type="password" autocomplete="current-password"
+                                    v-on:keydown.enter="passwordUpdate" v-model="user.currentPassword"
+                                    @change="checkPasswords('currentPassowrd')"
+                                    @blur="checkPasswords('currentPassowrd')" placeholder="現在のパスワード">
+                                </b-form-input>
+                                <div class="mt-2"></div>
+
+                                <code v-if="errorMessage.newPassword">{{errorMessage.newPassword}}</code>
+                                <b-form-input type="password" autocomplete="new-password"
+                                    v-on:keydown.enter="passwordUpdate" @change="checkPasswords('newPassword')"
+                                    @blur="checkPasswords('newPassword')" v-model="user.newPassword"
+                                    placeholder="新しいパスワード">
+                                </b-form-input>
+                                <div class="mt-2"></div>
+
+                                <code v-if="errorMessage.newPasswordConfirm">{{errorMessage.newPasswordConfirm}}</code>
+                                <b-form-input type="password" autocomplete="new-password"
+                                    v-model="user.newPasswordConfirm" v-on:keydown.enter="passwordUpdate"
+                                    @change="checkPasswords('newPasswordConfirm')"
+                                    @blur="checkPasswords('newPasswordConfirm')" placeholder="新しいパスワード再入力">
+                                </b-form-input>
+                                <div class="mt-2"></div>
                             </b-form>
                         </template>
                         <b-alert show variant="success" v-if="errorMessage.passwordUpdate=='success'">更新しました。</b-alert>
@@ -226,7 +221,7 @@
                     .catch(error => {
                         //console.log(error)
                         this.isLoggedIn = false
-                        //this.$store.commit("message", 'ログインしてください。')
+                        this.$store.commit("message", 'ログインしてください。')
                         this.$router.push("/login") //ログイン画面にジャンプ
                     })
             },

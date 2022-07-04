@@ -1,27 +1,24 @@
 <template>
-    <div v-if="isLoggedIn">
+    <div v-if="isLoggedIn=='no'">
         <h1>{{title}}</h1>
-        <div id="form">
-            <div class="form">
-                <div class="">
-                    <div class="form-group">
-                        <label for="">Email</label>
-                        <code>{{errorMessage.email}}</code>
-                        <input v-model="form.email" v-on:keydown.enter="register" @change="checkEmail"
-                            @blur="checkEmail" type="email" class="form-control">
-                    </div>
+        <b-form>
+            <b-form-group label="メールアドレス" description="">
+                <code>{{errorMessage.email}}</code>
+                <b-form-input v-model="form.email" v-on:keydown.enter="register" @change="checkEmail" @blur="checkEmail"
+                    type="email" class="form-control">
+                </b-form-input>
+            </b-form-group>
 
-                    <div class="form-group">
-                        <label for="">password</label>
-                        <code v-if="errorMessage.password">{{errorMessage.password}}</code>
-                        <input v-model="form.password" v-on:keydown.enter="register" @change="checkPassword"
-                            @blur="checkPassword" type="password" class="form-control">
-                    </div>
-                </div>
-            </div>
+            <b-form-group label="パスワード" description="">
+                <label for="">password</label>
+                <code v-if="errorMessage.password">{{errorMessage.password}}</code>
+                <b-form-input v-model="form.password" v-on:keydown.enter="register" @change="checkPassword"
+                    @blur="checkPassword" type="password" class="form-control">
+                </b-form-input>
+            </b-form-group>
             <b-alert show variant="danger" v-if="errorMessage.submit">{{errorMessage.submit}}</b-alert>
             <button type="button" class="btn btn-primary" @click="register">登録</button>
-        </div>
+        </b-form>
     </div>
 </template>
 <style scoped>
@@ -100,7 +97,7 @@
                 //モジュールから真偽を取得
                 return Validate.password(this.form.password).result
             },
-            login(){
+            login() {
                 axios.post('/api/login', this.form)
                     .then(response => {
                         let userInfo = {

@@ -23,14 +23,14 @@
                             <template #button-content>
                                 <em>{{ userName}}</em>
                             </template>
-                            <b-dropdown-item to="/account" >Account</b-dropdown-item>
-                            <b-dropdown-item @click="logout" >Logout</b-dropdown-item>
+                            <b-dropdown-item to="/account">Account</b-dropdown-item>
+                            <b-dropdown-item @click="logout">Logout</b-dropdown-item>
                         </b-nav-item-dropdown>
                         <button v-else>ログイン</button>
                     </b-navbar-nav>
                 </b-collapse>
             </b-navbar>
-        </div>      
+        </div>
     </header>
 </template>
 <script>
@@ -42,10 +42,10 @@
             }
         },
         mounted() {
+            //ユーザー名取れないなどログインしていないときだけ走らせれば省エネでは？
             axios.get("/api/loginCheck")
                 .then(response => {
                     this.isLoggedIn = true
-
                     //this.userName = localStorage.getItem('userName')
                     //email: localStorage.getItem("userEmail"),
 
@@ -61,22 +61,19 @@
                     console.log('user changed! %s => %s', oldValue, newValue)
                     this.userName = newValue
 
-                    // if(this.userName){
-                    //     console.log('ログインしたよ')
-                    //     this.makeToast('ログインしました。')
-                    // }else{
-                    //     console.log('ログアウトしたよ')
-                    //     this.makeToast('ログアウトしました。')                        
-                    // }
+                    //セッション切れログアウトからのログイン時には通知が出ない
+                    //oldvalueとnewvalueの動きを確認してリファクタリングが必要
 
-
-                    //セッション切れ後初回ログインで通らないので2重処理
-                    //これでうまくいったらノートに記載して
-                    // if (this.userName) {
-                    //     this.isLoggedIn = true
-                    // } else {
-                    //     this.isLoggedIn = false
-                    // }
+                    let referrer = this.$router.referrer//セッション切れの時のこの部分が知りたい
+                    console.log(referrer)
+                    
+                    if (this.userName && referrer.name == 'login' ) {
+                        //ユーザー名が取得できた&ログインページから飛んできたか、元々のユーザー名がnullなら
+                        this.makeToast('ログインしました。')
+                    } else if(this.userName==null) {
+                        //ユーザー名がnullになったら
+                        this.makeToast('ログアウトしました。')
+                    }
 
                     //vuexのユーザー名が変わったことを検知した上でサンクタムのログインチェック処理
                     axios.get("/api/loginCheck")
@@ -87,7 +84,7 @@
                                 //email: localStorage.getItem("userEmail"),
                             }
                             this.$store.commit("updateUser", userInfo);
-                            
+
                         })
                         .catch(error => {
                             this.isLoggedIn = false
@@ -128,12 +125,12 @@
         methods: {
             makeToast(message) {
                 this.$bvToast.toast(message, {
-                    title: 'ログイン通知',
-                    toaster:'b-toaster-bottom-left',
+                    title: '通知',
+                    toaster: 'b-toaster-bottom-left',
                     autoHideDelay: 5000,
                     appendToast: false
                 })
-            },            
+            },
             logout() {
                 axios.post("/api/logout")
                     .then(response => {

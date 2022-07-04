@@ -8,7 +8,6 @@
                         <label for="">作品名</label>
                         <code>{{errorMessage.name}}</code>
                         <input v-model="name" @change="checkName" @blur="checkName" type="txt" class="form-control">
-                        <p>{{name}}</p>
                     </div>
                 </div>
             </div>
@@ -36,12 +35,6 @@
                     <audio v-on:loadedmetadata="audioInfo" v-if="genre=='audio'" id="audio" controls
                         :src="blobUrl"></audio>
                 </div>
-                {{fileName}}
-            </div>
-
-            <div class=form-group id="genreSelectForm">
-                <label for="">ジャンル</label>
-                <input type="txt" placeholder="自動選択されます" v-bind:value="genreString" readonly>
             </div>
 
             <div class=form-group>
@@ -51,18 +44,33 @@
                         {{ feeOption.text }}
                     </option>
                 </select>
-                <span>Selected: {{ feeSelected }}</span>
             </div>
+
+            <template v-if="genre">
+                <div>
+                    <code>{{errorMessage.subGenre}}</code>
+                    <b-form-select v-model="subGenreSelected" :options="subGenreOption" class="mb-3"
+                        @change="checkSubGenre" @blur="checkSubGenre">
+                        <!-- This slot appears above the options from 'options' prop -->
+                        <template #first>v-bind:options="[genre ? 'active']"
+                            <b-form-select-option :value="null" disabled>-- Please select a subgenre --
+                            </b-form-select-option>
+                        </template>
+                    </b-form-select>
+
+                    <div class="mt-3">subGenreSelected: <strong>{{ subGenreSelected }}</strong></div>
+                </div>
+            </template>
+
 
             <div class="form-group">
                 <label for="">商品説明</label>
                 <code>{{errorMessage.detail}}</code>
                 <textarea v-model="detail" @change="checkDetail" @blur="checkDetail" class="form-control" id=""
                     rows="5"></textarea>
-                <p style="white-space: pre-line;">{{ detail }}</p>
             </div>
             <div class="form-submit">
-                <button type="button" class="btn btn-primary" @click="stockCreate">投稿する</button>
+                <button type="button" class="btn btn-primary" @click="stockCreate">投稿</button>
             </div>
         </div>
     </div>
@@ -128,17 +136,18 @@
                 isEnter: false, //ドラッグアンドドロップフォームの変数初期値
                 fileInfo: null, //inputfileの情報を格納する変数
                 videDuration: null,
-
                 fileType: null,
-
                 fileName: '',
-
                 deleteButton: false,
 
                 //ジャンル選択の配列
                 genre: '',
                 genreString: '',
                 //金額選択の配列
+
+                subGenreSelected: null,
+                subGenreOption: [],
+
                 feeSelected: 1500,
                 feeOptions: [{
                         text: '￥1,500',
@@ -153,7 +162,7 @@
                         value: 10000
                     },
                     {
-                        text: '20000',
+                        text: '￥20000',
                         value: 20000
                     },
                 ],
@@ -163,12 +172,15 @@
                 errorMessage: {
                     'name': null,
                     'detail': null,
-                    'file': null
+                    'file': null,
+                    'subGenre': null,
                 },
                 blobUrl: null,
                 previewArea: false,
                 isLoggedIn: false,
-                currentUserid:null,
+                currentUserid: null,
+
+
             }
         },
         mounted() {
@@ -176,25 +188,33 @@
                 .then(response => {
                     this.isLoggedIn = true
                     this.currentUserid = response.data.id
-
                 })
                 .catch(error => {
                     console.log(error)
                     this.isLoggedIn = false
-                    this.$store.commit("message",'ログインしてください。')
+                    this.$store.commit("message", 'ログインしてください。')
                     // this.$store.commit("jumpTo", this.$route.path)
 
                     //ローカルストレージにこのurlを記憶
-                    localStorage.setItem('jumpTo',this.$route.path);
+                    localStorage.setItem('jumpTo', this.$route.path);
 
                     //vuexバージョン（こっちをLoginlvueで使うとうまくいかない）
                     this.$store.commit('jumpTo', this.$route.path)
-                    
+
                     this.$router.push("/login") //ログイン画面にジャンプ
                 })
         },
 
         methods: {
+            getSubgenre() {
+                axios.get("/api/stocks/getSubgenre?genre=" + this.genre)
+                    .then(response => {
+                        let subgenres = response.data
+                        subgenres.filter(subgenre => {
+                            this.subGenreOption.push( {value:subgenre.subgenre,text: subgenre.subgenreText} )
+                        });
+                    }) //サブジャンルの選択肢をデータベースから取得
+            },
             videoInfo() {
                 console.log(video)
                 this.checkFile(video.duration) //プレビュー用のvideoタグから長さを取得
@@ -212,8 +232,10 @@
                 this.$refs.file.value = null; //input fileクリア
                 this.genre = null
                 this.genreString = null
+                this.subGenreOption = []
+                this.subGenreSelected = null
+                //サブジャンルも消す(消せてるはず)
             },
-
 
             //バリテーション
             checkName() {
@@ -233,6 +255,16 @@
                     var result = false
                 } //nameの入力に問題がなければtrueを返す
                 return (result)
+            },
+            checkSubGenre() {
+                console.log(this.subGenreSelected)
+                if (this.subGenreSelected == null || this.subGenreSelected == undefined) {
+                    this.errorMessage.subGenre = "選択してください"
+                    return false
+                } else {
+                    this.errorMessage.subGenre = ""
+                    return true
+                }
             },
             checkDetail() {
                 var n = ''
@@ -332,21 +364,36 @@
                     this.blobUrl = ""
                 }
                 this.genreSelect()
+                this.getSubgenre()
             },
 
             genreSelect() {
                 let result = this.checkFile() //ファイルに問題がないかチェック
 
+
                 if (result && this.fileInfo && this.fileInfo.type.match(
                         'image')) { //問題がないファイルが存在（選ばれていて）なおかつ画像なら
                     this.genre = 'image'
                     this.genreString = "画像"
+
+                    //これらいらん
+                    // this.subGenreOption = [{
+                    //         value: 'illust',
+                    //         text: 'イラスト'
+                    //     },
+                    //     {
+                    //         value: 'photo',
+                    //         text: '写真'
+                    //     }
+                    // ]
                 } else if (result && this.fileInfo && this.fileInfo.type.match(
                         'quicktime')) { //問題ないファイル存在が（選ばれていて）なおかつ動画なら
                     this.genre = 'video'
                     this.genreString = "映像"
 
-                //macのmovファイル？プレビューできないかもしれないイことを説明
+
+
+                    //macのmovファイル？プレビューできないかもしれないイことを説明
                 } else if (result && this.fileInfo && this.fileInfo.type.match(
                         'video')) { //問題ないファイル存在が（選ばれていて）なおかつ動画なら
                     this.genre = 'video'
@@ -356,6 +403,7 @@
                         'audio')) { //問題ないファイル存在が（選ばれていて）なおかつ音源なら
                     this.genre = 'audio'
                     this.genreString = "音源"
+
                 } else {
                     this.blobUrl = null
                     this.previewArea = false
@@ -366,16 +414,18 @@
                 let nameResult = this.checkName()
                 let detailResult = this.checkDetail()
                 let fileResult = this.checkFile()
+                let subGenreReulst = this.checkSubGenre()
 
-                if (nameResult && detailResult && fileResult) { //check項目が全てtrueなら
+                if (nameResult && detailResult && fileResult && subGenreReulst) { //check項目が全てtrueなら
                     let postData = new FormData()
                     postData.append('files[0]', this.fileInfo) //files配列の先頭はthis.fileInfo
                     postData.append('form[extention]', this.fileInfo.name.split('.').pop()) //拡張子を取得
                     postData.append('form[name]', this.name)
                     postData.append('form[genre]', this.genre)
+                    postData.append('form[subGenre]', this.subGenreSelected)
                     postData.append('form[fee]', this.feeSelected)
                     postData.append('form[detail]', this.detail)
-                    postData.append('userId', this.currentUserid)//ここが取れてない。currentID取るべき
+                    postData.append('userId', this.currentUserid) //ここが取れてない。currentID取るべき
 
                     //バリデーション関数のreturnがどちらもtrueなら下記実行
                     axios.post('/api/stocks/create', postData) //api.phpのルートを指定。第2引数には渡したい変数を入れる（今回は配列postData=入力された内容）

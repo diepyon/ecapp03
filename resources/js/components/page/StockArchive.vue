@@ -58,6 +58,7 @@
                 const img = document.getElementById(id);
                 img.setAttribute('src', '/storage/default_img/notfound.jpg');
             },
+           
         }
     }
 

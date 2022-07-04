@@ -54,7 +54,7 @@
     export default {
 
         name: 'Pagination',
-        props: ["genre", "keyword"], //複数書くときの書き方これであってるよな？
+        props: ["genre", "keyword", "subgenre"], //複数書くときの書き方これであってるよな？
 
 
         data() {
@@ -71,99 +71,116 @@
         },
         mounted() {
             this.current_page = Number(this.$route.query.page) || 1
-            //this.genre = this.$route.query.genre
-            console.log(this.genre)
+            //this.genre = this.$route.query.genre || null
+            
+            //今のところ動くが要注意
+            this.keyword = this.$route.query.key
+
 
             this.showArchive()
-
         },
         methods: {
             async showArchive() {
+                console.log('サブジャンルは')
+                console.log(this.subgenre)
+
                 let result = null
 
-                //最終的にはifではなく、引数をもとにジャンルやキーワードを使ったAPIを呼び出して検索したい
+                result = await axios.get('/api/search', {
+                    params: {
+                        genre:this.genre,
+                        subgenre:this.subgenre,
+                        key: this.keyword,
+                        page:this.current_page,
+                    }
+                })
 
+                // if (this.keyword && this.genre) {
+                //     console.log('キーワードとジャンル')
+                //     result = await axios.get(`/api/search?genre=${this.genre}&key=${this.keyword}&page=${this.current_page}`)
+                // } else if (!this.keyword && this.genre) {
+                //     console.log('ジャンルだけ')
+                //     result =await axios.get( `/api/search?genre=${this.genre}&page=${this.current_page}`)
+                // }else {
+                //     console.log('その他')
+                //     result = await axios.get(`/api/stocks?page=${this.current_page}`);
+                // }
+
+                //console.log(this.genre)
+                //console.log(this.keyword)
+
+                //console.log(result.data)
+
+                const stocks = result.data;
+                this.stocks = stocks.data;
+                this.parPage = stocks.meta.per_page //1ページ当たりの表示件数
+                this.totalStocksPer = stocks.meta.total //全部でアイテムが何個あるか
+                this.length = stocks.meta.last_page //総ページ数を取得             
+                this.makePagenation()
+
+                //console.log('ページネーション')
+                console.log(this.stocks)
+
+                //console.log('親コンポーネントに変数を渡すぜ')
+                this.$emit('stocksFromChild', this.stocks)
+            },
+            search(){
+                //わざわざメソッド分けるほどのことか？親で側でchangepage(1)を呼べばいい説
+                this.showArchive()
+                this.changePage(1)
+            },
+            makePagenation() {
+                this.pages = []
+                for (let i = 1; i < this.length + 1; i++) {
+                    //ページ番号とリンク先をオブジェクトで追加
+                    this.pages.push({
+                        no: i,
+                    })
+                }
+                //1個前のページ
+                if (this.current_page !== 1) {
+                    this.previous = this.current_page - 1
+                } else {
+                    this.previous = 1
+                }
+                //次のページ
+                if (this.current_page !== this.length) {
+                    this.next = this.current_page + 1
+                } else {
+                    this.next = this.length
+                }
+            },
+
+            changePage(number) {
+                this.current_page = number
+                this.showArchive()
+
+                let url = null
+
+                //サブジャンル系のクエリパラーメーター付きのURLもここに必要
                 if (this.keyword && this.genre) {
-                    console.log('キーワードだけ')
-                    result = await axios.get(`/api/search?genre=${this.genre}&key=${this.keyword}&page=${this.current_page}`)
+                    url = `${window.location.origin}/${this.genre}?key=${this.keyword}&page=${this.current_page}`
                 } else if (!this.keyword && this.genre) {
-                    console.log('ジャンルだけ')
-                    result =await axios.get( `/api/search?genre=${this.genre}&page=${this.current_page}`)
-                }else {
-                    console.log('その他')
-                    result = await axios.get(`/api/stocks?page=${this.current_page}`);
+                    url = `${window.location.origin}/${this.genre}?page=${this.current_page}`
+                } else {
+                    url = `${window.location.origin}/stocks?page=${this.current_page}`
                 }
 
-            console.log(this.genre)
-            console.log(this.keyword)
-            
-            console.log(result.data)
+                window.history.pushState({
+                        number
+                    },
+                    `Page${number}`,
+                    url
+                )
+                this.moveToTop()
+            },
+            moveToTop() {
+                window.scrollTo({
+                    top: 0,
+                });
+            },
 
-            const stocks = result.data;
-            this.stocks = stocks.data;
-            this.parPage = stocks.meta.per_page //1ページ当たりの表示件数
-            this.totalStocksPer = stocks.meta.total //全部でアイテムが何個あるか
-            this.length = stocks.meta.last_page //総ページ数を取得             
-            this.makePagenation()
-
-            console.log('ページネーション')
-            console.log(this.stocks)
-
-            console.log('親コンポーネントに変数を渡すぜ')
-            this.$emit('stocksFromChild', this.stocks)
         },
-        makePagenation() {
-            this.pages = []
-            for (let i = 1; i < this.length + 1; i++) {
-                //ページ番号とリンク先をオブジェクトで追加
-                this.pages.push({
-                    no: i,
-                })
-            }
-            //1個前のページ
-            if (this.current_page !== 1) {
-                this.previous = this.current_page - 1
-            } else {
-                this.previous = 1
-            }
-            //次のページ
-            if (this.current_page !== this.length) {
-                this.next = this.current_page + 1
-            } else {
-                this.next = this.length
-            }
-        },
-
-        changePage(number) {
-            this.current_page = number
-            this.showArchive()
-
-            let url = null
-
-            if (this.keyword && this.genre) {
-                url = `${window.location.origin}/${this.genre}?&key=${this.keyword}&page=${this.current_page}`
-            } else if (!this.keyword  && this.genre) {
-                url = `${window.location.origin}/${this.genre}?&page=${this.current_page}`
-            } else {
-                url = `${window.location.origin}/stocks?&page=${this.current_page}`
-            }
-
-            window.history.pushState({
-                    number
-                },
-                `Page${number}`,
-                url
-
-            )
-            this.moveToTop()
-        },
-        moveToTop() {
-            window.scrollTo({
-                top: 0,
-            });
-        },
-
-    },
     }
 
 </script>

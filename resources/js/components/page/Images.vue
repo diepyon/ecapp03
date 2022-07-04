@@ -2,22 +2,31 @@
     <div>
         <h1>{{title}}</h1>
         <h2 v-if="searchKeyword">「{{searchKeyword}}」の検索結果</h2>
-        洗濯済みの選択肢をドロップダウンに表示したければ、javascriptで書かないとあかんかも<br>
         <div>
             <b-input-group class="search">
                 <template #prepend>
-                    <b-dropdown id="dropdown-1" text="すべての画像">
-                        <b-dropdown-item>
-                            <font-awesome-icon :icon="['fas', 'image']" />イラスト</b-dropdown-item>
-                        <b-dropdown-item>写真</b-dropdown-item>
+                   <!-- subGenreSelected --> 
+                  
+                    <!-- imageをオブジェクト化する v-bind:text=" subGenreSelected='image' ? 'すべての画像' :subGenreSelected.text" -->
+                    <b-dropdown :text="subGenreSelected.text">
+                        <b-dropdown-item @click="selectSubgenre({value:null,text:'すべての画像'})">すべての画像</b-dropdown-item>
+                        <b-dropdown-item  
+                            v-for="subGenreOption in subGenreOptions" 
+                            :key="subGenreOption.id"
+                            @click="selectSubgenre(subGenreOption)"
+                        >
+                        {{subGenreOption.text}}
+                        </b-dropdown-item>
+
                     </b-dropdown>
                 </template>
 
-                <b-form-input v-model="keyword"  @keydown.enter="$refs.child.showArchive();searchKeyword = keyword">
+                <!--検索時にはページネーションが1になることもここで指定しなければいけない -->
+                <b-form-input v-model="keyword"  @keydown.enter="$refs.child.search();searchKeyword = keyword;current_page=1;">
                 </b-form-input>
 
                 <template #append>
-                    <b-button @click="$refs.child.showArchive();searchKeyword = keyword" type="" id="btn-search" variant="primary">
+                    <b-button @click="$refs.child.search();searchKeyword = keyword" type="" id="btn-search" variant="primary">
                         <font-awesome-icon :icon="['fa', 'search']" />
                     </b-button>
                 </template>
@@ -35,9 +44,7 @@
                 </div>
             </div>
         </div>
-
-        <Pagination @stocksFromChild="getStocksFromChild" :genre="'image'" :keyword="this.keyword"  ref="child" />
-
+        <Pagination @stocksFromChild="getStocksFromChild" :genre="'image'" :keyword="this.keyword" :subgenre="subGenreSelected.value"   ref="child" />
     </div>
 </template>
 <script>
@@ -66,19 +73,28 @@
                 next: null,
                 keyword: null,
                 searchKeyword: null,
-            }
+                subGenreOptions:[],
+                subGenreSelected:{value:null,text:'すべての画像'},
+                
+               }
         },
         mounted() {
             this.current_page = Number(this.$route.query.page) || 1
             this.keyword = this.$route.query.key
-
-
-
+            this.getSubgenre()
         },
         computed: {
 
         },
         methods: {
+            selectSubgenre(subGenreOption){
+                this.subGenreSelected = subGenreOption
+                //this.genre = subGenreOption.value
+
+                console.log('選ばれたサブジャンルは')
+                console.log(this.subGenreSelected)
+                console.log('子コンポーネントに投げるサブジャンルは'+this.subGenreSelected.value)
+            },
             getStocksFromChild(value) {
                 //ページネーションコンポーネントから一覧すべきレコードを取得
                 this.stocks = value
@@ -87,6 +103,17 @@
                 const img = document.getElementById(id);
                 img.setAttribute('src', '/storage/default_img/notfound.jpg');
             },
+            getSubgenre() {
+                axios.get("/api/stocks/getSubgenre?genre=image")
+                    .then(response => {
+                        let subgenres = response.data
+                        subgenres.filter(subgenre => {
+                            this.subGenreOptions.push( {value:subgenre.subgenre,text: subgenre.subgenreText} )
+                        });
+                    }) //サブジャンルの選択肢をデータベースから取得
+
+                    
+            },             
         }
     };
 
