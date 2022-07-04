@@ -54,7 +54,7 @@
     export default {
 
         name: 'Pagination',
-        props: ["genre", "keyword", "subgenre"], //複数書くときの書き方これであってるよな？
+        props: ["genre", "keyword", "subgenre"],
 
 
         data() {
@@ -75,7 +75,7 @@
             
             //今のところ動くが要注意
             this.keyword = this.$route.query.key
-
+            this.subgenre = this.$route.query.subgenre
 
             this.showArchive()
         },
@@ -118,16 +118,13 @@
                 this.length = stocks.meta.last_page //総ページ数を取得             
                 this.makePagenation()
 
-                //console.log('ページネーション')
-                console.log(this.stocks)
+                //console.log(this.stocks)
 
-                //console.log('親コンポーネントに変数を渡すぜ')
-                this.$emit('stocksFromChild', this.stocks)
+                this.$emit('stocksFromChild', this.stocks)//親コンポーネントに渡す
             },
             search(){
-                //わざわざメソッド分けるほどのことか？親で側でchangepage(1)を呼べばいい説
-                this.showArchive()
-                this.changePage(1)
+                this.changePage(1)//これが先に来ないとNG
+                this.showArchive()   
             },
             makePagenation() {
                 this.pages = []
@@ -158,7 +155,9 @@
                 let url = null
 
                 //サブジャンル系のクエリパラーメーター付きのURLもここに必要
-                if (this.keyword && this.genre) {
+                if (this.keyword && this.genre &&this.subgenre) {
+                    url = `${window.location.origin}/${this.genre}?subgenre=${this.subgenre}&key=${this.keyword}&page=${this.current_page}`
+                } else if(this.keyword && this.genre) {
                     url = `${window.location.origin}/${this.genre}?key=${this.keyword}&page=${this.current_page}`
                 } else if (!this.keyword && this.genre) {
                     url = `${window.location.origin}/${this.genre}?page=${this.current_page}`

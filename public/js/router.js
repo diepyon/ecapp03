@@ -237,7 +237,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   name: 'Pagination',
   props: ["genre", "keyword", "subgenre"],
-  //複数書くときの書き方これであってるよな？
   data: function data() {
     return {
       stocks: null,
@@ -255,6 +254,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     //今のところ動くが要注意
 
     this.keyword = this.$route.query.key;
+    this.subgenre = this.$route.query.subgenre;
     this.showArchive();
   },
   methods: {
@@ -303,14 +303,13 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
                 _this.length = stocks.meta.last_page; //総ページ数を取得             
 
-                _this.makePagenation(); //console.log('ページネーション')
+                _this.makePagenation(); //console.log(this.stocks)
 
 
-                console.log(_this.stocks); //console.log('親コンポーネントに変数を渡すぜ')
+                _this.$emit('stocksFromChild', _this.stocks); //親コンポーネントに渡す
 
-                _this.$emit('stocksFromChild', _this.stocks);
 
-              case 14:
+              case 13:
               case "end":
                 return _context.stop();
             }
@@ -319,9 +318,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }))();
     },
     search: function search() {
-      //わざわざメソッド分けるほどのことか？親で側でchangepage(1)を呼べばいい説
+      this.changePage(1); //これが先に来ないとNG
+
       this.showArchive();
-      this.changePage(1);
     },
     makePagenation: function makePagenation() {
       this.pages = [];
@@ -352,7 +351,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       this.showArchive();
       var url = null; //サブジャンル系のクエリパラーメーター付きのURLもここに必要
 
-      if (this.keyword && this.genre) {
+      if (this.keyword && this.genre && this.subgenre) {
+        url = "".concat(window.location.origin, "/").concat(this.genre, "?subgenre=").concat(this.subgenre, "&key=").concat(this.keyword, "&page=").concat(this.current_page);
+      } else if (this.keyword && this.genre) {
         url = "".concat(window.location.origin, "/").concat(this.genre, "?key=").concat(this.keyword, "&page=").concat(this.current_page);
       } else if (!this.keyword && this.genre) {
         url = "".concat(window.location.origin, "/").concat(this.genre, "?page=").concat(this.current_page);
