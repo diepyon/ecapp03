@@ -72,26 +72,54 @@
         mounted() {
             this.current_page = Number(this.$route.query.page) || 1
             //this.genre = this.$route.query.genre || null
-            
-            //今のところ動くが要注意
-            this.keyword = this.$route.query.key
-            this.subgenre = this.$route.query.subgenre
+
+            //親コンポーネントから受け取った変数を上書きすると怒られるから親コンポーネント側で指定した           
+            // this.keyword = this.$route.query.key
+            //this.subgenre = this.$route.query.subgenre
+
 
             this.showArchive()
         },
         methods: {
             async showArchive() {
-                console.log('サブジャンルは')
-                console.log(this.subgenre)
-
                 let result = null
 
+                let hoge = null
+                let fuga = null
+
+                console.log('if後')
+                hoge = this.subgenre
+                fuga = this.keyword
+
+                console.log(hoge)
+                console.log(fuga)
+
+
+                // if (!this.subgenre) {
+                //     hoge = this.$route.query.subgenre
+                // }
+                // if (!this.keyword) {
+                //     fuga = this.$route.query.key
+                // }
+                hoge = this.$route.query.subgenre
+                fuga = this.$route.query.key
+
+                console.log('if前')
+                console.log(hoge)
+                console.log(fuga)
+
                 result = await axios.get('/api/search', {
+                    // params: {
+                    //     genre:this.genre,
+                    //     subgenre:this.subgenre,
+                    //     key: this.keyword,
+                    //     page:this.current_page,
+                    // }
                     params: {
-                        genre:this.genre,
-                        subgenre:this.subgenre,
-                        key: this.keyword,
-                        page:this.current_page,
+                        genre: this.genre,
+                        subgenre: hoge,
+                        key: fuga,
+                        page: this.current_page,
                     }
                 })
 
@@ -117,14 +145,12 @@
                 this.totalStocksPer = stocks.meta.total //全部でアイテムが何個あるか
                 this.length = stocks.meta.last_page //総ページ数を取得             
                 this.makePagenation()
-
-                //console.log(this.stocks)
-
-                this.$emit('stocksFromChild', this.stocks)//親コンポーネントに渡す
+                this.$emit('stocksFromChild', this.stocks) //親コンポーネントに渡す
             },
-            search(){
-                this.changePage(1)//これが先に来ないとNG
-                this.showArchive()   
+            search() {
+                console.log('searchメソッド')
+                this.changePage(1) //これが先に来ないとNG
+                this.showArchive()
             },
             makePagenation() {
                 this.pages = []
@@ -154,10 +180,32 @@
 
                 let url = null
 
+                console.log('検索した段階でのサブジャンルは')
+                console.log(this.subgenre)
+
+                //多分ここの指定が悪い
                 //サブジャンル系のクエリパラーメーター付きのURLもここに必要
-                if (this.keyword && this.genre &&this.subgenre) {
-                    url = `${window.location.origin}/${this.genre}?subgenre=${this.subgenre}&key=${this.keyword}&page=${this.current_page}`
-                } else if(this.keyword && this.genre) {
+                if (this.keyword && this.genre && this.subgenre) {
+                    //全部ある
+                    console.log('全部')
+                    url =
+                        `${window.location.origin}/${this.genre}?subgenre=${this.subgenre}&key=${this.keyword}&page=${this.current_page}`
+                }
+
+                if (this.keyword && this.genre) {
+                    //親ジャンルとキーワード
+                    console.log('親ジャンルとキーワード')
+                    url =
+                        `${window.location.origin}/${this.genre}?key=${this.keyword}&page=${this.current_page}`
+                }
+
+
+                if (this.keyword && this.genre && this.subgenre) {
+                    url =
+                        `${window.location.origin}/${this.genre}?subgenre=${this.subgenre}&key=${this.keyword}&page=${this.current_page}`
+                } else if (!this.keyword && this.subgenre) {
+                    url = `${window.location.origin}/${this.genre}?subgenre=${this.subgenre}&page=${this.current_page}`
+                } else if (this.keyword && this.genre) {
                     url = `${window.location.origin}/${this.genre}?key=${this.keyword}&page=${this.current_page}`
                 } else if (!this.keyword && this.genre) {
                     url = `${window.location.origin}/${this.genre}?page=${this.current_page}`

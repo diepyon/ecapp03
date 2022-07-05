@@ -69,11 +69,15 @@ __webpack_require__.r(__webpack_exports__);
     var _this = this;
 
     //ユーザー名取れないなどログインしていないときだけ走らせれば省エネでは？
+    //ていうかbeforemountedに書いてるかいらん？console.logで確認中
     axios.get("/api/loginCheck").then(function (response) {
       _this.isLoggedIn = true; //this.userName = localStorage.getItem('userName')
       //email: localStorage.getItem("userEmail"),
+
+      console.log('mounted');
     })["catch"](function (error) {
       _this.isLoggedIn = false;
+      console.log('mounted');
     }); //プロフィール更新時に認識させるから必要
 
     this.$store.watch(function (state, getters) {
@@ -104,8 +108,11 @@ __webpack_require__.r(__webpack_exports__);
         };
 
         _this.$store.commit("updateUser", userInfo);
+
+        console.log('beforemounted');
       })["catch"](function (error) {
         _this.isLoggedIn = false;
+        console.log('beforemounted');
       });
     });
     var userInfo = {
@@ -251,10 +258,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   },
   mounted: function mounted() {
     this.current_page = Number(this.$route.query.page) || 1; //this.genre = this.$route.query.genre || null
-    //今のところ動くが要注意
+    //親コンポーネントから受け取った変数を上書きすると怒られるから親コンポーネント側で指定した           
+    // this.keyword = this.$route.query.key
+    //this.subgenre = this.$route.query.subgenre
 
-    this.keyword = this.$route.query.key;
-    this.subgenre = this.$route.query.subgenre;
     this.showArchive();
   },
   methods: {
@@ -262,25 +269,47 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       var _this = this;
 
       return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
-        var result, stocks;
+        var result, hoge, fuga, stocks;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
-                console.log('サブジャンルは');
-                console.log(_this.subgenre);
                 result = null;
-                _context.next = 5;
+                hoge = null;
+                fuga = null;
+                console.log('if後');
+                hoge = _this.subgenre;
+                fuga = _this.keyword;
+                console.log(hoge);
+                console.log(fuga); // if (!this.subgenre) {
+                //     hoge = this.$route.query.subgenre
+                // }
+                // if (!this.keyword) {
+                //     fuga = this.$route.query.key
+                // }
+
+                hoge = _this.$route.query.subgenre;
+                fuga = _this.$route.query.key;
+                console.log('if前');
+                console.log(hoge);
+                console.log(fuga);
+                _context.next = 15;
                 return axios.get('/api/search', {
+                  // params: {
+                  //     genre:this.genre,
+                  //     subgenre:this.subgenre,
+                  //     key: this.keyword,
+                  //     page:this.current_page,
+                  // }
                   params: {
                     genre: _this.genre,
-                    subgenre: _this.subgenre,
-                    key: _this.keyword,
+                    subgenre: hoge,
+                    key: fuga,
                     page: _this.current_page
                   }
                 });
 
-              case 5:
+              case 15:
                 result = _context.sent;
                 // if (this.keyword && this.genre) {
                 //     console.log('キーワードとジャンル')
@@ -303,13 +332,12 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
                 _this.length = stocks.meta.last_page; //総ページ数を取得             
 
-                _this.makePagenation(); //console.log(this.stocks)
-
+                _this.makePagenation();
 
                 _this.$emit('stocksFromChild', _this.stocks); //親コンポーネントに渡す
 
 
-              case 13:
+              case 23:
               case "end":
                 return _context.stop();
             }
@@ -318,6 +346,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }))();
     },
     search: function search() {
+      console.log('searchメソッド');
       this.changePage(1); //これが先に来ないとNG
 
       this.showArchive();
@@ -349,10 +378,27 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     changePage: function changePage(number) {
       this.current_page = number;
       this.showArchive();
-      var url = null; //サブジャンル系のクエリパラーメーター付きのURLもここに必要
+      var url = null;
+      console.log('検索した段階でのサブジャンルは');
+      console.log(this.subgenre); //多分ここの指定が悪い
+      //サブジャンル系のクエリパラーメーター付きのURLもここに必要
+
+      if (this.keyword && this.genre && this.subgenre) {
+        //全部ある
+        console.log('全部');
+        url = "".concat(window.location.origin, "/").concat(this.genre, "?subgenre=").concat(this.subgenre, "&key=").concat(this.keyword, "&page=").concat(this.current_page);
+      }
+
+      if (this.keyword && this.genre) {
+        //親ジャンルとキーワード
+        console.log('親ジャンルとキーワード');
+        url = "".concat(window.location.origin, "/").concat(this.genre, "?key=").concat(this.keyword, "&page=").concat(this.current_page);
+      }
 
       if (this.keyword && this.genre && this.subgenre) {
         url = "".concat(window.location.origin, "/").concat(this.genre, "?subgenre=").concat(this.subgenre, "&key=").concat(this.keyword, "&page=").concat(this.current_page);
+      } else if (!this.keyword && this.subgenre) {
+        url = "".concat(window.location.origin, "/").concat(this.genre, "?subgenre=").concat(this.subgenre, "&page=").concat(this.current_page);
       } else if (this.keyword && this.genre) {
         url = "".concat(window.location.origin, "/").concat(this.genre, "?key=").concat(this.keyword, "&page=").concat(this.current_page);
       } else if (!this.keyword && this.genre) {
@@ -1128,6 +1174,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 
 
@@ -1162,7 +1210,17 @@ __webpack_require__.r(__webpack_exports__);
   mounted: function mounted() {
     this.current_page = Number(this.$route.query.page) || 1;
     this.keyword = this.$route.query.key;
-    this.getSubgenre();
+    this.subGenreSelected = {
+      value: 'illust',
+      text: 'イラスト'
+    };
+    this.selectSubgenre(this.subGenreSelected); //this.subGenreSelected = {value:this.$route.query.subgenre,text:null}
+    //console.log('urlから取得したクエリ')
+    //console.log(this.subGenreSelected)
+    //let hoge = this.$route.query.subgenre
+    //console.log(hoge)
+
+    this.getSubgenre(); //this.selectSubgenre(this.subGenreSelected)
   },
   computed: {},
   methods: {
@@ -2407,7 +2465,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.stock_thumbnail[data-v-fa8d95c6] {\n    position: relative;\n    margin: 2.5px;\n}\n.genre_icon[data-v-fa8d95c6] {\n    color: #adb5bd99;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    font-size: 1.5rem;\n    cursor: pointer;\n    position: absolute;\n    bottom: 0%;\n    left: 0%;\n    margin: 8px;\n}\n\n/*サムネイルの左下に出るジャンル判別アイコン*/\n.stock_thumbnail[data-v-fa8d95c6] {\n    position: relative;\n}\n.stocks[data-v-fa8d95c6] {\n    display: flex;\n    flex-wrap: wrap;\n    /* 親要素を無視して画面いっぱいに表示 */\n    margin-right: calc(50% - 50vw);\n    margin-left: calc(50% - 50vw);\n}\n.stock_thumbnail:hover img[data-v-fa8d95c6] {\n    filter: brightness(50%);\n    transition: 0.1s ease-in-out;\n}\n\n/*レスポンシブデザイン*/\n@media screen and (min-width:769px) {\n\n    /*** この中にPCのスタイル（769px以上） ***/\n.thumbnail[data-v-fa8d95c6] {\n        flex-grow: 1;\n        -o-object-fit: cover;\n           object-fit: cover;\n        max-height: 200px;\n        max-width: 400px;\n        margin: 0.2rem;\n        border-radius: 4px;\n}\n}\n@media screen and (max-width:768px) {\n    /*** この中にタブレットのスタイル（768px以下） ***/\n.thumbnail[data-v-fa8d95c6] {\n        flex-grow: 1;\n        -o-object-fit: cover;\n           object-fit: cover;\n        max-height: 150px;\n        max-width: 300px;\n        margin: 0.2rem;\n        border-radius: 4px;\n}\n}\n@media screen and (max-width:599px) {\n\n    /*** この中にスマホのスタイル（599px以下） ***/\n.thumbnail[data-v-fa8d95c6] {\n        flex-grow: 1;\n        -o-object-fit: cover;\n           object-fit: cover;\n        max-height: 100px;\n        max-width: 200px;\n        margin: 0.2rem;\n        border-radius: 4px;\n}\n}\n.search[data-v-fa8d95c6] {\n    padding: .5em;\n}\n\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.stock_thumbnail[data-v-fa8d95c6] {\n    position: relative;\n    margin: 2.5px;\n}\n.genre_icon[data-v-fa8d95c6] {\n    color: #adb5bd99;\n    display: flex;\n    justify-content: center;\n    align-items: center;\n    font-size: 1.5rem;\n    cursor: pointer;\n    position: absolute;\n    bottom: 0%;\n    left: 0%;\n    margin: 8px;\n}\n\n/*サムネイルの左下に出るジャンル判別アイコン*/\n.stock_thumbnail[data-v-fa8d95c6] {\n    position: relative;\n}\n.stocks[data-v-fa8d95c6] {\n    display: flex;\n    flex-wrap: wrap;\n    /* 親要素を無視して画面いっぱいに表示 */\n    margin-right: calc(50% - 50vw);\n    margin-left: calc(50% - 50vw);\n}\n.stock_thumbnail:hover img[data-v-fa8d95c6] {\n    filter: brightness(50%);\n    transition: 0.1s ease-in-out;\n}\n\n/*レスポンシブデザイン*/\n@media screen and (min-width:769px) {\n\n    /*** この中にPCのスタイル（769px以上） ***/\n.thumbnail[data-v-fa8d95c6] {\n        flex-grow: 1;\n        -o-object-fit: cover;\n           object-fit: cover;\n        max-height: 200px;\n        max-width: 400px;\n        margin: 0.2rem;\n        border-radius: 4px;\n}\n}\n@media screen and (max-width:768px) {\n\n    /*** この中にタブレットのスタイル（768px以下） ***/\n.thumbnail[data-v-fa8d95c6] {\n        flex-grow: 1;\n        -o-object-fit: cover;\n           object-fit: cover;\n        max-height: 150px;\n        max-width: 300px;\n        margin: 0.2rem;\n        border-radius: 4px;\n}\n}\n@media screen and (max-width:599px) {\n\n    /*** この中にスマホのスタイル（599px以下） ***/\n.thumbnail[data-v-fa8d95c6] {\n        flex-grow: 1;\n        -o-object-fit: cover;\n           object-fit: cover;\n        max-height: 100px;\n        max-width: 200px;\n        margin: 0.2rem;\n        border-radius: 4px;\n}\n}\n.search[data-v-fa8d95c6] {\n    padding: .5em;\n}\n\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -9823,7 +9881,7 @@ var render = function() {
                               },
                               [
                                 _vm._v(
-                                  "\n                    " +
+                                  "\n                        " +
                                     _vm._s(subGenreOption.text) +
                                     "\n                    "
                                 )
@@ -9882,7 +9940,6 @@ var render = function() {
                     }
                     _vm.$refs.child.search()
                     _vm.searchKeyword = _vm.keyword
-                    _vm.current_page = 1
                   }
                 },
                 model: {

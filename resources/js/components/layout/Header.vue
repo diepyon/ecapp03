@@ -42,16 +42,20 @@
             }
         },
         mounted() {
+            
             //ユーザー名取れないなどログインしていないときだけ走らせれば省エネでは？
+            //ていうかbeforemountedに書いてるかいらん？console.logで確認中
             axios.get("/api/loginCheck")
                 .then(response => {
                     this.isLoggedIn = true
                     //this.userName = localStorage.getItem('userName')
                     //email: localStorage.getItem("userEmail"),
+                    console.log('mounted')
 
                 })
                 .catch(error => {
                     this.isLoggedIn = false
+                    console.log('mounted')
                 })
 
             //プロフィール更新時に認識させるから必要
@@ -84,10 +88,14 @@
                                 //email: localStorage.getItem("userEmail"),
                             }
                             this.$store.commit("updateUser", userInfo);
+                            console.log('beforemounted')
+
 
                         })
                         .catch(error => {
                             this.isLoggedIn = false
+                                                        console.log('beforemounted')
+
                         })
                 }
             )
