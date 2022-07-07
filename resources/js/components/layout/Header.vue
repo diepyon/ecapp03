@@ -51,7 +51,6 @@
                     //this.userName = localStorage.getItem('userName')
                     //email: localStorage.getItem("userEmail"),
                     console.log('mounted')
-
                 })
                 .catch(error => {
                     this.isLoggedIn = false

@@ -74,8 +74,8 @@
             //this.genre = this.$route.query.genre || null
 
             //親コンポーネントから受け取った変数を上書きすると怒られるから親コンポーネント側で指定した           
-            // this.keyword = this.$route.query.key
-            //this.subgenre = this.$route.query.subgenre
+            this.keyword = this.$route.query.key
+            this.subgenre = this.$route.query.subgenre
 
 
             this.showArchive()
@@ -87,26 +87,10 @@
                 let hoge = null
                 let fuga = null
 
-                console.log('if後')
-                hoge = this.subgenre
-                fuga = this.keyword
-
-                console.log(hoge)
-                console.log(fuga)
-
-
-                // if (!this.subgenre) {
-                //     hoge = this.$route.query.subgenre
-                // }
-                // if (!this.keyword) {
-                //     fuga = this.$route.query.key
-                // }
                 hoge = this.$route.query.subgenre
                 fuga = this.$route.query.key
 
-                console.log('if前')
-                console.log(hoge)
-                console.log(fuga)
+
 
                 result = await axios.get('/api/search', {
                     // params: {
@@ -199,17 +183,21 @@
                         `${window.location.origin}/${this.genre}?key=${this.keyword}&page=${this.current_page}`
                 }
 
-
                 if (this.keyword && this.genre && this.subgenre) {
+                    console.log('全部')
                     url =
                         `${window.location.origin}/${this.genre}?subgenre=${this.subgenre}&key=${this.keyword}&page=${this.current_page}`
                 } else if (!this.keyword && this.subgenre) {
+                    console.log('キーワード指定なしでサブジャンルだけ')
                     url = `${window.location.origin}/${this.genre}?subgenre=${this.subgenre}&page=${this.current_page}`
                 } else if (this.keyword && this.genre) {
+                    console.log('ジャンルとキーワード')
                     url = `${window.location.origin}/${this.genre}?key=${this.keyword}&page=${this.current_page}`
                 } else if (!this.keyword && this.genre) {
+                    console.log('キーワードなしで親ジャンルだけ')
                     url = `${window.location.origin}/${this.genre}?page=${this.current_page}`
                 } else {
+                    console.log('その他')
                     url = `${window.location.origin}/stocks?page=${this.current_page}`
                 }
 

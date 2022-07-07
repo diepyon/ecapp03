@@ -2,12 +2,10 @@
     <div>
         <h1>{{title}}</h1>
         <h2 v-if="searchKeyword">「{{searchKeyword}}」の検索結果</h2>
+        選択済みの選択肢をドロップダウンに表示したければ、javascriptで書かないとあかんかも
         <div>
             <b-input-group class="search">
                 <template #prepend>
-                    <!-- subGenreSelected -->
-
-                    <!-- imageをオブジェクト化する v-bind:text=" subGenreSelected='image' ? 'すべての画像' :subGenreSelected.text" -->
                     <b-dropdown :text="subGenreSelected.text">
                         <b-dropdown-item @click="selectSubgenre({value:null,text:'すべての画像'})">すべての画像</b-dropdown-item>
                         <b-dropdown-item v-for="subGenreOption in subGenreOptions" :key="subGenreOption.id"
@@ -18,19 +16,13 @@
                     </b-dropdown>
                 </template>
 
-                <!--検索時にはページネーションが1になることもここで指定しなければいけない -->
-                <b-form-input v-model="keyword"
-                    @keydown.enter="$refs.child.search();searchKeyword = keyword;">
+                <b-form-input v-model="keyword" v-on:keydown.enter="showArchive() ;changePage(1)">
                 </b-form-input>
 
-                <template #append>
-                    <b-button @click="$refs.child.search();searchKeyword = keyword" type="" id="btn-search"
-                        variant="primary">
-                        <font-awesome-icon :icon="['fa', 'search']" />
-                    </b-button>
-                </template>
+
             </b-input-group>
         </div>
+
         <div class="stocks">
             <div class="" v-for="stock in stocks" :key="stock.id">
                 <div class="stock_thumbnail">
@@ -45,26 +37,67 @@
                 </div>
             </div>
         </div>
-        <Pagination @stocksFromChild="getStocksFromChild" :genre="'image'" :keyword="this.keyword"
-            :subgenre="subGenreSelected.value" ref="child" />
+        <div class="text-center">
+            現在のページ：{{current_page}}<br>
+            トータルページ数:{{length}}<br>
+            トータル記事数:{{totalStocksPer}}<br>
+
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item"><button class="page-link" @click="changePage(1)">
+                            «</button></li>
+                    <li class="page-item"><button class="page-link" @click="changePage(previous)">
+                            ‹</button></li>
+
+                    <li role="separator" class="page-item disabled bv-d-xs-down-none" v-if="current_page > 3"><span
+                            class="page-link">…</span>
+                    </li>
+
+                    <li class="page-item"><button class="page-link" v-if="current_page -2 > 0"
+                            @click="changePage(current_page - 2)">{{current_page -2}}</button></li>
+
+                    <li class="page-item"><button class="page-link" v-if="current_page -1 > 0"
+                            @click="changePage(current_page - 1)">{{current_page -1}}</button></li>
+
+                    <li class="page-item active"><button class="page-link"
+                            @click="changePage(current_page)">{{current_page}}</button></li>
+
+                    <li class="page-item"><button class="page-link" v-if="current_page +1 <= length"
+                            @click="changePage(current_page + 1)">{{current_page +1}}</button></li>
+
+                    <li class="page-item"><button class="page-link" v-if="current_page +1 < length"
+                            @click="changePage(current_page + 2)">{{current_page +2}}</button></li>
+
+                    <li role="separator" class="page-item disabled bv-d-xs-down-none" v-if="current_page < length - 2">
+                        <span class="page-link">…</span>
+                    </li>
+
+                    <li class="page-item" v-if="current_page +2 > 0"><button class="page-link"
+                            @click="changePage(next)">
+                            ›</button></li>
+
+                    <li class="page-item"><button class="page-link" @click="changePage(length)">
+                            »</button></li>
+                </ul>
+            </nav>
+        </div>
+
     </div>
 </template>
 <script>
     import Header from "../layout/Header";
     import Footer from "../layout/Footer";
-    import Pagination from "../layout/Pagination";
-
     export default {
         components: {
             Header,
             Footer,
-            Pagination,
         },
         title: 'Image Archive',
         data() {
             return {
                 title: '画像',
                 stocks: null,
+                subgenre: null,
                 current_page: null,
                 lists: [],
                 length: null,
@@ -80,48 +113,109 @@
                     value: null,
                     text: 'すべての画像'
                 },
-
             }
         },
         mounted() {
+            this.getSubgenre()
+
+            //普段はURLから取得　検索時はそれを上書き　URLは変化する　が理想
             this.current_page = Number(this.$route.query.page) || 1
             this.keyword = this.$route.query.key
-            this.subGenreSelected =  {value:'illust',text:'イラスト'}
-            this.selectSubgenre(this.subGenreSelected)
+            //this.subgenre.value = this.$route.query.subgenre
 
+            //サブジャンルもURLのクエリパラメーターから取得したいがプルダウンを連動させる方法がわからない
 
-            
-            
-            
-            
-            //this.subGenreSelected = {value:this.$route.query.subgenre,text:null}
-
-            //console.log('urlから取得したクエリ')
-            //console.log(this.subGenreSelected)
-
-            //let hoge = this.$route.query.subgenre
-            //console.log(hoge)
-
-            this.getSubgenre()
-            //this.selectSubgenre(this.subGenreSelected)
+            this.showArchive()
         },
-        computed: {
-
-        },
+        computed: {},
         methods: {
             selectSubgenre(subGenreOption) {
                 this.subGenreSelected = subGenreOption
                 //this.genre = subGenreOption.value
-
                 console.log('選ばれたサブジャンルは')
                 console.log(this.subGenreSelected)
                 console.log('子コンポーネントに投げるサブジャンルは' + this.subGenreSelected.value)
             },
-            getStocksFromChild(value) {
-                //ページネーションコンポーネントから一覧すべきレコードを取得
-                this.stocks = value
-            },
+            async showArchive() {
+                let result = null
 
+
+                // this.keyword = this.keyword
+                // this.subgenre = this.subgenre
+                // result = await axios.get(
+                //     `/api/search?genre=image&subgenre=${this.subgenre}&key=${this.keyword}&page=${this.current_page}`
+                //     )
+                console.log('サブジャンルは')
+                console.log(this.subGenreSelected.value)
+
+                // if (this.subgenre == 0||this.subgenre==undefined) {
+                //     this.subgenre = null
+                // }
+
+                // if (this.keyword == 0||this.subgenre==undefined) {
+                //     this.keyword = undefined
+                // }
+
+
+                console.log(this.subgenre)
+
+                result = await axios.get('/api/search', {
+                    params: {
+                        genre: 'image',
+                        subgenre: this.subGenreSelected.value,
+                        key: this.keyword
+                    }
+                });
+
+                const stocks = result.data;
+                this.stocks = stocks.data;
+                this.parPage = stocks.meta
+                    .per_page //1ページ当たりの表示件数
+                this.totalStocksPer = stocks.meta.total //全部でアイテムが何個あるか
+                this.length = stocks.meta.last_page //総ページ数を取得
+                this.makePagenation()
+
+
+            },
+            makePagenation() {
+                this.pages = []
+                for (let i = 1; i < this.length + 1; i++) {
+                    //ページ番号とリンク先をオブジェクトで追加
+                    this.pages.push({
+                        no: i,
+                    })
+                }
+                //1個前のページ
+                if (this.current_page !== 1) {
+                    this.previous = this.current_page - 1
+                } else {
+                    this.previous = 1
+                }
+                //次のページ
+                if (this.current_page !== this.length) {
+                    this.next = this.current_page + 1
+                } else {
+                    this.next = this.length
+                }
+            },
+            changePage(number) {
+                console.log('changepage')
+
+                    this.current_page = number //受け取ったページ番号をthis.currentpageに格納
+                    this.showArchive()
+                    window.history.pushState({
+                            number
+                        },
+                        `Page${number}`,
+                        `${window.location.origin}/image?subgenre=${this.subGenreSelected.value}&?key=${this.keyword}&page=${this.current_page}`
+                    )      
+                this.moveToTop()
+            },
+            moveToTop() {
+                window.scrollTo({
+                    top: 0,
+                });
+            },
             checkImgExist(id) { //サムネイル画像がエラーになるときは代替え画像に置き換え
                 const img = document.getElementById(id);
                 img.setAttribute('src', '/storage/default_img/notfound.jpg');
@@ -137,9 +231,8 @@
                             })
                         });
                     }) //サブジャンルの選択肢をデータベースから取得
-
-
             },
+
         }
     };
 
@@ -185,7 +278,6 @@
     }
 
     /*レスポンシブデザイン*/
-
     @media screen and (min-width:769px) {
 
         /*** この中にPCのスタイル（769px以上） ***/

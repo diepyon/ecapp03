@@ -24,35 +24,36 @@ class StockController extends Controller
    
     public function search(Request $request){
         $pat = '%' . addcslashes($request->key, '%_\\') . '%';
-            
+         
         //return $request;
-
+        
         $stock = Stock::query();
-
-        if($request->subgenre && $request->key != 'undefined'){ //サブジャンルまで指定がありキーワードもあるなら
-            $stock->where('subGenre',$request->subgenre)->where('name','LIKE',$pat);
+  
+        if($request->genre && $request->subgenre==null && $request->key){
+            //return 'ジャンルあり、サブジャンルなし、キーワードあり';
+            $stock->where('genre',$request->genre)->where('name','LIKE',$pat); 
         }
-        if($request->subgenre && $request->key == 'undefined'){//サブジャンルの指定はあるがキーワードがないなら
+
+        if($request->genre && $request->subgenre==null && $request->key==null){
+            //return '親ジャンルあり、サブジャンルなし、キーワードなし';
+            $stock->where('genre',$request->genre);
+        }
+
+        if($request->subgenre && $request->key==null){
+            //return 'サブジャンルあり、キーワードなし';
             $stock->where('subGenre',$request->subgenre);
-        }
-        if($request->subgenre != 'undefined' && $request->subgenre == 'undefined' && $request->key != 'undefined'){
-            //サブジャンルの指定はないがキーワードの指定はある(親ジャンルの指定だけがある)
-            $stock->where('genre',$request->genre)->where('name','LIKE',$pat);
+        }        
+
+        if($request->subgenre && $request->key){
+            //return 'サブジャンルあり、キーワードあり';
+            $stock->where('subGenre',$request->subgenre)->where('name','LIKE',$pat); 
         }
 
-        if($request->genre != 'undefined' && $request->key != 'undefined'){
-            //サブジャンルの指定はないが親ジャンルとキーワードの指定はある            
-            $stock->where('genre',$request->genre)->where('name','LIKE',$pat);   
+        if($request->genre==null && $request->subgenre==null && $request->key=null){
+            return '全部ない　もういい？';
+
         }
 
-        if($request->genre != 'undefined' && $request->subgenre != 'undefined' && $request->key != 'undefined'){
-            //サブジャンルの指定はないが親ジャンルとキーワードの指定はある
-            $stock->where('genre',$request->genre)->where('name','LIKE',$pat);
-        }
-        if( $request->subgenre != 'undefined' && $request->key == 'undefined'){
-            //サブジャンルの指定はあるがキーワードはない
-            $stock->where('subGenre',$request->subgenre);
-        }
         return StockResource::collection($stock->orderBy('created_at', 'desc')->paginate(10));
     }
     

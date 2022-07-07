@@ -259,9 +259,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   mounted: function mounted() {
     this.current_page = Number(this.$route.query.page) || 1; //this.genre = this.$route.query.genre || null
     //親コンポーネントから受け取った変数を上書きすると怒られるから親コンポーネント側で指定した           
-    // this.keyword = this.$route.query.key
-    //this.subgenre = this.$route.query.subgenre
 
+    this.keyword = this.$route.query.key;
+    this.subgenre = this.$route.query.subgenre;
     this.showArchive();
   },
   methods: {
@@ -277,23 +277,9 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 result = null;
                 hoge = null;
                 fuga = null;
-                console.log('if後');
-                hoge = _this.subgenre;
-                fuga = _this.keyword;
-                console.log(hoge);
-                console.log(fuga); // if (!this.subgenre) {
-                //     hoge = this.$route.query.subgenre
-                // }
-                // if (!this.keyword) {
-                //     fuga = this.$route.query.key
-                // }
-
                 hoge = _this.$route.query.subgenre;
                 fuga = _this.$route.query.key;
-                console.log('if前');
-                console.log(hoge);
-                console.log(fuga);
-                _context.next = 15;
+                _context.next = 7;
                 return axios.get('/api/search', {
                   // params: {
                   //     genre:this.genre,
@@ -309,7 +295,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                   }
                 });
 
-              case 15:
+              case 7:
                 result = _context.sent;
                 // if (this.keyword && this.genre) {
                 //     console.log('キーワードとジャンル')
@@ -337,7 +323,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 _this.$emit('stocksFromChild', _this.stocks); //親コンポーネントに渡す
 
 
-              case 23:
+              case 15:
               case "end":
                 return _context.stop();
             }
@@ -396,14 +382,19 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }
 
       if (this.keyword && this.genre && this.subgenre) {
+        console.log('全部');
         url = "".concat(window.location.origin, "/").concat(this.genre, "?subgenre=").concat(this.subgenre, "&key=").concat(this.keyword, "&page=").concat(this.current_page);
       } else if (!this.keyword && this.subgenre) {
+        console.log('キーワード指定なしでサブジャンルだけ');
         url = "".concat(window.location.origin, "/").concat(this.genre, "?subgenre=").concat(this.subgenre, "&page=").concat(this.current_page);
       } else if (this.keyword && this.genre) {
+        console.log('ジャンルとキーワード');
         url = "".concat(window.location.origin, "/").concat(this.genre, "?key=").concat(this.keyword, "&page=").concat(this.current_page);
       } else if (!this.keyword && this.genre) {
+        console.log('キーワードなしで親ジャンルだけ');
         url = "".concat(window.location.origin, "/").concat(this.genre, "?page=").concat(this.current_page);
       } else {
+        console.log('その他');
         url = "".concat(window.location.origin, "/stocks?page=").concat(this.current_page);
       }
 
@@ -1122,74 +1113,115 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
 /* harmony export */ });
-/* harmony import */ var _layout_Header__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../layout/Header */ "./resources/js/components/layout/Header.vue");
-/* harmony import */ var _layout_Footer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../layout/Footer */ "./resources/js/components/layout/Footer.vue");
-/* harmony import */ var _layout_Pagination__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../layout/Pagination */ "./resources/js/components/layout/Pagination.vue");
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/regenerator */ "./node_modules/@babel/runtime/regenerator/index.js");
+/* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _layout_Header__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../layout/Header */ "./resources/js/components/layout/Header.vue");
+/* harmony import */ var _layout_Footer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../layout/Footer */ "./resources/js/components/layout/Footer.vue");
 
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
+
+function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {
-    Header: _layout_Header__WEBPACK_IMPORTED_MODULE_0__.default,
-    Footer: _layout_Footer__WEBPACK_IMPORTED_MODULE_1__.default,
-    Pagination: _layout_Pagination__WEBPACK_IMPORTED_MODULE_2__.default
+    Header: _layout_Header__WEBPACK_IMPORTED_MODULE_1__.default,
+    Footer: _layout_Footer__WEBPACK_IMPORTED_MODULE_2__.default
   },
   title: 'Image Archive',
   data: function data() {
     return {
       title: '画像',
       stocks: null,
+      subgenre: null,
       current_page: null,
       lists: [],
       length: null,
@@ -1208,19 +1240,13 @@ __webpack_require__.r(__webpack_exports__);
     };
   },
   mounted: function mounted() {
-    this.current_page = Number(this.$route.query.page) || 1;
-    this.keyword = this.$route.query.key;
-    this.subGenreSelected = {
-      value: 'illust',
-      text: 'イラスト'
-    };
-    this.selectSubgenre(this.subGenreSelected); //this.subGenreSelected = {value:this.$route.query.subgenre,text:null}
-    //console.log('urlから取得したクエリ')
-    //console.log(this.subGenreSelected)
-    //let hoge = this.$route.query.subgenre
-    //console.log(hoge)
+    this.getSubgenre(); //普段はURLから取得　検索時はそれを上書き　URLは変化する　が理想
 
-    this.getSubgenre(); //this.selectSubgenre(this.subGenreSelected)
+    this.current_page = Number(this.$route.query.page) || 1;
+    this.keyword = this.$route.query.key; //this.subgenre.value = this.$route.query.subgenre
+    //サブジャンルもURLのクエリパラメーターから取得したいがプルダウンを連動させる方法がわからない
+
+    this.showArchive();
   },
   computed: {},
   methods: {
@@ -1231,9 +1257,97 @@ __webpack_require__.r(__webpack_exports__);
       console.log(this.subGenreSelected);
       console.log('子コンポーネントに投げるサブジャンルは' + this.subGenreSelected.value);
     },
-    getStocksFromChild: function getStocksFromChild(value) {
-      //ページネーションコンポーネントから一覧すべきレコードを取得
-      this.stocks = value;
+    showArchive: function showArchive() {
+      var _this = this;
+
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+        var result, stocks;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                result = null; // this.keyword = this.keyword
+                // this.subgenre = this.subgenre
+                // result = await axios.get(
+                //     `/api/search?genre=image&subgenre=${this.subgenre}&key=${this.keyword}&page=${this.current_page}`
+                //     )
+
+                console.log('サブジャンルは');
+                console.log(_this.subGenreSelected.value); // if (this.subgenre == 0||this.subgenre==undefined) {
+                //     this.subgenre = null
+                // }
+                // if (this.keyword == 0||this.subgenre==undefined) {
+                //     this.keyword = undefined
+                // }
+
+                console.log(_this.subgenre);
+                _context.next = 6;
+                return axios.get('/api/search', {
+                  params: {
+                    genre: 'image',
+                    subgenre: _this.subGenreSelected.value,
+                    key: _this.keyword
+                  }
+                });
+
+              case 6:
+                result = _context.sent;
+                stocks = result.data;
+                _this.stocks = stocks.data;
+                _this.parPage = stocks.meta.per_page; //1ページ当たりの表示件数
+
+                _this.totalStocksPer = stocks.meta.total; //全部でアイテムが何個あるか
+
+                _this.length = stocks.meta.last_page; //総ページ数を取得
+
+                _this.makePagenation();
+
+              case 13:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee);
+      }))();
+    },
+    makePagenation: function makePagenation() {
+      this.pages = [];
+
+      for (var i = 1; i < this.length + 1; i++) {
+        //ページ番号とリンク先をオブジェクトで追加
+        this.pages.push({
+          no: i
+        });
+      } //1個前のページ
+
+
+      if (this.current_page !== 1) {
+        this.previous = this.current_page - 1;
+      } else {
+        this.previous = 1;
+      } //次のページ
+
+
+      if (this.current_page !== this.length) {
+        this.next = this.current_page + 1;
+      } else {
+        this.next = this.length;
+      }
+    },
+    changePage: function changePage(number) {
+      console.log('changepage');
+      this.current_page = number; //受け取ったページ番号をthis.currentpageに格納
+
+      this.showArchive();
+      window.history.pushState({
+        number: number
+      }, "Page".concat(number), "".concat(window.location.origin, "/image?subgenre=").concat(this.subGenreSelected.value, "&?key=").concat(this.keyword, "&page=").concat(this.current_page));
+      this.moveToTop();
+    },
+    moveToTop: function moveToTop() {
+      window.scrollTo({
+        top: 0
+      });
     },
     checkImgExist: function checkImgExist(id) {
       //サムネイル画像がエラーになるときは代替え画像に置き換え
@@ -1241,12 +1355,12 @@ __webpack_require__.r(__webpack_exports__);
       img.setAttribute('src', '/storage/default_img/notfound.jpg');
     },
     getSubgenre: function getSubgenre() {
-      var _this = this;
+      var _this2 = this;
 
       axios.get("/api/stocks/getSubgenre?genre=image").then(function (response) {
         var subgenres = response.data;
         subgenres.filter(function (subgenre) {
-          _this.subGenreOptions.push({
+          _this2.subGenreOptions.push({
             value: subgenre.subgenre,
             text: subgenre.subgenreText
           });
@@ -9828,190 +9942,328 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c(
-    "div",
-    [
-      _c("h1", [_vm._v(_vm._s(_vm.title))]),
-      _vm._v(" "),
-      _vm.searchKeyword
-        ? _c("h2", [_vm._v("「" + _vm._s(_vm.searchKeyword) + "」の検索結果")])
-        : _vm._e(),
-      _vm._v(" "),
-      _c(
-        "div",
-        [
-          _c(
-            "b-input-group",
-            {
-              staticClass: "search",
-              scopedSlots: _vm._u([
-                {
-                  key: "prepend",
-                  fn: function() {
-                    return [
-                      _c(
-                        "b-dropdown",
-                        { attrs: { text: _vm.subGenreSelected.text } },
-                        [
-                          _c(
+  return _c("div", [
+    _c("h1", [_vm._v(_vm._s(_vm.title))]),
+    _vm._v(" "),
+    _vm.searchKeyword
+      ? _c("h2", [_vm._v("「" + _vm._s(_vm.searchKeyword) + "」の検索結果")])
+      : _vm._e(),
+    _vm._v(
+      "\n    選択済みの選択肢をドロップダウンに表示したければ、javascriptで書かないとあかんかも\n    "
+    ),
+    _c(
+      "div",
+      [
+        _c(
+          "b-input-group",
+          {
+            staticClass: "search",
+            scopedSlots: _vm._u([
+              {
+                key: "prepend",
+                fn: function() {
+                  return [
+                    _c(
+                      "b-dropdown",
+                      { attrs: { text: _vm.subGenreSelected.text } },
+                      [
+                        _c(
+                          "b-dropdown-item",
+                          {
+                            on: {
+                              click: function($event) {
+                                return _vm.selectSubgenre({
+                                  value: null,
+                                  text: "すべての画像"
+                                })
+                              }
+                            }
+                          },
+                          [_vm._v("すべての画像")]
+                        ),
+                        _vm._v(" "),
+                        _vm._l(_vm.subGenreOptions, function(subGenreOption) {
+                          return _c(
                             "b-dropdown-item",
                             {
+                              key: subGenreOption.id,
                               on: {
                                 click: function($event) {
-                                  return _vm.selectSubgenre({
-                                    value: null,
-                                    text: "すべての画像"
-                                  })
+                                  return _vm.selectSubgenre(subGenreOption)
                                 }
                               }
                             },
-                            [_vm._v("すべての画像")]
-                          ),
-                          _vm._v(" "),
-                          _vm._l(_vm.subGenreOptions, function(subGenreOption) {
-                            return _c(
-                              "b-dropdown-item",
-                              {
-                                key: subGenreOption.id,
-                                on: {
-                                  click: function($event) {
-                                    return _vm.selectSubgenre(subGenreOption)
-                                  }
-                                }
-                              },
-                              [
-                                _vm._v(
-                                  "\n                        " +
-                                    _vm._s(subGenreOption.text) +
-                                    "\n                    "
-                                )
-                              ]
-                            )
-                          })
-                        ],
-                        2
-                      )
-                    ]
-                  },
-                  proxy: true
+                            [
+                              _vm._v(
+                                "\n                        " +
+                                  _vm._s(subGenreOption.text) +
+                                  "\n                    "
+                              )
+                            ]
+                          )
+                        })
+                      ],
+                      2
+                    )
+                  ]
                 },
-                {
-                  key: "append",
-                  fn: function() {
-                    return [
-                      _c(
-                        "b-button",
-                        {
-                          attrs: {
-                            type: "",
-                            id: "btn-search",
-                            variant: "primary"
-                          },
-                          on: {
-                            click: function($event) {
-                              _vm.$refs.child.search()
-                              _vm.searchKeyword = _vm.keyword
-                            }
-                          }
-                        },
-                        [
-                          _c("font-awesome-icon", {
-                            attrs: { icon: ["fa", "search"] }
-                          })
-                        ],
-                        1
-                      )
-                    ]
-                  },
-                  proxy: true
-                }
-              ])
-            },
-            [
-              _vm._v(" "),
-              _c("b-form-input", {
-                on: {
-                  keydown: function($event) {
-                    if (
-                      !$event.type.indexOf("key") &&
-                      _vm._k($event.keyCode, "enter", 13, $event.key, "Enter")
-                    ) {
-                      return null
-                    }
-                    _vm.$refs.child.search()
-                    _vm.searchKeyword = _vm.keyword
+                proxy: true
+              }
+            ])
+          },
+          [
+            _vm._v(" "),
+            _c("b-form-input", {
+              on: {
+                keydown: function($event) {
+                  if (
+                    !$event.type.indexOf("key") &&
+                    _vm._k($event.keyCode, "enter", 13, $event.key, "Enter")
+                  ) {
+                    return null
                   }
-                },
-                model: {
-                  value: _vm.keyword,
-                  callback: function($$v) {
-                    _vm.keyword = $$v
-                  },
-                  expression: "keyword"
+                  _vm.showArchive()
+                  _vm.changePage(1)
                 }
-              })
+              },
+              model: {
+                value: _vm.keyword,
+                callback: function($$v) {
+                  _vm.keyword = $$v
+                },
+                expression: "keyword"
+              }
+            })
+          ],
+          1
+        )
+      ],
+      1
+    ),
+    _vm._v(" "),
+    _c(
+      "div",
+      { staticClass: "stocks" },
+      _vm._l(_vm.stocks, function(stock) {
+        return _c("div", { key: stock.id }, [
+          _c(
+            "div",
+            { staticClass: "stock_thumbnail" },
+            [
+              _c("router-link", { attrs: { to: "stocks/" + stock.id } }, [
+                _c("img", {
+                  staticClass: "thumbnail",
+                  attrs: {
+                    id: stock.id,
+                    src: "/storage/stock_thumbnail/" + stock.filename + ".png"
+                  },
+                  on: {
+                    error: function($event) {
+                      return _vm.checkImgExist(stock.id)
+                    }
+                  }
+                })
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "genre_icon" }, [
+                _c(
+                  "span",
+                  [
+                    _c("font-awesome-icon", {
+                      attrs: { icon: ["fas", "image"] }
+                    })
+                  ],
+                  1
+                )
+              ])
             ],
             1
           )
-        ],
-        1
-      ),
+        ])
+      }),
+      0
+    ),
+    _vm._v(" "),
+    _c("div", { staticClass: "text-center" }, [
+      _vm._v("\n        現在のページ：" + _vm._s(_vm.current_page)),
+      _c("br"),
+      _vm._v("\n        トータルページ数:" + _vm._s(_vm.length)),
+      _c("br"),
+      _vm._v("\n        トータル記事数:" + _vm._s(_vm.totalStocksPer)),
+      _c("br"),
       _vm._v(" "),
-      _c(
-        "div",
-        { staticClass: "stocks" },
-        _vm._l(_vm.stocks, function(stock) {
-          return _c("div", { key: stock.id }, [
+      _c("nav", { attrs: { "aria-label": "Page navigation example" } }, [
+        _c("ul", { staticClass: "pagination justify-content-center" }, [
+          _c("li", { staticClass: "page-item" }, [
             _c(
-              "div",
-              { staticClass: "stock_thumbnail" },
-              [
-                _c("router-link", { attrs: { to: "stocks/" + stock.id } }, [
-                  _c("img", {
-                    staticClass: "thumbnail",
-                    attrs: {
-                      id: stock.id,
-                      src: "/storage/stock_thumbnail/" + stock.filename + ".png"
-                    },
+              "button",
+              {
+                staticClass: "page-link",
+                on: {
+                  click: function($event) {
+                    return _vm.changePage(1)
+                  }
+                }
+              },
+              [_vm._v("\n                        «")]
+            )
+          ]),
+          _vm._v(" "),
+          _c("li", { staticClass: "page-item" }, [
+            _c(
+              "button",
+              {
+                staticClass: "page-link",
+                on: {
+                  click: function($event) {
+                    return _vm.changePage(_vm.previous)
+                  }
+                }
+              },
+              [_vm._v("\n                        ‹")]
+            )
+          ]),
+          _vm._v(" "),
+          _vm.current_page > 3
+            ? _c(
+                "li",
+                {
+                  staticClass: "page-item disabled bv-d-xs-down-none",
+                  attrs: { role: "separator" }
+                },
+                [_c("span", { staticClass: "page-link" }, [_vm._v("…")])]
+              )
+            : _vm._e(),
+          _vm._v(" "),
+          _c("li", { staticClass: "page-item" }, [
+            _vm.current_page - 2 > 0
+              ? _c(
+                  "button",
+                  {
+                    staticClass: "page-link",
                     on: {
-                      error: function($event) {
-                        return _vm.checkImgExist(stock.id)
+                      click: function($event) {
+                        return _vm.changePage(_vm.current_page - 2)
                       }
                     }
-                  })
-                ]),
-                _vm._v(" "),
-                _c("div", { staticClass: "genre_icon" }, [
-                  _c(
-                    "span",
-                    [
-                      _c("font-awesome-icon", {
-                        attrs: { icon: ["fas", "image"] }
-                      })
-                    ],
-                    1
-                  )
-                ])
-              ],
-              1
+                  },
+                  [_vm._v(_vm._s(_vm.current_page - 2))]
+                )
+              : _vm._e()
+          ]),
+          _vm._v(" "),
+          _c("li", { staticClass: "page-item" }, [
+            _vm.current_page - 1 > 0
+              ? _c(
+                  "button",
+                  {
+                    staticClass: "page-link",
+                    on: {
+                      click: function($event) {
+                        return _vm.changePage(_vm.current_page - 1)
+                      }
+                    }
+                  },
+                  [_vm._v(_vm._s(_vm.current_page - 1))]
+                )
+              : _vm._e()
+          ]),
+          _vm._v(" "),
+          _c("li", { staticClass: "page-item active" }, [
+            _c(
+              "button",
+              {
+                staticClass: "page-link",
+                on: {
+                  click: function($event) {
+                    return _vm.changePage(_vm.current_page)
+                  }
+                }
+              },
+              [_vm._v(_vm._s(_vm.current_page))]
+            )
+          ]),
+          _vm._v(" "),
+          _c("li", { staticClass: "page-item" }, [
+            _vm.current_page + 1 <= _vm.length
+              ? _c(
+                  "button",
+                  {
+                    staticClass: "page-link",
+                    on: {
+                      click: function($event) {
+                        return _vm.changePage(_vm.current_page + 1)
+                      }
+                    }
+                  },
+                  [_vm._v(_vm._s(_vm.current_page + 1))]
+                )
+              : _vm._e()
+          ]),
+          _vm._v(" "),
+          _c("li", { staticClass: "page-item" }, [
+            _vm.current_page + 1 < _vm.length
+              ? _c(
+                  "button",
+                  {
+                    staticClass: "page-link",
+                    on: {
+                      click: function($event) {
+                        return _vm.changePage(_vm.current_page + 2)
+                      }
+                    }
+                  },
+                  [_vm._v(_vm._s(_vm.current_page + 2))]
+                )
+              : _vm._e()
+          ]),
+          _vm._v(" "),
+          _vm.current_page < _vm.length - 2
+            ? _c(
+                "li",
+                {
+                  staticClass: "page-item disabled bv-d-xs-down-none",
+                  attrs: { role: "separator" }
+                },
+                [_c("span", { staticClass: "page-link" }, [_vm._v("…")])]
+              )
+            : _vm._e(),
+          _vm._v(" "),
+          _vm.current_page + 2 > 0
+            ? _c("li", { staticClass: "page-item" }, [
+                _c(
+                  "button",
+                  {
+                    staticClass: "page-link",
+                    on: {
+                      click: function($event) {
+                        return _vm.changePage(_vm.next)
+                      }
+                    }
+                  },
+                  [_vm._v("\n                        ›")]
+                )
+              ])
+            : _vm._e(),
+          _vm._v(" "),
+          _c("li", { staticClass: "page-item" }, [
+            _c(
+              "button",
+              {
+                staticClass: "page-link",
+                on: {
+                  click: function($event) {
+                    return _vm.changePage(_vm.length)
+                  }
+                }
+              },
+              [_vm._v("\n                        »")]
             )
           ])
-        }),
-        0
-      ),
-      _vm._v(" "),
-      _c("Pagination", {
-        ref: "child",
-        attrs: {
-          genre: "image",
-          keyword: this.keyword,
-          subgenre: _vm.subGenreSelected.value
-        },
-        on: { stocksFromChild: _vm.getStocksFromChild }
-      })
-    ],
-    1
-  )
+        ])
+      ])
+    ])
+  ])
 }
 var staticRenderFns = []
 render._withStripped = true
