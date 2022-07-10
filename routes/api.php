@@ -34,6 +34,10 @@ Route::get('/search', [StockController::class, 'search']);
 //sanctomのmidlewareで挟んだほうがいい
 Route::post('/stocks/create', [StockController::class, 'create']);
 Route::get('/stocks/getSubgenre', [SubgenreController::class, 'getSubgenre']);
+Route::get('/stocks/subgenreSelectedByUrl', [SubgenreController::class, 'subgenreSelectedByUrl']);
+
+
+
 
 Route::get('/stocks/{stock_id}', [StockController::class, 'single']);//urlのstock_idの部分に入力された数字をsingleメソッドに渡す
 Route::get('/stock/author/{author_id}', [StockController::class, 'stocksByAuthorId']);

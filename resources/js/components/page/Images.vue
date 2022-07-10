@@ -2,7 +2,6 @@
     <div>
         <h1>{{title}}</h1>
         <h2 v-if="searchKeyword">「{{searchKeyword}}」の検索結果</h2>
-        選択済みの選択肢をドロップダウンに表示したければ、javascriptで書かないとあかんかも
         <div>
             <b-input-group class="search">
                 <template #prepend>
@@ -12,14 +11,10 @@
                             @click="selectSubgenre(subGenreOption)">
                             {{subGenreOption.text}}
                         </b-dropdown-item>
-
                     </b-dropdown>
                 </template>
-
                 <b-form-input v-model="keyword" v-on:keydown.enter="showArchive() ;changePage(1)">
                 </b-form-input>
-
-
             </b-input-group>
         </div>
 
@@ -116,61 +111,71 @@
             }
         },
         mounted() {
-            this.getSubgenre()
+            window.addEventListener("popstate", this.handlePopstate)
 
-            //普段はURLから取得　検索時はそれを上書き　URLは変化する　が理想
+            this.getSubgenre()
             this.current_page = Number(this.$route.query.page) || 1
             this.keyword = this.$route.query.key
-            //this.subgenre.value = this.$route.query.subgenre
+            this.subGenreSelected.value = this.$route.query.subgenre
 
-            //サブジャンルもURLのクエリパラメーターから取得したいがプルダウンを連動させる方法がわからない
-
+            if (this.$route.query.subgenre != undefined) {
+                //console.log('サブジャンルはudifeinedじゃないぞ')
+                this.subgenreSelectedByUrl()
+            }
             this.showArchive()
         },
+        beforeDestroy() {
+            window.removeEventListener("popstate", this.handlePopstate);
+        },
         computed: {},
+
         methods: {
             selectSubgenre(subGenreOption) {
                 this.subGenreSelected = subGenreOption
-                //this.genre = subGenreOption.value
-                console.log('選ばれたサブジャンルは')
-                console.log(this.subGenreSelected)
-                console.log('子コンポーネントに投げるサブジャンルは' + this.subGenreSelected.value)
+
+                //console.log('選ばれたサブジャンルは')
+                //console.log(this.subGenreSelected)
             },
+
+            handlePopstate() {
+                this.current_page = Number(this.$route.query.page) || 1
+
+                if (this.$route.query.key != undefined) {
+                    this.keyword = this.$route.query.key
+                } else {
+                    this.keyword = ''
+                }
+                if (this.$route.query.subgenre != undefined) {
+                    this.subGenreSelected.value = this.$route.query.subgenre
+                    this.subgenreSelectedByUrl()
+                } else {
+                    this.subgenreSelectedByUrl()
+                }
+
+                // if (this.$route.query.subgenre != undefined) {
+                //     //console.log('サブジャンルはudifeinedじゃないぞ')
+                //     this.subgenreSelectedByUrl()
+                // }
+                this.showArchive()
+            },
+
             async showArchive() {
+                this.searchKeyword = this.keyword
+
                 let result = null
-
-
-                // this.keyword = this.keyword
-                // this.subgenre = this.subgenre
-                // result = await axios.get(
-                //     `/api/search?genre=image&subgenre=${this.subgenre}&key=${this.keyword}&page=${this.current_page}`
-                //     )
-                console.log('サブジャンルは')
-                console.log(this.subGenreSelected.value)
-
-                // if (this.subgenre == 0||this.subgenre==undefined) {
-                //     this.subgenre = null
-                // }
-
-                // if (this.keyword == 0||this.subgenre==undefined) {
-                //     this.keyword = undefined
-                // }
-
-
-                console.log(this.subgenre)
 
                 result = await axios.get('/api/search', {
                     params: {
                         genre: 'image',
                         subgenre: this.subGenreSelected.value,
-                        key: this.keyword
+                        key: this.keyword,
+                        page: this.current_page,
                     }
                 });
 
                 const stocks = result.data;
                 this.stocks = stocks.data;
-                this.parPage = stocks.meta
-                    .per_page //1ページ当たりの表示件数
+                this.parPage = stocks.meta.per_page //1ページ当たりの表示件数
                 this.totalStocksPer = stocks.meta.total //全部でアイテムが何個あるか
                 this.length = stocks.meta.last_page //総ページ数を取得
                 this.makePagenation()
@@ -199,16 +204,30 @@
                 }
             },
             changePage(number) {
-                console.log('changepage')
+                this.current_page = number //受け取ったページ番号をthis.current_pageに格納
 
-                    this.current_page = number //受け取ったページ番号をthis.currentpageに格納
-                    this.showArchive()
-                    window.history.pushState({
-                            number
-                        },
-                        `Page${number}`,
-                        `${window.location.origin}/image?subgenre=${this.subGenreSelected.value}&?key=${this.keyword}&page=${this.current_page}`
-                    )      
+                let $url = null
+
+                if (this.subGenreSelected.value) {
+                    console.log('サブジャンルの指定がある')
+                    $url =
+                        `${window.location.origin}/image?subgenre=${this.subGenreSelected.value}&key=${this.keyword}&page=${this.current_page}`
+                } else if (!this.subGenreSelected.value && !this.keyword) {
+                    console.log('サブジャンルもキーワードも指定がない')
+                    $url = `${window.location.origin}/image?page=${this.current_page}`
+                } else if (!this.subGenreSelected.value) {
+                    console.log('サブジャンルの指定がない')
+                    $url = `${window.location.origin}/image?key=${this.keyword}&page=${this.current_page}`
+                }
+
+                window.history.pushState({
+                        number
+                    },
+                    `Page${number}`,
+                    $url
+                )
+
+                this.showArchive()
                 this.moveToTop()
             },
             moveToTop() {
@@ -232,6 +251,16 @@
                         });
                     }) //サブジャンルの選択肢をデータベースから取得
             },
+            subgenreSelectedByUrl() {
+                axios.get("/api/stocks/subgenreSelectedByUrl?subgenre=" + this.$route.query.subgenre)
+                    .then(response => {
+                        //console.log('apiから取得したサブジャンルは')
+                        //console.log(response.data.subgenre.value)
+                        this.subGenreSelected.value = response.data.subgenre
+                        this.subGenreSelected.text = response.data.subgenreText
+                        //console.log(this.subGenreSelected)
+                    }) //サブジャンルの選択肢をデータベースから取得
+            }
 
         }
     };
