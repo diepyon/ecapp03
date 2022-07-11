@@ -1254,8 +1254,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   computed: {},
   methods: {
     selectSubgenre: function selectSubgenre(subGenreOption) {
-      this.subGenreSelected = subGenreOption; //console.log('選ばれたサブジャンルは')
-      //console.log(this.subGenreSelected)
+      this.subGenreSelected = subGenreOption;
     },
     handlePopstate: function handlePopstate() {
       this.current_page = Number(this.$route.query.page) || 1;
@@ -1270,12 +1269,11 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         this.subGenreSelected.value = this.$route.query.subgenre;
         this.subgenreSelectedByUrl();
       } else {
-        this.subgenreSelectedByUrl();
-      } // if (this.$route.query.subgenre != undefined) {
-      //     //console.log('サブジャンルはudifeinedじゃないぞ')
-      //     this.subgenreSelectedByUrl()
-      // }
-
+        this.selectSubgenre({
+          value: null,
+          text: 'すべての画像'
+        });
+      }
 
       this.showArchive();
     },
@@ -1393,10 +1391,13 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       var _this3 = this;
 
       axios.get("/api/stocks/subgenreSelectedByUrl?subgenre=" + this.$route.query.subgenre).then(function (response) {
-        //console.log('apiから取得したサブジャンルは')
-        //console.log(response.data.subgenre.value)
-        _this3.subGenreSelected.value = response.data.subgenre;
-        _this3.subGenreSelected.text = response.data.subgenreText; //console.log(this.subGenreSelected)
+        console.log('apiから取得したサブジャンルは');
+        console.log(response.data.subgenre);
+
+        if (response.data.subgenre != undefined) {
+          _this3.subGenreSelected.value = response.data.subgenre;
+          _this3.subGenreSelected.text = response.data.subgenreText;
+        }
       }); //サブジャンルの選択肢をデータベースから取得
     }
   }

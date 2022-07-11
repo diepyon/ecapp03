@@ -132,9 +132,6 @@
         methods: {
             selectSubgenre(subGenreOption) {
                 this.subGenreSelected = subGenreOption
-
-                //console.log('選ばれたサブジャンルは')
-                //console.log(this.subGenreSelected)
             },
 
             handlePopstate() {
@@ -149,13 +146,11 @@
                     this.subGenreSelected.value = this.$route.query.subgenre
                     this.subgenreSelectedByUrl()
                 } else {
-                    this.subgenreSelectedByUrl()
+                    this.selectSubgenre({
+                        value: null,
+                        text: 'すべての画像'
+                    })
                 }
-
-                // if (this.$route.query.subgenre != undefined) {
-                //     //console.log('サブジャンルはudifeinedじゃないぞ')
-                //     this.subgenreSelectedByUrl()
-                // }
                 this.showArchive()
             },
 
@@ -254,11 +249,13 @@
             subgenreSelectedByUrl() {
                 axios.get("/api/stocks/subgenreSelectedByUrl?subgenre=" + this.$route.query.subgenre)
                     .then(response => {
-                        //console.log('apiから取得したサブジャンルは')
-                        //console.log(response.data.subgenre.value)
-                        this.subGenreSelected.value = response.data.subgenre
-                        this.subGenreSelected.text = response.data.subgenreText
-                        //console.log(this.subGenreSelected)
+                        console.log('apiから取得したサブジャンルは')
+                        console.log(response.data.subgenre)
+
+                        if (response.data.subgenre != undefined) {
+                            this.subGenreSelected.value = response.data.subgenre
+                            this.subGenreSelected.text = response.data.subgenreText
+                        }
                     }) //サブジャンルの選択肢をデータベースから取得
             }
 
