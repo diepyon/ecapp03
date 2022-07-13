@@ -6,7 +6,7 @@
             <b-input-group class="search">
                 <template #prepend>
                     <b-dropdown :text="subGenreSelected.text">
-                        <b-dropdown-item @click="selectSubgenre({value:null,text:'すべての画像'})">すべての画像</b-dropdown-item>
+                        <b-dropdown-item @click="selectSubgenre({value:null,text:'すべての映像'})">すべての映像</b-dropdown-item>
                         <b-dropdown-item v-for="subGenreOption in subGenreOptions" :key="subGenreOption.id"
                             @click="selectSubgenre(subGenreOption)">
                             {{subGenreOption.text}}
@@ -32,7 +32,7 @@
                     </router-link>
                     <div class="genre_icon">
                         <span>
-                            <font-awesome-icon :icon="['fas', 'image']" /></span>
+                            <font-awesome-icon :icon="['fas', 'video']" /></span>
                     </div>
                 </div>
             </div>
@@ -92,10 +92,10 @@
             Header,
             Footer,
         },
-        title: 'Image Archive',
+        title: 'Video Archive',
         data() {
             return {
-                title: '画像',
+                title: '映像',
                 stocks: null,
                 subgenre: null,
                 current_page: null,
@@ -111,13 +111,11 @@
                 subGenreOptions: [],
                 subGenreSelected: {
                     value: null,
-                    text: 'すべての画像'
+                    text: 'すべての映像'
                 },
             }
         },
         mounted() {
-            //console.log('mounted発火')
-
             window.addEventListener("popstate", this.handlePopstate)
 
             this.getSubgenre()
@@ -135,7 +133,7 @@
             window.removeEventListener("popstate", this.handlePopstate);
         },
         computed: {},
-        
+
         methods: {
             selectSubgenre(subGenreOption) {
                 this.subGenreSelected = subGenreOption
@@ -155,7 +153,7 @@
                 } else {
                     this.selectSubgenre({
                         value: null,
-                        text: 'すべての画像'
+                        text: 'すべての映像'
                     })
                 }
                 this.showArchive()
@@ -168,7 +166,7 @@
 
                 result = await axios.get('/api/search', {
                     params: {
-                        genre: 'image',
+                        genre: 'video',
                         subgenre: this.subGenreSelected.value,
                         key: this.keyword,
                         page: this.current_page,
@@ -205,22 +203,23 @@
             },
             changePage(number) {
                 this.current_page = number //受け取ったページ番号をthis.current_pageに格納
+
                 let $url = null
 
                 if (this.subGenreSelected.value && this.keyword) {
                     //console.log('サブジャンルの指定も、キーワードの指定もある')
                     $url =
-                        `${window.location.origin}/image?subgenre=${this.subGenreSelected.value}&key=${this.keyword}&page=${this.current_page}`
+                        `${window.location.origin}/video?subgenre=${this.subGenreSelected.value}&key=${this.keyword}&page=${this.current_page}`
                 } else if (this.subGenreSelected.value && !this.keyword) {
                     //console.log('サブジャンルの指定はあるが、キーワードの指定はない')
                     $url =
-                        `${window.location.origin}/image?subgenre=${this.subGenreSelected.value}&page=${this.current_page}`
+                        `${window.location.origin}/video?subgenre=${this.subGenreSelected.value}&page=${this.current_page}`
                 } else if (!this.subGenreSelected.value && !this.keyword) {
                     //console.log('サブジャンルもキーワードも指定がない')
-                    $url = `${window.location.origin}/image?page=${this.current_page}`
+                    $url = `${window.location.origin}/video?page=${this.current_page}`
                 } else if (!this.subGenreSelected.value) {
                     //console.log('サブジャンルの指定がない')
-                    $url = `${window.location.origin}/image?key=${this.keyword}&page=${this.current_page}`
+                    $url = `${window.location.origin}/video?key=${this.keyword}&page=${this.current_page}`
                 }
 
                 window.history.pushState({
@@ -238,12 +237,12 @@
                     top: 0,
                 });
             },
-            checkImgExist(id) { //サムネイル画像がエラーになるときは代替え画像に置き換え
+            checkImgExist(id) { //サムネイル画像がエラーになるときは代替え映像に置き換え
                 const img = document.getElementById(id);
                 img.setAttribute('src', '/storage/default_img/notfound.jpg');
             },
             getSubgenre() {
-                axios.get("/api/stocks/getSubgenre?genre=image")
+                axios.get("/api/stocks/getSubgenre?genre=video")
                     .then(response => {
                         let subgenres = response.data
                         subgenres.filter(subgenre => {
@@ -265,8 +264,8 @@
                             this.subGenreSelected.text = response.data.subgenreText
                         }
                     }) //サブジャンルの選択肢をデータベースから取得
-            },
-        },
+            }
+        }
     };
 
 </script>

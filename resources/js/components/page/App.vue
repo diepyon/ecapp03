@@ -14,6 +14,11 @@
     import SingleImage from '../layout/SingleImage'
 
     export default {
+        data() {
+            return {
+            }
+        },
+
         components: {
             Header,
             Footer,
@@ -25,6 +30,9 @@
             //うまくいかない
             //this.$store.commit("resetState") //vuexに保存されているメッセージをリセット
         },
+        methods: {
+
+        }
     }
 
 </script>
@@ -37,5 +45,10 @@
     footer {
         margin-top: .5em;
     }
+
+    /* cssを親に集約するならここに書く */
+    /* ::v-deep .aaa {
+        color:red;
+    } */
 
 </style>

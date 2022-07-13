@@ -5,6 +5,8 @@ import About from './components/page/About.vue'
 import StockCreate from './components/page/StockCreate.vue'
 import StockArchive from './components/page/StockArchive.vue'
 import Images from './components/page/Images.vue'
+import Videos from './components/page/Videos.vue'
+import Audios from './components/page/Audios.vue'
 import StockSingle from './components/page/StockSingle.vue'
 import Login from './components/page/Login.vue'
 import NotFound from './components/page/NotFound.vue'
@@ -45,7 +47,17 @@ const router = new Router({
             path: '/image',
             name: 'images',
             component: Images
-        },//これは必要。URLの受け皿にもなる。
+        },
+        {
+            path: '/video',
+            name: 'videos',
+            component: Videos
+        },
+        {
+            path: '/audio',
+            name: 'audios',
+            component: Audios
+        },        
         {
             path: '/stocks/:id(\\d+)',
             name: 'stocksingle',

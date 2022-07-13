@@ -10,9 +10,6 @@ use App\Http\Requests\UserRegistRequest;
 use App\Providers\RouteServiceProvider;
 use App\Models\User;
 
-//use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
-
-
 class RegisterController extends Controller
 {
     public function register(UserRegistRequest $request)

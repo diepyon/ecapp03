@@ -12,6 +12,8 @@
                         </b-nav-item>
                         <b-nav-item :class="{ active: $route.path === '/stocks' }" to="/stocks">Archive</b-nav-item>
                         <b-nav-item :class="{ active: $route.path === '/image' }" to="/image">画像</b-nav-item>
+                        <b-nav-item :class="{ active: $route.path === '/audio' }" to="/audio">音源</b-nav-item>
+                        <b-nav-item :class="{ active: $route.path === '/video' }" to="/video">映像</b-nav-item>
                         <b-nav-item :class="{ active: $route.path === '/login' }" to="/login">Login</b-nav-item>
                         <b-nav-item :class="{ active: $route.path === '/register' }" to="/register">Register
                         </b-nav-item>
@@ -39,10 +41,10 @@
             return {
                 userName: null,
                 isLoggedIn: false,
+                resetFlug:null,
             }
         },
         mounted() {
-            
             //ユーザー名取れないなどログインしていないときだけ走らせれば省エネでは？
             //ていうかbeforemountedに書いてるかいらん？console.logで確認中
             axios.get("/api/loginCheck")
@@ -50,11 +52,11 @@
                     this.isLoggedIn = true
                     //this.userName = localStorage.getItem('userName')
                     //email: localStorage.getItem("userEmail"),
-                    console.log('mounted')
+                    console.log('mountedのログインチェックに成功')
                 })
                 .catch(error => {
                     this.isLoggedIn = false
-                    console.log('mounted')
+                    console.log('mountedに失敗')
                 })
 
             //プロフィール更新時に認識させるから必要
@@ -67,13 +69,13 @@
                     //セッション切れログアウトからのログイン時には通知が出ない
                     //oldvalueとnewvalueの動きを確認してリファクタリングが必要
 
-                    let referrer = this.$router.referrer//セッション切れの時のこの部分が知りたい
+                    let referrer = this.$router.referrer //セッション切れの時のこの部分が知りたい
                     console.log(referrer)
-                    
-                    if (this.userName && referrer.name == 'login' ) {
+
+                    if (this.userName && referrer.name == 'login') {
                         //ユーザー名が取得できた&ログインページから飛んできたか、元々のユーザー名がnullなら
                         this.makeToast('ログインしました。')
-                    } else if(this.userName==null) {
+                    } else if (this.userName == null) {
                         //ユーザー名がnullになったら
                         this.makeToast('ログアウトしました。')
                     }
@@ -87,14 +89,11 @@
                                 //email: localStorage.getItem("userEmail"),
                             }
                             this.$store.commit("updateUser", userInfo);
-                            console.log('beforemounted')
-
-
+                            console.log('gettersのログインチェックに成功')
                         })
                         .catch(error => {
                             this.isLoggedIn = false
-                                                        console.log('beforemounted')
-
+                            console.log('gettersのログインチェックに失敗')
                         })
                 }
             )
@@ -103,27 +102,27 @@
                 //email: localStorage.getItem("userEmail"),
             }
             this.$store.commit("updateUser", userInfo);
-
             //console.log(localStorage.getItem("userName")) //localstorageの値をとる
         },
 
         beforeUpdate() {
-            //console.log('beforeupdate')
-
-            //ここに書けばリロードじゃなくも行けるのでは？
-            //これでいけるならmounted直下の axios.get("/api/loginCheck")はいらないんじゃないかな
-            axios.get("/api/loginCheck")
-                .then(response => {
-                    this.isLoggedIn = true
-                    let userInfo = {
-                        name: this.$store.getters.getUserName,
-                        //email: localStorage.getItem("userEmail"),
-                    }
-                    this.$store.commit("updateUser", userInfo);
-                })
-                .catch(error => {
-                    this.isLoggedIn = false
-                })
+            //セッション切れの時にもちゃんと動作するか確認
+            if (this.isLoggedIn == false) {
+                axios.get("/api/loginCheck")
+                    .then(response => {
+                        this.isLoggedIn = true
+                        let userInfo = {
+                            name: this.$store.getters.getUserName,
+                            //email: localStorage.getItem("userEmail"),
+                        }
+                        this.$store.commit("updateUser", userInfo)
+                        console.log('beforeupdateのチェックに成功')
+                    })
+                    .catch(error => {
+                        this.isLoggedIn = false
+                        console.log('beforeupdateのチェックに失敗')
+                    })
+            }
         },
 
         computed: {
