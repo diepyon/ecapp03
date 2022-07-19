@@ -117,9 +117,7 @@
         },
         mounted() {
             //console.log('mounted発火')
-
             window.addEventListener("popstate", this.handlePopstate)
-
             this.getSubgenre()
             this.current_page = Number(this.$route.query.page) || 1
             this.keyword = this.$route.query.key
@@ -251,7 +249,7 @@
                                 value: subgenre.subgenre,
                                 text: subgenre.subgenreText
                             })
-                        });
+                        })
                     }) //サブジャンルの選択肢をデータベースから取得
             },
             subgenreSelectedByUrl() {

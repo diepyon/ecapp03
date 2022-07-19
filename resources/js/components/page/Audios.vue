@@ -23,10 +23,43 @@
             </b-input-group>
         </div>
 
-        <div>
-            <b-table striped hover :items="items"></b-table>
-        </div>
+        <!-- <div>
+            <b-table :items="items"></b-table>
+        </div> -->
 
+        <table data-v-35119782="" role="table" aria-busy="false" aria-colcount="3" class="table b-table">
+            <tbody role="rowgroup">
+                <tr role="row" class="" v-for="stock in stocks" :key="stock.id">
+                    <td aria-colindex="1" role="cell" class="">
+                        <!-- <b-button v-if="playing" style="margin-top:0;" @click="stop">
+                            <font-awesome-icon :icon="['fa', 'stop']" />
+                        </b-button>
+                        <b-button v-else style="margin-top:0" @click="play(stock.id)">
+                            <font-awesome-icon :icon="['fa', 'play']" />
+                        </b-button> -->
+                    </td>
+                    <td aria-colindex="2" role="cell" class=""> {{stock.name}}</td>
+                    <td aria-colindex="3" role="cell" class="">
+                        <div style="width:100%; margin:0 0 0 .5em ;">
+                            <!-- <wavesurfer :src="'/storage/stock_sample/'+stock.filename+'.mp3'" :options="options"
+                                id="'wavesurfer" :ref="surf"></wavesurfer> -->
+                        </div>
+                        {{stock.filename}}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div style="width:100%; margin:0 0 0 .5em ;">
+            <b-button v-if="playing" style="margin-top:0;" @click="stop">
+                <font-awesome-icon :icon="['fa', 'stop']" />
+            </b-button>
+            <b-button v-else style="margin-top:0" @click="play()">
+                <font-awesome-icon :icon="['fa', 'play']" />
+            </b-button>
+            <wavesurfer :src="'/storage/stock_sample/63337fec.mp3'" :options="options" id="aaa" ref="surf" >
+            </wavesurfer>
+        </div>
 
 
         <div class="">
@@ -82,16 +115,17 @@
                 </ul>
             </nav>
         </div>
-
     </div>
 </template>
 <script>
     import Header from "../layout/Header";
     import Footer from "../layout/Footer";
+    import WaveSurferVue from "wavesurfer.js-vue";
     export default {
         components: {
             Header,
             Footer,
+            WaveSurferVue,
         },
         title: 'Audio Archive',
         data() {
@@ -114,7 +148,10 @@
                     value: null,
                     text: 'すべての音源'
                 },
-
+                playing: false,
+                options: {
+                    height: 90
+                },
 
                 items: [{
                         age: 40,
@@ -137,8 +174,6 @@
                         last_name: 'Carney'
                     }
                 ]
-
-
             }
         },
         mounted() {
@@ -150,7 +185,6 @@
             this.subGenreSelected.value = this.$route.query.subgenre
 
             if (this.$route.query.subgenre != undefined) {
-                //console.log('サブジャンルはudifeinedじゃないぞ')
                 this.subgenreSelectedByUrl()
             }
             this.showArchive()
@@ -158,9 +192,28 @@
         beforeDestroy() {
             window.removeEventListener("popstate", this.handlePopstate);
         },
-        computed: {},
 
+        computed: {
+            player() {
+                return this.$refs.surf.waveSurfer
+            }
+        },
         methods: {
+            play: async function () {
+                this.$refs.surf.waveSurfer.play() //普通に再生
+                
+                //idを指定したい
+
+            },
+            finish: async function (playing) {
+                console.log('finishメソッドに渡った時点では' + playing)
+                var hage = this.$refs.surf.waveSurfer.on('finish', await
+                    function () {
+                        console.log('owata')
+                    });
+                return 'finish'
+            },
+
             selectSubgenre(subGenreOption) {
                 this.subGenreSelected = subGenreOption
             },
@@ -187,9 +240,7 @@
 
             async showArchive() {
                 this.searchKeyword = this.keyword
-
                 let result = null
-
                 result = await axios.get('/api/search', {
                     params: {
                         genre: 'audio',
@@ -197,8 +248,7 @@
                         key: this.keyword,
                         page: this.current_page,
                     }
-                });
-
+                })
                 const stocks = result.data;
                 this.stocks = stocks.data;
                 this.parPage = stocks.meta.per_page //1ページ当たりの表示件数
@@ -318,7 +368,6 @@
     .stock_thumbnail {
         position: relative;
     }
-
 
     .stock_thumbnail:hover img {
         filter: brightness(50%);

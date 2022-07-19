@@ -25,18 +25,15 @@
     .enter {
         border: 10px dotted powderblue;
     }
-
     .preview {
         margin: .5em;
     }
-
     /*ファイルプレビューエリアの余白*/
     .preview img,
     video {
         width: 100%;
         max-width: 500px;
     }
-
 </style>
 <script>
     import Header from '../layout/Header'

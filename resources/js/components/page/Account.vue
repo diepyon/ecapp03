@@ -195,7 +195,7 @@
                     .then(response => {
                         this.isLoggedIn = true
                         let currentUser = response.data
-
+                        console.log(currentUser)
                         this.user.name = currentUser.name
                         this.user.email = currentUser.email
 

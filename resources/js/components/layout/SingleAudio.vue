@@ -56,7 +56,7 @@
                 options: {
                     height: 90
                 },
-                file: "/storage/stock_sample/" + this.stock.filename + ".mp3",//ng
+                file: "/storage/stock_sample/" + this.stock.filename + ".mp3",
             }
         },
         mounted() {
@@ -66,6 +66,7 @@
         },
         methods: {
             play: async function () {
+                console.log(this.$refs.surf.waveSurfer)
                 this.$refs.surf.waveSurfer.play() //普通に再生
                 this.playing = this.$refs.surf.waveSurfer.isPlaying()
 

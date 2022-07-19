@@ -31,9 +31,9 @@
     import Header from "../layout/Header";
     import Footer from "../layout/Footer";
     import Pagination from "../layout/Pagination";
+    
 
     export default {
-
         components: {
             Header,
             Footer,

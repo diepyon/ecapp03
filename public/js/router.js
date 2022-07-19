@@ -496,8 +496,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       options: {
         height: 90
       },
-      file: "/storage/stock_sample/" + this.stock.filename + ".mp3" //ng
-
+      file: "/storage/stock_sample/" + this.stock.filename + ".mp3"
     };
   },
   mounted: function mounted() {
@@ -512,13 +511,14 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
+                console.log(this.$refs.surf.waveSurfer);
                 this.$refs.surf.waveSurfer.play(); //普通に再生
 
                 this.playing = this.$refs.surf.waveSurfer.isPlaying();
-                _context.next = 4;
+                _context.next = 5;
                 return this.finish();
 
-              case 4:
+              case 5:
                 result = _context.sent;
                 console.log('playメソッドの最後'); //作戦 
                 //オーディオの秒数を定義
@@ -528,7 +528,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 //もしくは再生ボタンを押してからその秒数がたったらストップする
                 //途中で停止された場合はその処理をstop関数側でリセット
 
-              case 6:
+              case 7:
               case "end":
                 return _context.stop();
             }
@@ -973,6 +973,7 @@ __webpack_require__.r(__webpack_exports__);
       axios.get("/api/loginCheck").then(function (response) {
         _this2.isLoggedIn = true;
         var currentUser = response.data;
+        console.log(currentUser);
         _this2.user.name = currentUser.name;
         _this2.user.email = currentUser.email; //let icon = currentUser.icon
 
@@ -1088,6 +1089,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _layout_Header__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../layout/Header */ "./resources/js/components/layout/Header.vue");
 /* harmony import */ var _layout_Footer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../layout/Footer */ "./resources/js/components/layout/Footer.vue");
+/* harmony import */ var wavesurfer_js_vue__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! wavesurfer.js-vue */ "./node_modules/wavesurfer.js-vue/src/index.js");
 
 
 function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { Promise.resolve(value).then(_next, _throw); } }
@@ -1181,12 +1183,46 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 
 
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = ({
   components: {
     Header: _layout_Header__WEBPACK_IMPORTED_MODULE_1__.default,
-    Footer: _layout_Footer__WEBPACK_IMPORTED_MODULE_2__.default
+    Footer: _layout_Footer__WEBPACK_IMPORTED_MODULE_2__.default,
+    WaveSurferVue: wavesurfer_js_vue__WEBPACK_IMPORTED_MODULE_3__.default
   },
   title: 'Audio Archive',
   data: function data() {
@@ -1208,6 +1244,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       subGenreSelected: {
         value: null,
         text: 'すべての音源'
+      },
+      playing: false,
+      options: {
+        height: 90
       },
       items: [{
         age: 40,
@@ -1236,7 +1276,6 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     this.subGenreSelected.value = this.$route.query.subgenre;
 
     if (this.$route.query.subgenre != undefined) {
-      //console.log('サブジャンルはudifeinedじゃないぞ')
       this.subgenreSelectedByUrl();
     }
 
@@ -1245,8 +1284,68 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
   beforeDestroy: function beforeDestroy() {
     window.removeEventListener("popstate", this.handlePopstate);
   },
-  computed: {},
+  computed: {
+    player: function player() {
+      return this.$refs.surf.waveSurfer;
+    }
+  },
   methods: {
+    play: function () {
+      var _play = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                this.$refs.surf.waveSurfer.play(); //普通に再生
+                //idを指定したい
+
+              case 1:
+              case "end":
+                return _context.stop();
+            }
+          }
+        }, _callee, this);
+      }));
+
+      function play() {
+        return _play.apply(this, arguments);
+      }
+
+      return play;
+    }(),
+    finish: function () {
+      var _finish = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee2(playing) {
+        var hage;
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee2$(_context2) {
+          while (1) {
+            switch (_context2.prev = _context2.next) {
+              case 0:
+                console.log('finishメソッドに渡った時点では' + playing);
+                _context2.t0 = this.$refs.surf.waveSurfer;
+                _context2.next = 4;
+                return function () {
+                  console.log('owata');
+                };
+
+              case 4:
+                _context2.t1 = _context2.sent;
+                hage = _context2.t0.on.call(_context2.t0, 'finish', _context2.t1);
+                return _context2.abrupt("return", 'finish');
+
+              case 7:
+              case "end":
+                return _context2.stop();
+            }
+          }
+        }, _callee2, this);
+      }));
+
+      function finish(_x) {
+        return _finish.apply(this, arguments);
+      }
+
+      return finish;
+    }(),
     selectSubgenre: function selectSubgenre(subGenreOption) {
       this.subGenreSelected = subGenreOption;
     },
@@ -1274,15 +1373,15 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     showArchive: function showArchive() {
       var _this = this;
 
-      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee() {
+      return _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().mark(function _callee3() {
         var result, stocks;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee$(_context) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default().wrap(function _callee3$(_context3) {
           while (1) {
-            switch (_context.prev = _context.next) {
+            switch (_context3.prev = _context3.next) {
               case 0:
                 _this.searchKeyword = _this.keyword;
                 result = null;
-                _context.next = 4;
+                _context3.next = 4;
                 return axios.get('/api/search', {
                   params: {
                     genre: 'audio',
@@ -1293,7 +1392,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 });
 
               case 4:
-                result = _context.sent;
+                result = _context3.sent;
                 stocks = result.data;
                 _this.stocks = stocks.data;
                 _this.parPage = stocks.meta.per_page; //1ページ当たりの表示件数
@@ -1306,10 +1405,10 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
               case 11:
               case "end":
-                return _context.stop();
+                return _context3.stop();
             }
           }
-        }, _callee);
+        }, _callee3);
       }))();
     },
     makePagenation: function makePagenation() {
@@ -1944,9 +2043,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _layout_Header__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../layout/Header */ "./resources/js/components/layout/Header.vue");
 /* harmony import */ var _layout_Footer__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../layout/Footer */ "./resources/js/components/layout/Footer.vue");
 /* harmony import */ var _modules_validation_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../modules/validation.js */ "./resources/js/modules/validation.js");
-//
-//
-//
 //
 //
 //
@@ -3312,7 +3408,7 @@ __webpack_require__.r(__webpack_exports__);
 
 var ___CSS_LOADER_EXPORT___ = _node_modules_css_loader_dist_runtime_api_js__WEBPACK_IMPORTED_MODULE_0___default()(function(i){return i[1]});
 // Module
-___CSS_LOADER_EXPORT___.push([module.id, "\n.enter[data-v-7a540488] {\n    border: 10px dotted powderblue;\n}\n.preview[data-v-7a540488] {\n    margin: .5em;\n}\n\n/*ファイルプレビューエリアの余白*/\n.preview img[data-v-7a540488],\nvideo[data-v-7a540488] {\n    width: 100%;\n    max-width: 500px;\n}\n\n", ""]);
+___CSS_LOADER_EXPORT___.push([module.id, "\n.enter[data-v-7a540488] {\n    border: 10px dotted powderblue;\n}\n.preview[data-v-7a540488] {\n    margin: .5em;\n}\n/*ファイルプレビューエリアの余白*/\n.preview img[data-v-7a540488],\nvideo[data-v-7a540488] {\n    width: 100%;\n    max-width: 500px;\n}\n", ""]);
 // Exports
 /* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (___CSS_LOADER_EXPORT___);
 
@@ -11023,8 +11119,79 @@ var render = function() {
     ),
     _vm._v(" "),
     _c(
+      "table",
+      {
+        staticClass: "table b-table",
+        attrs: {
+          "data-v-35119782": "",
+          role: "table",
+          "aria-busy": "false",
+          "aria-colcount": "3"
+        }
+      },
+      [
+        _c(
+          "tbody",
+          { attrs: { role: "rowgroup" } },
+          _vm._l(_vm.stocks, function(stock) {
+            return _c("tr", { key: stock.id, attrs: { role: "row" } }, [
+              _c("td", { attrs: { "aria-colindex": "1", role: "cell" } }),
+              _vm._v(" "),
+              _c("td", { attrs: { "aria-colindex": "2", role: "cell" } }, [
+                _vm._v(" " + _vm._s(stock.name))
+              ]),
+              _vm._v(" "),
+              _c("td", { attrs: { "aria-colindex": "3", role: "cell" } }, [
+                _c("div", {
+                  staticStyle: { width: "100%", margin: "0 0 0 .5em" }
+                }),
+                _vm._v(
+                  "\n                    " +
+                    _vm._s(stock.filename) +
+                    "\n                "
+                )
+              ])
+            ])
+          }),
+          0
+        )
+      ]
+    ),
+    _vm._v(" "),
+    _c(
       "div",
-      [_c("b-table", { attrs: { striped: "", hover: "", items: _vm.items } })],
+      { staticStyle: { width: "100%", margin: "0 0 0 .5em" } },
+      [
+        _vm.playing
+          ? _c(
+              "b-button",
+              { staticStyle: { "margin-top": "0" }, on: { click: _vm.stop } },
+              [_c("font-awesome-icon", { attrs: { icon: ["fa", "stop"] } })],
+              1
+            )
+          : _c(
+              "b-button",
+              {
+                staticStyle: { "margin-top": "0" },
+                on: {
+                  click: function($event) {
+                    return _vm.play()
+                  }
+                }
+              },
+              [_c("font-awesome-icon", { attrs: { icon: ["fa", "play"] } })],
+              1
+            ),
+        _vm._v(" "),
+        _c("wavesurfer", {
+          ref: "surf",
+          attrs: {
+            src: "/storage/stock_sample/63337fec.mp3",
+            options: _vm.options,
+            id: "aaa"
+          }
+        })
+      ],
       1
     ),
     _vm._v(" "),
